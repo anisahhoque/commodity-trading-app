@@ -66,8 +66,8 @@ ALTER TABLE
 -- Creating role_assignment table
 CREATE TABLE "role_assignment"(
 	"AssignmentID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
-	"UserID" INT NOT NULL,
-	"RoleID" TINYINT NOT NULL
+	"UserID" UNIQUEIDENTIFIER NOT NULL,
+	"RoleID" UNIQUEIDENTIFIER NOT NULL
 );
 ALTER TABLE
 	"role_assignment" ADD CONSTRAINT "role_assignment_assignmentid_primary" PRIMARY KEY("AssignmentID");
@@ -80,7 +80,7 @@ ALTER TABLE
  -- Create trader_account table
 CREATE TABLE "trader_account"(
 	"TraderID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
-	"UserID" INT NOT NULL,
+	"UserID" UNIQUEIDENTIFIER NOT NULL,
 	"Balance" BIGINT NOT NULL,
 	"AccountName" NVARCHAR(50) NOT NULL
 );
@@ -93,15 +93,15 @@ ALTER TABLE
  -- Creating trade table
 CREATE TABLE "trade"(
 	"TradeID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
-	"TraderID" INT NOT NULL,
-	"CommodityID" TINYINT NOT NULL,
+	"TraderID" UNIQUEIDENTIFIER NOT NULL,
+	"CommodityID" UNIQUEIDENTIFIER NOT NULL,
 	"PricePerUnit" BIGINT NOT NULL,
 	"Quantity" TINYINT NOT NULL,
 	"IsBuy" BIT NOT NULL,
 	"Expiry" DATETIME NOT NULL,
 	"CreatedAt" DATETIME NOT NULL,
 	"Bourse" NVARCHAR(10) NOT NULL,
-	"MitigationID" BIGINT NOT NULL,
+	"MitigationID" UNIQUEIDENTIFIER NOT NULL,
 	"IsOpen" BIT NOT NULL,
 	"Contract" NVARCHAR(5) NOT NULL
 );
