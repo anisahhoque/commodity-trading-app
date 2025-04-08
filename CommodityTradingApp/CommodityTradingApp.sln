@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommodityTradingApp", "CommodityTradingApp\CommodityTradingApp.csproj", "{B04B7EBA-C666-4855-8054-5CB5334610C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommodityTradingAppTests", "CommodityTradingAppTests\CommodityTradingAppTests.csproj", "{5420C382-4AA4-4351-9C7B-AF8404BCA42B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B04B7EBA-C666-4855-8054-5CB5334610C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B04B7EBA-C666-4855-8054-5CB5334610C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B04B7EBA-C666-4855-8054-5CB5334610C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5420C382-4AA4-4351-9C7B-AF8404BCA42B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5420C382-4AA4-4351-9C7B-AF8404BCA42B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5420C382-4AA4-4351-9C7B-AF8404BCA42B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5420C382-4AA4-4351-9C7B-AF8404BCA42B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
