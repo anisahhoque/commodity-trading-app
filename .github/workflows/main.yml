@@ -20,15 +20,29 @@ jobs:
         with:
           dotnet-version: '9.0'  
 
-      - name: Restore dependencies
-        run: dotnet restore  
+      
+      - name: Restore all solutions
+        run: |
+          # For Windows (using PowerShell):
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet restore $_.FullName }
 
+          # For Linux/Mac (using find):
+          # for solution in $(find . -name '*.sln'); do
+          #   dotnet restore $solution
+          # done
+
+     
       - name: Build the project
-        run: dotnet build --no-restore  
+        run: |
+          # Build each solution file
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet build $_.FullName --no-restore }
 
+    
       - name: Run tests
-        run: dotnet test  
-        continue-on-error: false  
+        run: |
+          # Run tests for each solution
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet test $_.FullName --no-build }
+        continue-on-error: false 
 
 
 concurrency:
