@@ -1,5 +1,27 @@
---- Create tables with no foreign keys first
+-- Drop views if they exist before recreating them
+DROP VIEW IF EXISTS vw_user_trading_accounts;
+DROP VIEW IF EXISTS vw_trades_by_commodity;
+DROP VIEW IF EXISTS vw_user_roles;
+DROP VIEW IF EXISTS vw_trader_trades;
 
+GO
+
+	
+	
+-- Drop tables if they exist before recreating them
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS "role";
+DROP TABLE IF EXISTS "commodity";
+DROP TABLE IF EXISTS "trade_mitigations";
+DROP TABLE IF EXISTS "role_assignment";
+DROP TABLE IF EXISTS "trader_account";
+DROP TABLE IF EXISTS "trade";
+
+GO
+
+
+	
+--- Create tables with no foreign keys first
 -- Creating user table
 CREATE TABLE "user"(
 	"UserID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
