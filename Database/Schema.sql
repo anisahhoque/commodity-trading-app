@@ -31,8 +31,8 @@ ALTER TABLE
  -- Creating trade_mitigations
 CREATE TABLE "trade_mitigations"(
     "MitigationID" BIGINT IDENTITY(1,1) NOT NULL,
-    "SellPointProfit" BIGINT NOT NULL,
-    "SellPointLoss" BIGINT NOT NULL
+    "SellPointProfit" BIGINT,
+    "SellPointLoss" BIGINT
 );
 ALTER TABLE
     "trade_mitigations" ADD CONSTRAINT "trade_mitigations_mitigationid_primary" PRIMARY KEY("MitigationID");
@@ -55,16 +55,17 @@ ALTER TABLE
     "role_assignment" ADD CONSTRAINT "role_assignment_roleid_foreign" FOREIGN KEY("RoleID") REFERENCES "role"("RoleID");
 
 
- -- Create trader_detail table
-CREATE TABLE "trader_detail"(
+ -- Create trader_account table
+CREATE TABLE "trader_account"(
     "TraderID" INT IDENTITY(1,1) NOT NULL,
     "UserID" INT NOT NULL,
-    "Balance" BIGINT NOT NULL
+    "Balance" BIGINT NOT NULL,
+    "AccountName" NVARCHAR(50) NOT NULL
 );
 ALTER TABLE
-    "trader_detail" ADD CONSTRAINT "trader_detail_traderid_primary" PRIMARY KEY("TraderID");
+    "trader_account" ADD CONSTRAINT "trader_account_traderid_primary" PRIMARY KEY("TraderID");
 ALTER TABLE
-    "trader_detail" ADD CONSTRAINT "trader_detail_userid_foreign" FOREIGN KEY("UserID") REFERENCES "user"("UserID");
+    "trader_account" ADD CONSTRAINT "trader_account_userid_foreign" FOREIGN KEY("UserID") REFERENCES "user"("UserID");
 
 
  -- Creating trade table
@@ -79,13 +80,14 @@ CREATE TABLE "trade"(
     "CreatedAt" DATETIME NOT NULL,
     "Bourse" NVARCHAR(10) NOT NULL,
     "MitigationID" BIGINT NOT NULL,
-    "IsOpen" BIT NOT NULL
+    "IsOpen" BIT NOT NULL,
+    "Contract" NVARCHAR(5) NOT NULL
 );
 ALTER TABLE
     "trade" ADD CONSTRAINT "trade_tradeid_primary" PRIMARY KEY("TradeID");
 ALTER TABLE
     "trade" ADD CONSTRAINT "trade_mitigationid_foreign" FOREIGN KEY("MitigationID") REFERENCES "trade_mitigations"("MitigationID");
 ALTER TABLE
-    "trade" ADD CONSTRAINT "trade_traderid_foreign" FOREIGN KEY("TraderID") REFERENCES "trader_detail"("TraderID");
+    "trade" ADD CONSTRAINT "trade_traderid_foreign" FOREIGN KEY("TraderID") REFERENCES "trader_account"("TraderID");
 ALTER TABLE
     "trade" ADD CONSTRAINT "trade_commodityid_foreign" FOREIGN KEY("CommodityID") REFERENCES "commodity"("CommodityID");
