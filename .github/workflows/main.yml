@@ -1,0 +1,35 @@
+name: Build and Run Tests for C# Project
+
+on:
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    runs-on: windows-latest 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '9.0'  
+
+      - name: Restore dependencies
+        run: dotnet restore  
+
+      - name: Build the project
+        run: dotnet build --no-restore  
+
+      - name: Run tests
+        run: dotnet test  
+        continue-on-error: false  
+
+
+concurrency:
+  group: "merge-test-check"
+  cancel-in-progress: true
