@@ -1,0 +1,50 @@
+name: Build and Run Tests for C# Project
+
+on:
+  pull_request:
+    branches:
+      - main
+      - development
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '9.0'  
+
+      
+      - name: Restore all solutions
+        run: |
+          # For Windows (using PowerShell):
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet restore $_.FullName }
+
+          # For Linux/Mac (using find):
+          # for solution in $(find . -name '*.sln'); do
+          #   dotnet restore $solution
+          # done
+
+     
+      - name: Build the project
+        run: |
+          # Build each solution file
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet build $_.FullName --no-restore }
+
+    
+      - name: Run tests
+        run: |
+          # Run tests for each solution
+          Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet test $_.FullName --no-build }
+        continue-on-error: false 
+
+
+concurrency:
+  group: "merge-test-check"
+  cancel-in-progress: true
