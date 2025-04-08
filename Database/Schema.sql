@@ -91,3 +91,89 @@ ALTER TABLE
     "trade" ADD CONSTRAINT "trade_traderid_foreign" FOREIGN KEY("TraderID") REFERENCES "trader_account"("TraderID");
 ALTER TABLE
     "trade" ADD CONSTRAINT "trade_commodityid_foreign" FOREIGN KEY("CommodityID") REFERENCES "commodity"("CommodityID");
+GO
+
+--- Add views
+-- View for all the trades by trader, use the command SELECT * FROM vw_trader_trades WHERE "TraderID" = [TraderID]; to get history.
+-- Use SELECT * FROM vw_trader_trades WHERE "TraderID" = [TraderID] AND IsOpen = 1; to get current open positions
+CREATE VIEW vw_trader_trades AS
+SELECT 
+    t."TradeID",
+    t."TraderID",
+    c."CommodityName",
+    t."PricePerUnit",
+    t."Quantity",
+    t."IsBuy",
+    t."Expiry",
+    t."CreatedAt",
+    t."Bourse",
+    tm."SellPointProfit",
+    tm."SellPointLoss",
+    t."IsOpen",
+    t."Contract"
+FROM 
+    "trade" t
+JOIN 
+    "commodity" c ON t."CommodityID" = c."CommodityID"
+JOIN 
+    "trade_mitigations" tm ON t."MitigationID" = tm."MitigationID";
+GO
+
+
+-- View for all roles of a certain user, use SELECT * FROM vw_user_roles WHERE "UserID" = [UserID];
+CREATE VIEW vw_user_roles AS
+SELECT 
+    u."UserID",
+    u."Username",
+    r."RoleName"
+FROM 
+    "user" u
+JOIN 
+    "role_assignment" ra ON u."UserID" = ra."UserID"
+JOIN 
+    "role" r ON ra."RoleID" = r."RoleID";
+GO
+
+
+-- View for what commodities are popular use  SELECT * FROM vw_trades_by_commodity; to see full breakdown
+CREATE VIEW vw_trades_by_commodity AS
+SELECT 
+    c."CommodityName",
+    SUM(t."Quantity") AS TotalQuantity,
+    SUM(t."PricePerUnit" * t."Quantity") AS TotalValue
+FROM 
+    "trade" t
+JOIN 
+    "commodity" c ON t."CommodityID" = c."CommodityID"
+GROUP BY 
+    c."CommodityName";
+GO
+
+
+-- View for details on all trading accounts of a particular user use SELECT * FROM vw_user_trading_accounts WHERE "UserID" = [UserID]; to see a single users details
+CREATE VIEW vw_user_trading_accounts AS
+SELECT 
+    u."UserID",
+    u."Username",
+    ta."TraderID",
+    ta."AccountName",
+    ta."Balance",
+    c."CommodityName",
+    t."TradeID",
+    t."PricePerUnit",
+    t."Quantity",
+    t."IsBuy",
+    t."Expiry",
+    t."CreatedAt" AS TradeCreatedAt,
+    t."IsOpen",
+    t."Bourse",
+    t."Contract"
+FROM 
+    "user" u
+JOIN 
+    "trader_account" ta ON u."UserID" = ta."UserID"
+LEFT JOIN 
+    "trade" t ON ta."TraderID" = t."TraderID"
+LEFT JOIN 
+    "commodity" c ON t."CommodityID" = c."CommodityID";
+GO
