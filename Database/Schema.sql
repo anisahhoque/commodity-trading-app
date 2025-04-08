@@ -135,12 +135,14 @@ JOIN
 GO
 
 
--- View for what commodities are popular use  SELECT * FROM vw_trades_by_commodity; to see full breakdown
+-- View for what commodities are popular use SELECT * FROM vw_trades_by_commodity; to see full breakdown
 CREATE VIEW vw_trades_by_commodity AS
 SELECT 
     c."CommodityName",
-    SUM(t."Quantity") AS TotalQuantity,
-    SUM(t."PricePerUnit" * t."Quantity") AS TotalValue
+    SUM(CASE WHEN t."IsBuy" = 1 THEN t."Quantity" ELSE 0 END) AS TotalBuyQuantity,
+    SUM(CASE WHEN t."IsBuy" = 1 THEN t."PricePerUnit" * t."Quantity" ELSE 0 END) AS TotalBuyValue,
+    SUM(CASE WHEN t."IsBuy" = 0 THEN t."Quantity" ELSE 0 END) AS TotalSellQuantity,
+    SUM(CASE WHEN t."IsBuy" = 0 THEN t."PricePerUnit" * t."Quantity" ELSE 0 END) AS TotalSellValue
 FROM 
     "trade" t
 JOIN 
@@ -148,6 +150,7 @@ JOIN
 GROUP BY 
     c."CommodityName";
 GO
+
 
 
 -- View for details on all trading accounts of a particular user use SELECT * FROM vw_user_trading_accounts WHERE "UserID" = [UserID]; to see a single users details
