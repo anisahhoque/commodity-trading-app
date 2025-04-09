@@ -8,16 +8,32 @@ namespace CommodityTradingApp.Controllers
     public class TraderController : Controller
     {
         // GET: Trader/Index
-        // Creating a new instance of the Trader model
         public IActionResult Index()
         {
-            Trader trader = new Trader
+            // Simulate current user and role
+            bool isManager = true; // Change to false to test user view
+            int currentUserId = 1;
+
+            var allTraders = new List<Trader>
+    {
+        new Trader { Id = Guid.NewGuid(), AccountName = "Alice", Balance = 5000, UserId = 1 },
+        new Trader { Id = Guid.NewGuid(), AccountName = "Bob", Balance = 10000, UserId = 2 },
+        new Trader { Id = Guid.NewGuid(), AccountName = "Charlie", Balance = 7500, UserId = 3 }
+    };
+
+            IEnumerable<Trader> visibleTraders;
+
+            if (isManager)
             {
-                Id = 65, //Need a GUID example
-                AccountName = "John Doe",
-                Balance = 10000.00m
-            };
-            return View(trader);
+                visibleTraders = allTraders;
+            }
+            else
+            {
+                visibleTraders = allTraders.Where(t => t.UserId == currentUserId);
+            }
+
+            return View(visibleTraders);
         }
+
     }
 }
