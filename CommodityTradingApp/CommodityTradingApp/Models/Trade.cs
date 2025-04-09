@@ -6,7 +6,7 @@
         public Guid TradeID { get; set; }        
         public Guid TraderID { get; set; }       
         public Guid CommodityID { get; set; }    
-        public long PricePerUnit { get; set; }   
+        public decimal PricePerUnit { get; set; }   
         public int Quantity { get; set; }       
         public bool IsBuy { get; set; }          
         public DateTime Expiry { get; set; }     
