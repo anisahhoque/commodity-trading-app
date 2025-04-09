@@ -3,6 +3,8 @@ using CommodityTradingApp.Models;
 
 namespace CommodityTradingApp.Controllers
 {
+    //Need to ensure i have DBContext, and inject it into controller
+    //DBcontext must have class that represents DbSet<Trader> Traders
     public class TraderController : Controller
     {
         // GET: Trader/Index
@@ -11,7 +13,7 @@ namespace CommodityTradingApp.Controllers
         {
             Trader trader = new Trader
             {
-                Id = 1,
+                Id = 65, //Need a GUID example
                 AccountName = "John Doe",
                 Balance = 10000.00m
             };
