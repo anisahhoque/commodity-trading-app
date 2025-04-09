@@ -16,20 +16,20 @@ DROP TABLE IF EXISTS "trade_mitigations";
 DROP TABLE IF EXISTS "role_assignment";
 DROP TABLE IF EXISTS "trader_account";
 DROP TABLE IF EXISTS "trade";
+DROP TABLE IF EXISTS "country";
 
 GO
 
 
 	
 --- Create tables with no foreign keys first
--- Creating user table
-CREATE TABLE "user"(
-	"UserID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
-	"Username" NVARCHAR(50) NOT NULL,
-	"PasswordHash" NVARCHAR(255) NOT NULL
+ -- Creating country table
+CREATE TABLE "country"(
+	"CountryID" TINYINT IDENTITY(1,1) NOT NULL,
+	"Country" NVARCHAR(50)
 );
 ALTER TABLE
-	"user" ADD CONSTRAINT "user_userid_primary" PRIMARY KEY("UserID");
+	"country" ADD CONSTRAINT "country_countryid_primary" PRIMARY KEY("CountryID");
 
 
 -- Create role table
@@ -62,6 +62,17 @@ ALTER TABLE
 
 
 --- Create tables with foriegn keys
+-- Creating user table
+CREATE TABLE "user"(
+	"UserID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
+	"Username" NVARCHAR(50) NOT NULL,
+	"PasswordHash" NVARCHAR(255) NOT NULL,
+	"CountryID" UNIQUEIDENTIFIER NOT NULL
+);
+ALTER TABLE
+	"user" ADD CONSTRAINT "user_userid_primary" PRIMARY KEY("UserID");
+ALTER TABLE
+	"user" ADD CONSTRAINT "user_countryid_foreign" FOREIGN KEY("CountryID") REFERENCES "country"("CountryID");
 
 -- Creating role_assignment table
 CREATE TABLE "role_assignment"(
@@ -179,6 +190,7 @@ CREATE VIEW vw_user_trading_accounts AS
 SELECT
 	u."UserID",
 	u."Username",
+	co."Country",
 	ta."TraderID",
 	ta."AccountName",
 	ta."Balance",
@@ -199,5 +211,7 @@ JOIN
 LEFT JOIN
 	"trade" t ON ta."TraderID" = t."TraderID"
 LEFT JOIN
-	"commodity" c ON t."CommodityID" = c."CommodityID";
+	"commodity" c ON t."CommodityID" = c."CommodityID"
+LEFT JOIN
+	"country" co ON u."CountryID" = co."CountryID";
 GO
