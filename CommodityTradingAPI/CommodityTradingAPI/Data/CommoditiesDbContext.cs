@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using CommodityTradingAPI.Models;
+﻿using CommodityTradingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommodityTradingAPI.Data;
 
-public partial class CommodotiesDbContext : DbContext
+public partial class CommoditiesDbContext : DbContext
 {
-    public CommodotiesDbContext()
+    public CommoditiesDbContext()
     {
     }
 
-    public CommodotiesDbContext(DbContextOptions<CommodotiesDbContext> options)
+    public CommoditiesDbContext(DbContextOptions<CommoditiesDbContext> options)
         : base(options)
     {
     }
