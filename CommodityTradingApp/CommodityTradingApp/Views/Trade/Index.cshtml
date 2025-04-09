@@ -34,11 +34,7 @@
                 <td>@item.MitigationID</td>
                 <td>@(item.IsOpen ? "Yes" : "No")</td>
                 <td>@item.Contract</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.TradeID">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.TradeID">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.TradeID">Delete</a>
-                </td>
+
             </tr>
         }
     </tbody>
