@@ -43,3 +43,18 @@
         }
     </tbody>
 </table>
+<script>
+    document.getElementById("tradeFilter").addEventListener("change", function () {
+        var filterValue = this.value;
+        var rows = document.querySelectorAll("#tradeTableBody tr");
+
+        rows.forEach(function (row) {
+            var isBuy = row.getAttribute("data-isbuy");
+            if (filterValue === "" || (filterValue === "true" && isBuy === "true") || (filterValue === "false" && isBuy === "false")) {
+                row.style.display = "";  // Show the row
+            } else {
+                row.style.display = "none";  // Hide the row
+            }
+        });
+    });
+</script>
