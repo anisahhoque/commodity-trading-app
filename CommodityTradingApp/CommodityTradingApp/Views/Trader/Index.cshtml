@@ -1,0 +1,16 @@
+﻿@model IEnumerable<CommodityTradingApp.Models.Trader>
+
+<h2>All Traders</h2>
+<table>
+    <tr>
+        <th>Account Name</th>
+        <th>Balance</th>
+    </tr>
+    @foreach (var trader in Model)
+    {
+        <tr>
+            <td>@trader.AccountName</td>
+            <td>@trader.Balance</td>
+        </tr>
+    }
+</table>
