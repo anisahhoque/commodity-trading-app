@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CommodityTradingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace New.Namespace;
+namespace CommodityTradingAPI.Data;
 
 public partial class CommodotiesDbContext : DbContext
 {
