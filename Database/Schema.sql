@@ -44,8 +44,8 @@ ALTER TABLE
 -- Creating trade_mitigations
 CREATE TABLE "trade_mitigations"(
 	"MitigationID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
-	"SellPointProfit" BIGINT,
-	"SellPointLoss" BIGINT
+	"SellPointProfit" DECIMAL,
+	"SellPointLoss" DECIMAL
 );
 ALTER TABLE
 	"trade_mitigations" ADD CONSTRAINT "trade_mitigations_mitigationid_primary" PRIMARY KEY("MitigationID");
@@ -80,7 +80,7 @@ ALTER TABLE
 CREATE TABLE "trader_account"(
 	"TraderID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
 	"UserID" UNIQUEIDENTIFIER NOT NULL,
-	"Balance" BIGINT NOT NULL,
+	"Balance" DECIMAL NOT NULL,
 	"AccountName" NVARCHAR(50) NOT NULL
 );
 ALTER TABLE
@@ -93,7 +93,7 @@ CREATE TABLE "trade"(
 	"TradeID" UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
 	"TraderID" UNIQUEIDENTIFIER NOT NULL,
 	"CommodityID" UNIQUEIDENTIFIER NOT NULL,
-	"PricePerUnit" BIGINT NOT NULL,
+	"PricePerUnit" DECIMAL NOT NULL,
 	"Quantity" TINYINT NOT NULL,
 	"IsBuy" BIT NOT NULL,
 	"Expiry" DATETIME NOT NULL,
