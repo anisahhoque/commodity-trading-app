@@ -99,3 +99,4 @@ obj
 .env
 appsettings.json
 **/publish/
+*.csproj.user
