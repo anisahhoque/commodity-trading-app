@@ -336,7 +336,7 @@ VALUES
     ('Oman'),
     ('Pakistan'),
     ('Palau'),
-	('Palestine'),
+	  ('Palestine'),
     ('Panama'),
     ('Papua New Guinea'),
     ('Paraguay'),
