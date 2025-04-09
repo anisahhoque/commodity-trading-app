@@ -11,7 +11,7 @@ public partial class VwTraderTrade
 
     public string CommodityName { get; set; } = null!;
 
-    public long PricePerUnit { get; set; }
+    public decimal PricePerUnit { get; set; }
 
     public byte Quantity { get; set; }
 
@@ -23,9 +23,9 @@ public partial class VwTraderTrade
 
     public string Bourse { get; set; } = null!;
 
-    public long? SellPointProfit { get; set; }
+    public decimal? SellPointProfit { get; set; }
 
-    public long? SellPointLoss { get; set; }
+    public decimal? SellPointLoss { get; set; }
 
     public bool IsOpen { get; set; }
 

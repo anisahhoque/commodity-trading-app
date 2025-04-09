@@ -9,9 +9,9 @@ public partial class VwTradesByCommodity
 
     public int? TotalBuyQuantity { get; set; }
 
-    public long? TotalBuyValue { get; set; }
+    public decimal? TotalBuyValue { get; set; }
 
     public int? TotalSellQuantity { get; set; }
 
-    public long? TotalSellValue { get; set; }
+    public decimal? TotalSellValue { get; set; }
 }

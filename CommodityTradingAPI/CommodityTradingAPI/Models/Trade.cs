@@ -11,7 +11,7 @@ public partial class Trade
 
     public Guid CommodityId { get; set; }
 
-    public long PricePerUnit { get; set; }
+    public decimal PricePerUnit { get; set; }
 
     public byte Quantity { get; set; }
 

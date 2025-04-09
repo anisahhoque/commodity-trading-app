@@ -66,9 +66,7 @@ public partial class CommodotiesDbContext : DbContext
             entity.Property(e => e.CountryId)
                 .ValueGeneratedOnAdd()
                 .HasColumnName("CountryID");
-            entity.Property(e => e.Country1)
-                .HasMaxLength(50)
-                .HasColumnName("Country");
+            entity.Property(e => e.CountryName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -121,6 +119,7 @@ public partial class CommodotiesDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Expiry).HasColumnType("datetime");
             entity.Property(e => e.MitigationId).HasColumnName("MitigationID");
+            entity.Property(e => e.PricePerUnit).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.TraderId).HasColumnName("TraderID");
 
             entity.HasOne(d => d.Commodity).WithMany(p => p.Trades)
@@ -148,6 +147,8 @@ public partial class CommodotiesDbContext : DbContext
             entity.Property(e => e.MitigationId)
                 .HasDefaultValueSql("(newid())")
                 .HasColumnName("MitigationID");
+            entity.Property(e => e.SellPointLoss).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.SellPointProfit).HasColumnType("decimal(18, 0)");
         });
 
         modelBuilder.Entity<TraderAccount>(entity =>
@@ -160,6 +161,7 @@ public partial class CommodotiesDbContext : DbContext
                 .HasDefaultValueSql("(newid())")
                 .HasColumnName("TraderID");
             entity.Property(e => e.AccountName).HasMaxLength(50);
+            entity.Property(e => e.Balance).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.TraderAccounts)
@@ -198,6 +200,9 @@ public partial class CommodotiesDbContext : DbContext
             entity.Property(e => e.Contract).HasMaxLength(5);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Expiry).HasColumnType("datetime");
+            entity.Property(e => e.PricePerUnit).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.SellPointLoss).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.SellPointProfit).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.TradeId).HasColumnName("TradeID");
             entity.Property(e => e.TraderId).HasColumnName("TraderID");
         });
@@ -209,6 +214,8 @@ public partial class CommodotiesDbContext : DbContext
                 .ToView("vw_trades_by_commodity");
 
             entity.Property(e => e.CommodityName).HasMaxLength(50);
+            entity.Property(e => e.TotalBuyValue).HasColumnType("decimal(38, 0)");
+            entity.Property(e => e.TotalSellValue).HasColumnType("decimal(38, 0)");
         });
 
         modelBuilder.Entity<VwUserRole>(entity =>
@@ -229,11 +236,13 @@ public partial class CommodotiesDbContext : DbContext
                 .ToView("vw_user_trading_accounts");
 
             entity.Property(e => e.AccountName).HasMaxLength(50);
+            entity.Property(e => e.Balance).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.Bourse).HasMaxLength(10);
             entity.Property(e => e.CommodityName).HasMaxLength(50);
             entity.Property(e => e.Contract).HasMaxLength(5);
-            entity.Property(e => e.Country).HasMaxLength(50);
+            entity.Property(e => e.CountryName).HasMaxLength(50);
             entity.Property(e => e.Expiry).HasColumnType("datetime");
+            entity.Property(e => e.PricePerUnit).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.TradeCreatedAt).HasColumnType("datetime");
             entity.Property(e => e.TradeId).HasColumnName("TradeID");
             entity.Property(e => e.TraderId).HasColumnName("TraderID");

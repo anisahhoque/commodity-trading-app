@@ -9,19 +9,19 @@ public partial class VwUserTradingAccount
 
     public string Username { get; set; } = null!;
 
-    public string? Country { get; set; }
+    public string? CountryName { get; set; }
 
     public Guid TraderId { get; set; }
 
     public string AccountName { get; set; } = null!;
 
-    public long Balance { get; set; }
+    public decimal Balance { get; set; }
 
     public string? CommodityName { get; set; }
 
     public Guid? TradeId { get; set; }
 
-    public long? PricePerUnit { get; set; }
+    public decimal? PricePerUnit { get; set; }
 
     public byte? Quantity { get; set; }
 

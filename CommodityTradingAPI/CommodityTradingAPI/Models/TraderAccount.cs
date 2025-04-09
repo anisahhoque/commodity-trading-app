@@ -9,7 +9,7 @@ public partial class TraderAccount
 
     public Guid UserId { get; set; }
 
-    public long Balance { get; set; }
+    public decimal Balance { get; set; }
 
     public string AccountName { get; set; } = null!;
 
