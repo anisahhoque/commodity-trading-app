@@ -21,6 +21,18 @@ namespace CommodityTradingApp.Controllers
 
             return View(pagedTrades);
         }
+
+        public async Task<IActionResult> ActiveTrades(int page = 1, int pageSize = 10, bool? isOpen = true)
+        {
+            var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
+            var totalTrades = filteredTrades.Count();
+            var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+
+
+
+            return View(pagedTrades);
+        }
         private static List<Trade> GetMockTrades()
         {
             return new List<Trade>
