@@ -5,7 +5,13 @@ namespace CommodityTradingApp.Controllers
 {
     public class TradeController : Controller
     {
+        private readonly HttpClient _httpClient;
         private static List<Trade> trades = GetMockTrades();
+
+        public TradeController(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
         public async Task<IActionResult> Index()
         {
             return View(trades);

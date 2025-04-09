@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CommodityTradingApp.Controllers
 {
-    public class CommoditiesController : Controller
+    public class CommodityController : Controller
 
     {
         private readonly HttpClient _httpClient;
         private static List<Commodity> commodities = GetMockCommodities();
 
-        public CommoditiesController(HttpClient httpClient)
+        public CommodityController(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
@@ -40,4 +40,5 @@ namespace CommodityTradingApp.Controllers
                 }
             };
         }
+    }
 }

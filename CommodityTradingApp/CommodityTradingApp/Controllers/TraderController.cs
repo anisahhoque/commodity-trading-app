@@ -5,6 +5,8 @@ namespace CommodityTradingApp.Controllers
 {
     //Need to ensure i have DBContext, and inject it into controller
     //DBcontext must have class that represents DbSet<Trader> Traders
+
+
     public class TraderController : Controller
     {
         // GET: Trader/Index
