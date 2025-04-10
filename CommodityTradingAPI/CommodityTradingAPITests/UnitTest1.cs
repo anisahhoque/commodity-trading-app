@@ -54,8 +54,8 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var createdUser = await _context.Users.FindAsync(user.UserId);
-            Assert.IsNotNull(createdUser);  // Checks if the user was created
-            Assert.AreEqual("testuser", createdUser.Username);  // Verifies the username
+            Assert.That(createdUser, Is.Not.Null);  // Checks if the user was created
+            Assert.That("testuser", Is.EqualTo(createdUser.Username));  // Verifies the username
         }
 
         // Test for deleting a user
@@ -76,7 +76,7 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var deletedUser = await _context.Users.FindAsync(user.UserId);
-            Assert.IsNull(deletedUser);  // Verifies that the user is deleted
+            Assert.That(deletedUser, Is.Null);  // Verifies that the user is deleted
         }
 
         // Test for editing a user
@@ -98,8 +98,8 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var updatedUser = await _context.Users.FindAsync(user.UserId);
-            Assert.IsNotNull(updatedUser);  // Verifies the user exists
-            Assert.AreEqual("updateduser", updatedUser.Username);  // Verifies the updated username
+            Assert.That(updatedUser, Is.Not.Null);  // Verifies the user exists
+            Assert.That("updateduser", Is.EqualTo(updatedUser.Username));  // Verifies the updated username
         }
 
         // Tests for trader-related functions
@@ -130,8 +130,8 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var createdTrader = await _context.Traders.FindAsync(trader.TraderId);
-            Assert.IsNotNull(createdTrader);  // Verifies the trader is created
-            Assert.AreEqual("TestTrader", createdTrader.AccountName);  // Verifies the trader's account name
+            Assert.That(createdTrader, Is.Not.Null);  // Verifies the trader is created
+            Assert.That("TestTrader", Is.EqualTo(createdTrader.AccountName));  // Verifies the trader's account name
         }
 
         // Test for deleting a trader
@@ -164,7 +164,7 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var deletedTrader = await _context.Traders.FindAsync(trader.TraderId);
-            Assert.IsNull(deletedTrader);  // Verifies the trader is deleted
+            Assert.That(deletedTrader, Is.Null);  // Verifies the trader is deleted
         }
 
         // Test for editing a trader
@@ -198,8 +198,8 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var updatedTrader = await _context.Traders.FindAsync(trader.TraderId);
-            Assert.IsNotNull(updatedTrader);  // Verifies trader exists
-            Assert.AreEqual("UpdatedTrader", updatedTrader.AccountName);  // Verifies the account name is updated
+            Assert.That(updatedTrader, Is.Not.Null);  // Verifies trader exists
+            Assert.That("UpdatedTrader", Is.EqualTo(updatedTrader.AccountName));  // Verifies the account name is updated
         }
 
         [Test]
@@ -213,9 +213,9 @@ namespace CommodityTradingAPITests
             };
 
             var response = await _client.PostAsJsonAsync("/api/User", newUserDetails);
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.That(HttpStatusCode.BadRequest, Is.EqualTo(response.StatusCode));
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(responseContent.Contains("Invalid country name."));
+            Assert.That(responseContent.Contains("Invalid country name."),Is.True);
         }
 
         [Test]
@@ -239,9 +239,9 @@ namespace CommodityTradingAPITests
             };
 
             var response = await _client.PostAsJsonAsync("/api/User", newUserDetails);
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.That(HttpStatusCode.BadRequest, Is.EqualTo(response.StatusCode));
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(responseContent.Contains("Username already exists."));
+            Assert.That(responseContent.Contains("Username already exists."), Is.True);
         }
 
         [Test]
@@ -249,7 +249,7 @@ namespace CommodityTradingAPITests
         {
             // Make an unauthenticated request to the Index endpoint
             var response = await _client.GetAsync("/api/User");
-            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.That(HttpStatusCode.Unauthorized, Is.EqualTo(response.StatusCode));
         }
 
         [Test]
@@ -281,8 +281,8 @@ namespace CommodityTradingAPITests
             var deletedUser = await _context.Users.FindAsync(user.UserId);
             var deletedTrader = await _context.Traders.FindAsync(trader.TraderId);
 
-            Assert.IsNull(deletedUser);  // Verifies the user was deleted
-            Assert.IsNull(deletedTrader);  // Verifies the trader was deleted (if cascade delete is enabled)
+            Assert.That(deletedUser, Is.Null);  // Verifies the user was deleted
+            Assert.That(deletedTrader, Is.Null);  // Verifies the trader was deleted (if cascade delete is enabled)
         }
 
         [Test]
@@ -290,7 +290,7 @@ namespace CommodityTradingAPITests
         {
             var nonExistentUserId = Guid.NewGuid();  // Use a GUID that is not in the database
             var response = await _client.GetAsync($"/api/User/{nonExistentUserId}");
-            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.That(HttpStatusCode.NotFound, Is.EqualTo(response.StatusCode));
         }
 
         // Clean up after testing
