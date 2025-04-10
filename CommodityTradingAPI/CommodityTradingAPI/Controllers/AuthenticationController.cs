@@ -1,5 +1,6 @@
 ﻿using CommodityTradingAPI.Data;
 using CommodityTradingAPI.Models;
+using CommodityTradingAPI.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

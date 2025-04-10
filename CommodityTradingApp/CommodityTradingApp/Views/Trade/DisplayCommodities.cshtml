@@ -13,7 +13,6 @@
             <h3>@item.CommodityName</h3>
             <p><strong>ID:</strong> @item.CommodityId</p>
 
-
             <div class="commodity-info">
                 <div>
                     <strong>Price:</strong> 10
@@ -32,51 +31,37 @@
                 </div>
             </div>
 
+            
 
-            <button class="btn btn-primary" onclick="toggleTradeForm('@item.CommodityId')">Trade</button>
-
-
-            <div class="trade-form" id="trade-form-@item.CommodityId" style="display:none; margin-top: 10px;">
-                <div>
-                    <label for="quantity">Quantity</label>
-                    <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" />
-                </div>
-                <div>
-                    <label for="buy-sell">Buy/Sell</label>
-                    <select id="buy-sell" class="form-control">
-                        <option value="buy">Buy</option>
-                        <option value="sell">Sell</option>
-                    </select>
-                </div>
-                <div>
-                    <button class="btn btn-success" style="margin-top: 10px;">Submit</button>
-                </div>
+            <div class="commodity-actions">
+                <form class="trade-form" id="trade-form-@item.CommodityId" method="post" action="@Url.Action("CreateTrade", "Trade")">
+                    <div>
+                        <label for="quantity-@item.CommodityId">Quantity</label>
+                        <input type="number" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
+                    </div>
+                    <div>
+                        <label for="buy-sell-@item.CommodityId">Buy/Sell</label>
+                        <select id="buy-sell-@item.CommodityId" name="IsBuy" class="form-control" required>
+                            <option value="true">Buy</option>
+                            <option value="false">Sell</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" style="margin-top: 10px;" type="submit">Trade</button>
+                    </div>
+                </form>
             </div>
         </div>
     }
 </div>
-<script>
-    function toggleTradeForm(commodityId) {
 
-        var tradeForm = document.getElementById("trade-form-" + commodityId);
-
-
-        if (tradeForm.style.display === "none" || tradeForm.style.display === "") {
-            tradeForm.style.display = "block";
-        } else {
-            tradeForm.style.display = "none";
-        }
-    }
-</script>
 <style>
-
     .commodity-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 20px;
         padding: 20px;
     }
-
 
     .commodity-box {
         border: 1px solid #ccc;
@@ -85,6 +70,7 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         background-color: #fff;
         transition: transform 0.3s, box-shadow 0.3s;
+        position: relative; /* Added to position trade form */
     }
 
         .commodity-box:hover {
@@ -103,7 +89,6 @@
             color: #555;
         }
 
-
     .commodity-info {
         margin-top: 10px;
         margin-bottom: 20px;
@@ -111,33 +96,28 @@
         color: #333;
     }
 
-        .commodity-info div {
-            margin-bottom: 5px;
-        }
-
-
     .commodity-actions {
         text-align: center;
     }
 
-        .commodity-actions .btn {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-
+ 
     .trade-form {
+        display: none;
         margin-top: 20px;
         padding: 15px;
         border-top: 2px solid #ddd;
     }
 
-        .trade-form .form-group {
-            margin-bottom: 10px;
-        }
+   
+    .commodity-box:hover .trade-form {
+        display: block;
+    }
 
-        .trade-form .btn {
-            width: 100%;
-        }
+    .trade-form .form-group {
+        margin-bottom: 10px;
+    }
+
+    .trade-form .btn {
+        width: 100%;
+    }
 </style>
-

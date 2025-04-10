@@ -4,6 +4,7 @@ using CommodityTradingAPI.Models;
 using Microsoft.AspNetCore.Hosting;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using System.Net;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
@@ -11,20 +12,25 @@ using Microsoft.Extensions.DependencyInjection;
 using CommodityTradingAPI.Data;
 using System.Net.Http.Json;
 
+
 namespace CommodityTradingAPITests
 {
     [TestFixture]
     public class Tests
     {
         private CommoditiesDbContext _context;
+
         private HttpClient _client;
+
 
         // Setup an in-memory database for testing
         [SetUp]
         public void Setup()
         {
+
             var builder = new WebHostBuilder()
                 .UseEnvironment("Testing");
+
 
             var options = new DbContextOptionsBuilder<CommoditiesDbContext>()
                 .UseInMemoryDatabase(databaseName: "CommodityTradingTestDB")
@@ -54,8 +60,10 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var createdUser = await _context.Users.FindAsync(user.UserId);
+
             Assert.That(createdUser, Is.Not.Null);  // Checks if the user was created
             Assert.That("testuser", Is.EqualTo(createdUser.Username));  // Verifies the username
+
         }
 
         // Test for deleting a user
@@ -76,7 +84,9 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var deletedUser = await _context.Users.FindAsync(user.UserId);
+
             Assert.That(deletedUser, Is.Null);  // Verifies that the user is deleted
+
         }
 
         // Test for editing a user
@@ -98,8 +108,10 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var updatedUser = await _context.Users.FindAsync(user.UserId);
+
             Assert.That(updatedUser, Is.Not.Null);  // Verifies the user exists
             Assert.That("updateduser", Is.EqualTo(updatedUser.Username));  // Verifies the updated username
+
         }
 
         // Tests for trader-related functions
@@ -130,13 +142,17 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             var createdTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
+
             Assert.That(createdTrader, Is.Not.Null);  // Verifies the trader is created
             Assert.That("TestTrader", Is.EqualTo(createdTrader.AccountName));  // Verifies the trader's account name
+
         }
 
         // Test for deleting a trader
         [Test]
+
         public async Task TestDeleteTrader()
+
         {
             var user = new User
             {
@@ -163,13 +179,17 @@ namespace CommodityTradingAPITests
             _context.TraderAccounts.Remove(trader);
             await _context.SaveChangesAsync();
 
+
             var deletedTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.That(deletedTrader, Is.Null);  // Verifies the trader is deleted
+
         }
 
         // Test for editing a trader
         [Test]
+
         public async Task TestEditTrader()
+
         {
             var user = new User
             {
@@ -191,6 +211,7 @@ namespace CommodityTradingAPITests
             await _context.SaveChangesAsync();
 
             _context.TraderAccounts.Add(trader);
+
             await _context.SaveChangesAsync();
 
             trader.AccountName = "UpdatedTrader";
@@ -291,6 +312,7 @@ namespace CommodityTradingAPITests
             var nonExistentUserId = Guid.NewGuid();  // Use a GUID that is not in the database
             var response = await _client.GetAsync($"/api/User/{nonExistentUserId}");
             Assert.That(HttpStatusCode.NotFound, Is.EqualTo(response.StatusCode));
+
         }
 
         // Clean up after testing
