@@ -39,10 +39,15 @@ namespace CommodityTradingApp.Controllers
 
             return View(pagedTrades);
         }
-        public async Task<IActionResult> CreateTrade()
+        public async Task<IActionResult> DisplayCommodities()
         {
             //call get details for each commodity in commodities
             return View(commodities);
+        }
+        public async Task<IActionResult> CreateTrade()
+        {
+            
+            return RedirectToAction("Index");
         }
         public async Task<IActionResult> DeleteTrade(Guid id)
         {
