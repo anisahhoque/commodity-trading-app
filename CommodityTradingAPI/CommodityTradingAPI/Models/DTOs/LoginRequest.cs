@@ -1,4 +1,4 @@
-﻿namespace CommodityTradingAPI.Models
+﻿namespace CommodityTradingAPI.Models.DTOs
 {
     public class LoginRequest
     {
