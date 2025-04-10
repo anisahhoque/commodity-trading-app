@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Hosting;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using CommodityTradingAPI.Data;
 
 namespace CommodityTradingAPITests
@@ -20,11 +23,7 @@ namespace CommodityTradingAPITests
         public void Setup()
         {
             var builder = new WebHostBuilder()
-                .UseEnvironment("Testing")  // Optional: To specify the testing environment
-                .UseStartup<Startup>();  // Your actual Startup class
-
-            _server = new TestServer(builder);
-            _client = _server.CreateClient();
+                .UseEnvironment("Testing");
 
             var options = new DbContextOptionsBuilder<CommoditiesDbContext>()
                 .UseInMemoryDatabase(databaseName: "CommodityTradingTestDB")
@@ -297,6 +296,7 @@ namespace CommodityTradingAPITests
         [TearDown]
         public void TearDown()
         {
+            _client.Dispose();
             _context.Dispose();
         }
     }
