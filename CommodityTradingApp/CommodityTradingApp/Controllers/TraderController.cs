@@ -66,6 +66,16 @@ namespace CommodityTradingApp.Controllers
             {
                 new Trade { TradeID = Guid.NewGuid(), TraderID = trader.Id, Contract = "Buy Gold", IsOpen = true}
             };
+            var historicalTrades = new List<Trade>
+            {
+                new Trade { TradeID = Guid.NewGuid(), TraderID = trader.Id, Contract = "Sell Silver", IsOpen = false}
+            };
+
+            //Passing all of this information into the view
+            var model = new TraderDetailsViewModel
+            {
+
+            }
 
         }
     }
