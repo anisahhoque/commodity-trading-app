@@ -159,5 +159,32 @@ namespace CommodityTradingApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // GET: Trader/Delete/{guid}
+        //This is the view for deleting a trader
+        public IActionResult Delete(Guid id)
+        {
+            // Simulated manager check
+            bool isManager = true;
+
+            if (!isManager)
+                return Unauthorized();
+
+            // Simulated data (replace with DB call in real implementation)
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Bob",
+                Balance = 10000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+                return NotFound();
+
+            return View(trader); // Confirm delete
+        }
+
+
     }
 }
