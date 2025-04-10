@@ -3,22 +3,25 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CommodityTradingAPI.Data;
+using CommodityTradingAPI.Models;
+
 
 namespace CommodityTradingAPITests
 {
     public class Tests
     {
-        private ApplicationDbContext _context;
+        private CommoditiesDbContext _context;
 
         // Setup an in-memory database for testing
         [SetUp]
         public void Setup()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            var options = new DbContextOptionsBuilder<CommoditiesDbContext>()
                 .UseInMemoryDatabase(databaseName: "CommodityTradingTestDB")
                 .Options;
 
-            _context = new ApplicationDbContext(options);
+            _context = new CommoditiesDbContext(options);
 
             // Ensure the database is created fresh for each test
             _context.Database.EnsureDeleted();
@@ -32,16 +35,16 @@ namespace CommodityTradingAPITests
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var createdUser = await _context.Users.FindAsync(user.UserID);
+            var createdUser = await _context.Users.FindAsync(user.UserId);
             Assert.IsNotNull(createdUser);
             Assert.AreEqual("testuser", createdUser.Username);
         }
@@ -52,10 +55,10 @@ namespace CommodityTradingAPITests
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -63,7 +66,7 @@ namespace CommodityTradingAPITests
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            var deletedUser = await _context.Users.FindAsync(user.UserID);
+            var deletedUser = await _context.Users.FindAsync(user.UserId);
             Assert.IsNull(deletedUser);
         }
 
@@ -73,10 +76,10 @@ namespace CommodityTradingAPITests
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -85,7 +88,7 @@ namespace CommodityTradingAPITests
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            var updatedUser = await _context.Users.FindAsync(user.UserID);
+            var updatedUser = await _context.Users.FindAsync(user.UserId);
             Assert.IsNotNull(updatedUser);
             Assert.AreEqual("updateduser", updatedUser.Username);
         }
@@ -97,16 +100,16 @@ namespace CommodityTradingAPITests
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
 
-            var trader = new Trader
+            var trader = new TraderAccount
             {
-                TraderID = Guid.NewGuid(),
-                UserID = user.UserID,
+                TraderId = Guid.NewGuid(),
+                UserId = user.UserId,
                 Balance = 100000,
                 AccountName = "TestTrader"
             };
@@ -114,30 +117,30 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
-            var createdTrader = await _context.Traders.FindAsync(trader.TraderID);
+            var createdTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.IsNotNull(createdTrader);
             Assert.AreEqual("TestTrader", createdTrader.AccountName);
         }
 
         // Test for deleting a user
         [Test]
-        public async Task TestDeleteUser()
+        public async Task TestDeleteUser2()
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
 
-            var trader = new Trader
+            var trader = new TraderAccount
             {
-                TraderID = Guid.NewGuid(),
-                UserID = user.UserID,
+                TraderId = Guid.NewGuid(),
+                UserId = user.UserId,
                 Balance = 100000,
                 AccountName = "TestTrader"
             };
@@ -145,32 +148,32 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Remove(trader);
+            _context.TraderAccounts.Remove(trader);
             await _context.SaveChangesAsync();
 
-            var createdTrader = await _context.Traders.FindAsync(trader.TraderID);
+            var createdTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.IsNull(createdTrader);
         }
 
         // Test for editing a user
         [Test]
-        public async Task TestEditUser()
+        public async Task TestEditUser2()
         {
             var user = new User
             {
-                UserID = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Username = "testuser",
                 PasswordHash = "hashedpassword",
-                CountryID = 1
+                CountryId = 1
             };
 
-            var trader = new Trader
+            var trader = new TraderAccount
             {
-                TraderID = Guid.NewGuid(),
-                UserID = user.UserID,
+                TraderId = Guid.NewGuid(),
+                UserId = user.UserId,
                 Balance = 100000,
                 AccountName = "TestTrader"
             };
@@ -178,14 +181,14 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
             trader.AccountName = "updatedtrader";
-            _context.Trader.Update(trader);
+            _context.TraderAccounts.Update(trader);
             await _context.SaveChangesAsync();
 
-            var updatedTrader = await _context.Traders.FindAsync(trader.TraderID);
+            var updatedTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.IsNotNull(updatedTrader);
             Assert.AreEqual("updatedtrader", updatedTrader.AccountName);
         }
