@@ -69,11 +69,11 @@ namespace CommodityTradingApp.Controllers
             //Simulate active and historical trades
             var activeTrades = new List<Trade>
             {
-                new Trade { TradeID = Guid.NewGuid(), TraderID = trader.Id, Contract = "Buy Gold", IsOpen = true}
+                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Buy Gold", IsOpen = true}
             };
             var historicalTrades = new List<Trade>
             {
-                new Trade { TradeID = Guid.NewGuid(), TraderID = trader.Id, Contract = "Sell Silver", IsOpen = false}
+                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Sell Silver", IsOpen = false}
             };
 
             //Passing all of this information into the view
