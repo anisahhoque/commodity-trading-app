@@ -201,5 +201,25 @@ namespace CommodityTradingApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // GET: Trader/Deposit/{guid}
+        public IActionResult Deposit(Guid id)
+        {
+            // Simulated data fetch - replace with DB context
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Alice",
+                Balance = 100000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+                return NotFound();
+
+            return View(trader); // Show deposit form
+        }
+
+
     }
 }
