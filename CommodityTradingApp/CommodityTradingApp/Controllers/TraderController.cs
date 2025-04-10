@@ -220,6 +220,31 @@ namespace CommodityTradingApp.Controllers
             return View(trader); // Show deposit form
         }
 
+        // POST: Trader/Deposit/{guid}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Deposit(Guid id, decimal depositAmount)
+        {
+            // Simulated data fetch - replace with DB context
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Alice",
+                Balance = 100000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+                return NotFound();
+
+            // Update balance
+            trader.Balance += depositAmount;
+
+            // In real app, save changes to DB here
+
+            TempData["SuccessMessage"] = $"Successfully deposited {depositAmount:C} into {trader.AccountName}'s account.";
+            return RedirectToAction("Details", new { id = trader.Id });
+        }
 
     }
 }
