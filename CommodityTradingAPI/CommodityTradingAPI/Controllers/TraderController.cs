@@ -44,8 +44,13 @@ namespace CommodityTradingAPI.Controllers
 
         [HttpGet("{id}/portfolio")]
         public async Task<IActionResult> TradeHistory(Guid id)
+
+            //returns the trading accounts balance, plus all the traders' currently open trades
         {
             var trader = await _context.TraderAccounts.FindAsync(id);
+            var user = trader.User;
+
+
             //var trades = trader.Trades.ToList();
             if (trader == null)
             {
@@ -58,6 +63,9 @@ namespace CommodityTradingAPI.Controllers
             }
             return Ok(trades);
         }
+
+        //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
+
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TraderAccount traderAccount)
