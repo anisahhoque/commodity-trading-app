@@ -188,7 +188,6 @@ namespace CommodityTradingApp.Controllers
         // POST: Trader/Delete/{guid}
         //This is the action that handles the form submission for deleting a trader
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)
         {
             // Simulated manager check
@@ -197,7 +196,7 @@ namespace CommodityTradingApp.Controllers
             if (!isManager)
                 return Unauthorized();
 
-            // Here you'd normally remove the trader from DB
+            // Here you'd remove the trader from DB
             Console.WriteLine($"Deleted Trader with ID: {id}");
 
             return RedirectToAction("Index");
