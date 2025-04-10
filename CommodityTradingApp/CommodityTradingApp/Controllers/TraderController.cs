@@ -94,5 +94,25 @@ namespace CommodityTradingApp.Controllers
             return View();
         }
 
+        // POST: Trader/Create
+        //This is the action that handles the form submission for creating a new trader
+        [HttpPost]
+        public IActionResult Create(CreateTraderViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var newTrader = new Trader
+                {
+                    Id = Guid.NewGuid(),
+                    AccountName = model.AccountName,
+                    Balance = model.Balance,
+                    UserId = model.UserId
+                };
+
+                return RedirectToAction("Index");
+            }
+
+            return View(model);
+        }
     }
 }
