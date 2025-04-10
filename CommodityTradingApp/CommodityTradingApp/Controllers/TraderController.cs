@@ -77,7 +77,7 @@ namespace CommodityTradingApp.Controllers
             };
 
             //Passing all of this information into the view
-            var model = new TraderDetailsViewModel
+            var model = new ViewModel
             {
                 Trader = trader,
                 ActiveTrades = activeTrades,
@@ -86,7 +86,13 @@ namespace CommodityTradingApp.Controllers
 
             return View(model);
         }
+
+        // GET: Trader/Create
+        //This is the view for creating a new trader
+        public IActionResult Create()
+        {
+            return View();
+        }
+
     }
-
-
 }
