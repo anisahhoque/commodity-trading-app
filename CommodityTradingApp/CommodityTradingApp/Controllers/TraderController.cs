@@ -35,5 +35,32 @@ namespace CommodityTradingApp.Controllers
             return View(visibleTraders);
         }
 
+
+        // GET: Trader/Details/5
+        public IActionResult Details(int id)
+        {
+            //Simulate current user and role
+            bool isManager = true;
+            int currentUserId = 1;
+
+            var allTraders = new List<Trader>
+        {
+            new Trader { Id = Guid.NewGuid(), AccountName = "Alice", Balance = 5000, UserId = 1 },
+            new Trader { Id = Guid.NewGuid(), AccountName = "Bob", Balance = 10000, UserId = 2 },
+            new Trader { Id = Guid.NewGuid(), AccountName = "Charlie", Balance = 7500, UserId = 3 }
+        };
+
+            var trader = allTraders.FirstOrDefault(t => t.Id.GetHashCode() == id); // Simulate fetching trader by ID
+
+            if (trader == null)
+            {
+                return NotFound();
+            }
+
+
+
+        }
     }
+
+
 }
