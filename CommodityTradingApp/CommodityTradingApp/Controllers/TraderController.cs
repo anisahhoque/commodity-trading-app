@@ -268,5 +268,43 @@ namespace CommodityTradingApp.Controllers
             return View(trader);
         }
 
+
+        // POST: Trader/Withdraw/{guid}
+        [HttpPost]
+        public IActionResult Withdraw(Guid id, decimal withdrawAmount)
+        {
+            // Simulate finding trader
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Bob",
+                Balance = 100000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+                return NotFound();
+
+            if (withdrawAmount <= 0)
+            {
+                ModelState.AddModelError("", "Withdraw amount must be greater than zero.");
+                return View(trader);
+            }
+
+            if (withdrawAmount > trader.Balance)
+            {
+                ModelState.AddModelError("", "Insufficient balance.");
+                return View(trader);
+            }
+
+            // Apply withdrawal
+            trader.Balance -= withdrawAmount;
+
+            // Simulate DB save
+            Console.WriteLine($"Updated Trader {trader.AccountName}'s balance: {trader.Balance}");
+
+            return RedirectToAction("Index");
+        }
+
     }
 }
