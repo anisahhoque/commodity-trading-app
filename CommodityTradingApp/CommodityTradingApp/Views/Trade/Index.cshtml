@@ -3,16 +3,16 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Trade ID</th>
-            <th>Trader ID</th>
-            <th>Commodity ID</th>
+            <th>Trade Id</th>
+            <th>Trader Id</th>
+            <th>Commodity Id</th>
             <th>Price Per Unit</th>
             <th>Quantity</th>
             <th>Buy/Sell</th>
             <th>Expiry</th>
             <th>Created At</th>
             <th>Bourse</th>
-            <th>Mitigation ID</th>
+            <th>Mitigation Id</th>
             <th>Is Open</th>
             <th>Contract</th>
             <th></th>
@@ -22,20 +22,26 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.TradeID</td>
-                <td>@item.TraderID</td>
-                <td>@item.CommodityID</td>
+                <td>@item.TradeId</td>
+                <td>@item.TraderId</td>
+                <td>@item.CommodityId</td>
                 <td>@item.PricePerUnit.ToString("C")</td>
                 <td>@item.Quantity</td>
                 <td>@(item.IsBuy ? "Buy" : "Sell")</td>
                 <td>@item.Expiry.ToString("yyyy-MM-dd")</td>
                 <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@item.Bourse</td>
-                <td>@item.MitigationID</td>
+                <td>@item.MitigationId</td>
                 <td>@(item.IsOpen ? "Yes" : "No")</td>
                 <td>@item.Contract</td>
 
             </tr>
+        <td>
+            <a asp-action="Edit" asp-route-id="@item.TradeId">Edit</a> |
+            <a asp-action="Details" asp-route-id="@item.TradeId">Details</a> |
+            <a asp-action="Delete" asp-route-id="@item.TradeId">Delete</a>
+
+        </td>
         }
     </tbody>
 </table>

@@ -4,6 +4,6 @@
     {
         public Guid CommodityId { get; set; }
         public string CommodityName { get; set; }
-        public int high;
+
     }
 }

@@ -44,6 +44,11 @@ namespace CommodityTradingApp.Controllers
             //call get details for each commodity in commodities
             return View(commodities);
         }
+        public async Task<IActionResult> DeleteTrade(Guid TradeId)
+        {
+            //
+            return RedirectToAction("Index");
+        }
         private static List<Commodity> GetMockCommodities()
         {
             return new List<Commodity>
@@ -73,46 +78,46 @@ namespace CommodityTradingApp.Controllers
             {
                 new Trade
                 {
-                    TradeID = Guid.NewGuid(),
-                    TraderID = Guid.NewGuid(),
-                    CommodityID = Guid.NewGuid(),
+                    TradeId = Guid.NewGuid(),
+                    TraderId = Guid.NewGuid(),
+                    CommodityId = Guid.NewGuid(),
                     PricePerUnit = 150.75m,
                     Quantity = 100,
                     IsBuy = true,
                     Expiry = DateTime.Now.AddDays(30),
                     CreatedAt = DateTime.Now,
                     Bourse = "NYSE",
-                    MitigationID = Guid.NewGuid(),
+                    MitigationId = Guid.NewGuid(),
                     IsOpen = true,
                     Contract = "XYZ123"
                 },
                 new Trade
                 {
-                    TradeID = Guid.NewGuid(),
-                    TraderID = Guid.NewGuid(),
-                    CommodityID = Guid.NewGuid(),
+                    TradeId = Guid.NewGuid(),
+                    TraderId = Guid.NewGuid(),
+                    CommodityId = Guid.NewGuid(),
                     PricePerUnit = 120.50m,
                     Quantity = 50,
                     IsBuy = false,
                     Expiry = DateTime.Now.AddDays(60),
                     CreatedAt = DateTime.Now,
                     Bourse = "LSE",
-                    MitigationID = Guid.NewGuid(),
+                    MitigationId = Guid.NewGuid(),
                     IsOpen = false,
                     Contract = "ABC456"
                 },
                 new Trade
                 {
-                    TradeID = Guid.NewGuid(),
-                    TraderID = Guid.NewGuid(),
-                    CommodityID = Guid.NewGuid(),
+                    TradeId = Guid.NewGuid(),
+                    TraderId = Guid.NewGuid(),
+                    CommodityId = Guid.NewGuid(),
                     PricePerUnit = 200.00m,
                     Quantity = 25,
                     IsBuy = true,
                     Expiry = DateTime.Now.AddDays(45),
                     CreatedAt = DateTime.Now,
                     Bourse = "CME",
-                    MitigationID = Guid.NewGuid(),
+                    MitigationId = Guid.NewGuid(),
                     IsOpen = true,
                     Contract = "DEF789"
                 }
