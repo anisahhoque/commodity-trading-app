@@ -1,5 +1,6 @@
 ﻿using CommodityTradingAPI.Data;
 using CommodityTradingAPI.Models;
+using CommodityTradingAPI.Models.DTOs;
 using CommodityTradingAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,7 @@ namespace CommodityTradingAPI.Controllers
         }
 
         [HttpGet("{id}/portfolio")]
-        public async Task<IActionResult> TradeHistory(Guid id)
+        public async Task<IActionResult> Portfolio(Guid id)
 
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
@@ -61,7 +62,17 @@ namespace CommodityTradingAPI.Controllers
             {
                 return NotFound("No open trades found for this trader");
             }
-            return Ok(trades);
+
+            TraderAccountPortfolioDto traderPortfolio = new()
+            {
+                AccountName = trader.AccountName,
+                UserName = user.Username,
+                Balance = trader.Balance,
+                OpenAccountTrades = trades
+            };
+
+
+            return Ok(traderPortfolio);
         }
 
         //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
