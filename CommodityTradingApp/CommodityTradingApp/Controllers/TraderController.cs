@@ -57,7 +57,15 @@ namespace CommodityTradingApp.Controllers
                 return NotFound();
             }
 
+            //if not a manager, block access to other traders
+            if (!isManager && trader.UserId != currentUserId)
+                return Unauthorized();
 
+            //Simulate active and historical trades
+            var activeTrades = new List<Trade>
+            {
+                new Trade { TradeID = Guid.NewGuid(), TraderID = trader.Id, Contract = "Buy Gold", IsOpen = true}
+            };
 
         }
     }
