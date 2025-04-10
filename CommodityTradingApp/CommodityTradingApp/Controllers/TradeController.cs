@@ -41,6 +41,7 @@ namespace CommodityTradingApp.Controllers
         }
         public async Task<IActionResult> CreateTrade()
         {
+            //call get details for each commodity in commodities
             return View(commodities);
         }
         private static List<Commodity> GetMockCommodities()

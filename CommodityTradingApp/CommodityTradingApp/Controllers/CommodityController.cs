@@ -15,6 +15,7 @@ namespace CommodityTradingApp.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            //call get list of commodities
             return View(commodities);
         }
         private static List<Commodity> GetMockCommodities()
@@ -25,6 +26,7 @@ namespace CommodityTradingApp.Controllers
                 {
                     CommodityId = Guid.NewGuid(),
                     CommodityName = "Gold"
+                    
                 },
                 new Commodity
                 {
