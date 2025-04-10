@@ -74,9 +74,12 @@ namespace CommodityTradingApp.Controllers
             //Passing all of this information into the view
             var model = new TraderDetailsViewModel
             {
+                Trader = trader,
+                ActiveTrades = activeTrades,
+                HistoricalTrades = historicalTrades
+            };
 
-            }
-
+            return View(model);
         }
     }
 
