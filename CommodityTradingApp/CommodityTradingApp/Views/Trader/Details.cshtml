@@ -5,3 +5,57 @@
 }
 
 <h2>Trader Details</h2>
+
+<div>
+    <strong>Account Name:</strong> @Model.Trader.AccountName <br />
+    <strong>Balance:</strong> @Model.Trader.Balance.ToString("C") <br />
+    <strong>User ID:</strong> @Model.Trader.UserId
+</div>
+
+<hr />
+
+<h3>Active Trades</h3>
+@if (Model.ActiveTrades != null && Model.ActiveTrades.Any())
+{
+    <table>
+        <tr>
+            <th>Contract</th>
+            <th>Status</th>
+        </tr>
+        @foreach (var trade in Model.ActiveTrades)
+        {
+            <tr>
+                <td>@trade.Contract</td>
+                <td>@(trade.IsOpen ? "Open" : "Closed")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>No active trades found.</p>
+}
+
+<hr />
+
+<h3>Trade History</h3>
+@if (Model.HistoricalTrades != null && Model.HistoricalTrades.Any())
+{
+    <table>
+        <tr>
+            <th>Contract</th>
+            <th>Status</th>
+        </tr>
+        @foreach (var trade in Model.HistoricalTrades)
+        {
+            <tr>
+                <td>@trade.Contract</td>
+                <td>@(trade.IsOpen ? "Open" : "Closed")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>No historical trades found.</p>
+}
