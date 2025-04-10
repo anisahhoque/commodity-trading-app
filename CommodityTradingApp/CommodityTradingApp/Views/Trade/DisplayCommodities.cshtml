@@ -31,24 +31,25 @@
                 </div>
             </div>
 
-            <!-- Instead of button, we'll use hover to show trade form -->
+            
+
             <div class="commodity-actions">
-                <div class="trade-form" id="trade-form-@item.CommodityId" method="post" action="@Url.Action("CreateTrade", "Trade")">
+                <form class="trade-form" id="trade-form-@item.CommodityId" method="post" action="@Url.Action("CreateTrade", "Trade")">
                     <div>
                         <label for="quantity-@item.CommodityId">Quantity</label>
-                        <input type="number" id="quantity-@item.CommodityId" class="form-control" placeholder="Enter quantity" required />
+                        <input type="number" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
                     </div>
                     <div>
                         <label for="buy-sell-@item.CommodityId">Buy/Sell</label>
-                        <select id="buy-sell-@item.CommodityId" class="form-control" required>
-                            <option value="buy">Buy</option>
-                            <option value="sell">Sell</option>
+                        <select id="buy-sell-@item.CommodityId" name="IsBuy" class="form-control" required>
+                            <option value="true">Buy</option>
+                            <option value="false">Sell</option>
                         </select>
                     </div>
                     <div>
-                        <button class="btn btn-success" style="margin-top: 10px;">Trade</button>
+                        <button class="btn btn-success" style="margin-top: 10px;" type="submit">Trade</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     }
@@ -99,7 +100,7 @@
         text-align: center;
     }
 
-    /* Initially hide the trade form */
+ 
     .trade-form {
         display: none;
         margin-top: 20px;
@@ -107,7 +108,7 @@
         border-top: 2px solid #ddd;
     }
 
-    /* Show the trade form when hovering over the commodity box */
+   
     .commodity-box:hover .trade-form {
         display: block;
     }

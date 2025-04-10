@@ -44,9 +44,25 @@ namespace CommodityTradingApp.Controllers
             //call get details for each commodity in commodities
             return View(commodities);
         }
-        public async Task<IActionResult> CreateTrade()
+        [HttpPost]
+        public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
         {
-            
+            var newTrade = new Trade
+            {
+                TradeId = Guid.NewGuid(),
+                TraderId = Guid.NewGuid(), 
+                CommodityId = CommodityId,
+                PricePerUnit = 100.0m, // will obtain price using api
+                Quantity = Quantity,
+                IsBuy = IsBuy,
+                Expiry = DateTime.Now.AddDays(30),
+                CreatedAt = DateTime.Now,
+                Bourse = "NYSE", //grab from api
+                MitigationId = Guid.NewGuid(),
+                IsOpen = true,
+                Contract = "ABC01"
+            };
+            trades.Add(newTrade);
             return RedirectToAction("Index");
         }
         public async Task<IActionResult> DeleteTrade(Guid id)
