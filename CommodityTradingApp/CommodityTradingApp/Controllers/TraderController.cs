@@ -143,5 +143,21 @@ namespace CommodityTradingApp.Controllers
 
             return View(viewModel);
         }
+
+        // POST: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
+        [HttpPost]
+        public IActionResult Edit(EditTraderViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // In real app: fetch trader from DB by ID and update fields
+            // Simulate update success
+            Console.WriteLine($"Updated Trader {model.Id}: Name={model.AccountName}, Balance={model.Balance}");
+
+            return RedirectToAction("Index");
+        }
     }
 }
