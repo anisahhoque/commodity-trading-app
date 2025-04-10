@@ -5,7 +5,13 @@ namespace CommodityTradingApp.Controllers
 {
     public class TradeController : Controller
     {
+        private readonly HttpClient _httpClient;
         private static List<Trade> trades = GetMockTrades();
+        private static List<Commodity> commodities = GetMockCommodities();
+        public TradeController(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
         public async Task<IActionResult> Index()
         {
             return View(trades);
@@ -32,6 +38,33 @@ namespace CommodityTradingApp.Controllers
 
 
             return View(pagedTrades);
+        }
+        public async Task<IActionResult> CreateTrade()
+        {
+            return View(commodities);
+        }
+        private static List<Commodity> GetMockCommodities()
+        {
+            return new List<Commodity>
+            {
+                new Commodity
+                {
+                    CommodityId = Guid.NewGuid(),
+                    CommodityName = "Gold"
+                },
+                new Commodity
+                {
+                    CommodityId = Guid.NewGuid(),
+                    CommodityName = "Oil"
+
+                },
+                new Commodity
+                {
+                    CommodityId = Guid.NewGuid(),
+                    CommodityName = "Silver"
+
+                }
+            };
         }
         private static List<Trade> GetMockTrades()
         {

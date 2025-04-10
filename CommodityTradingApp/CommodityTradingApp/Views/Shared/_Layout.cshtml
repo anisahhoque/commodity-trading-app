@@ -23,6 +23,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="tradeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Trade
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="tradeDropdown">
+                                <li><a class="dropdown-item" asp-controller="Trade" asp-action="CreateTrade">Trade Now</a></li>
+                                <li><a class="dropdown-item" asp-controller="Trade" asp-action="Index">All Trades</a></li>
+                                <li><a class="dropdown-item" asp-controller="Trade" asp-action="TradeHistory">Trade History</a></li>
+                                <li><a class="dropdown-item" asp-controller="Trade" asp-action="ActiveTrades">Active Trades</a></li>
+                            </ul>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
