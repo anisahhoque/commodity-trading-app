@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using NUnit.Framework;
 using CommodityTradingAPI.Models;
 
 namespace CommodityTradingAPI.Controllers
