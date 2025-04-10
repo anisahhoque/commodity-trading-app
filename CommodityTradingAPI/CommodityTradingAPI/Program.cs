@@ -22,7 +22,7 @@ builder.Services.AddDbContext<CommoditiesDbContext>(options =>
              {
                  Username = "Admin",
                  PasswordHash = BCrypt.Net.BCrypt.HashPassword(builder.Configuration["AdminPassword"]),
-                 CountryId = 186
+                 CountryId = 14
              });
              context.SaveChanges();
          }
