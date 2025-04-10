@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CommodityTradingApp.Models;
+using CommodityTradingApp.ViewModels;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -77,7 +78,7 @@ namespace CommodityTradingApp.Controllers
             };
 
             //Passing all of this information into the view
-            var model = new ViewModel
+            var model = new TraderDetailsViewModel
             {
                 Trader = trader,
                 ActiveTrades = activeTrades,
