@@ -61,6 +61,11 @@ namespace CommodityTradingApp.Controllers
         }
         public async Task<IActionResult> UpdateTrade(Guid id)
         {
+            var tradeToUpdate = trades.FirstOrDefault(t => t.TradeId == id);
+            if (tradeToUpdate != null)
+            {
+                tradeToUpdate.IsOpen = false; 
+            }
             //make a call to update trade
             return RedirectToAction("Index");
         }
