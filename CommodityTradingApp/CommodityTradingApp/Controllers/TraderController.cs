@@ -115,5 +115,33 @@ namespace CommodityTradingApp.Controllers
 
             return View(model);
         }
+
+        // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
+        //This is the view for editing a trader
+        public IActionResult Edit(Guid id)
+        {
+            // Simulated data (replace with DB context query in real app)
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Alice",
+                Balance = 5000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new EditTraderViewModel
+            {
+                Id = trader.Id,
+                AccountName = trader.AccountName,
+                Balance = trader.Balance
+            };
+
+            return View(viewModel);
+        }
     }
 }
