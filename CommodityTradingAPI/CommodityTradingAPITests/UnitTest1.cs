@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using CommodityTradingAPI.Data;
+using System.Net.Http.Json;
 
 namespace CommodityTradingAPITests
 {
@@ -125,10 +126,10 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
-            var createdTrader = await _context.Traders.FindAsync(trader.TraderId);
+            var createdTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.That(createdTrader, Is.Not.Null);  // Verifies the trader is created
             Assert.That("TestTrader", Is.EqualTo(createdTrader.AccountName));  // Verifies the trader's account name
         }
@@ -156,13 +157,13 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Remove(trader);
+            _context.TraderAccounts.Remove(trader);
             await _context.SaveChangesAsync();
 
-            var deletedTrader = await _context.Traders.FindAsync(trader.TraderId);
+            var deletedTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.That(deletedTrader, Is.Null);  // Verifies the trader is deleted
         }
 
@@ -189,14 +190,14 @@ namespace CommodityTradingAPITests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
             trader.AccountName = "UpdatedTrader";
-            _context.Traders.Update(trader);
+            _context.TraderAccounts.Update(trader);
             await _context.SaveChangesAsync();
 
-            var updatedTrader = await _context.Traders.FindAsync(trader.TraderId);
+            var updatedTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
             Assert.That(updatedTrader, Is.Not.Null);  // Verifies trader exists
             Assert.That("UpdatedTrader", Is.EqualTo(updatedTrader.AccountName));  // Verifies the account name is updated
         }
@@ -271,14 +272,14 @@ namespace CommodityTradingAPITests
             };
 
             _context.Users.Add(user);
-            _context.Traders.Add(trader);
+            _context.TraderAccounts.Add(trader);
             await _context.SaveChangesAsync();
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             var deletedUser = await _context.Users.FindAsync(user.UserId);
-            var deletedTrader = await _context.Traders.FindAsync(trader.TraderId);
+            var deletedTrader = await _context.TraderAccounts.FindAsync(trader.TraderId);
 
             Assert.That(deletedUser, Is.Null);  // Verifies the user was deleted
             Assert.That(deletedTrader, Is.Null);  // Verifies the trader was deleted (if cascade delete is enabled)
