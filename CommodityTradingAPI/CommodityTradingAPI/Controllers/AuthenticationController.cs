@@ -1,5 +1,5 @@
 ﻿using CommodityTradingAPI.Data;
-using Microsoft.AspNetCore.Http;
+using CommodityTradingAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,16 +22,15 @@ namespace CommodityTradingAPI.Controllers
         }
 
 
-
         [HttpPost("Login")]
-        public ActionResult<User> Login([Bind("UserName,Password")] User user)
+        public ActionResult<User> Login([Bind("Username,Password")] LoginRequest request)
         {
-            var dbUser = _context.User.FirstOrDefault(u => u.UserName == user.UserName);
-            if (dbUser == null || !dbUser.Authenticate(user.Password))
+            var dbUser = _context.Users.FirstOrDefault(u => u.Username == request.Username);
+            if (dbUser == null || !BCrypt.Net.BCrypt.Verify(request.Password, dbUser.PasswordHash))
             {
                 return BadRequest("Invalid login");
             }
-            var token = CreateToken(user);
+            var token = CreateJwt(dbUser);
 
             Response.Cookies.Append("AuthToken", token, new CookieOptions
             {
@@ -44,17 +43,18 @@ namespace CommodityTradingAPI.Controllers
             return Ok(new { message = "Login successful" });
         }
 
+        [HttpPost("Logout")]
         public IActionResult Logout()
         {
             Response.Cookies.Delete("AuthToken");
             return Ok(new { message = "Logged out successfully" });
         }
 
-        private string CreateToken(User user)
+        private string CreateJwt(User user)
         {
             var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Name, user.Username),
                 };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));

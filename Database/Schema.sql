@@ -20,7 +20,7 @@ GO
 -- Creating country table
 CREATE TABLE "country"(
 	"CountryID" TINYINT IDENTITY(1,1) NOT NULL,
-	"Country" NVARCHAR(50)
+	"CountryName" NVARCHAR(50)
 );
 ALTER TABLE
     "country" ADD CONSTRAINT "country_countryid_primary" PRIMARY KEY("CountryID")
@@ -174,7 +174,7 @@ CREATE VIEW vw_user_trading_accounts AS
 SELECT
 	u."UserID",
 	u."Username",
-	co."Country",
+	co."CountryName",
 	ta."TraderID",
 	ta."AccountName",
 	ta."Balance",
@@ -202,7 +202,7 @@ GO
 
 
 -- Seeding country table with UN recognized countries and observer states
-INSERT INTO "country" ("Country")
+INSERT INTO "country" ("CountryName")
 VALUES
     ('Afghanistan'),
     ('Albania'),
