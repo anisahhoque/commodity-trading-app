@@ -1,0 +1,143 @@
+﻿@model IEnumerable<CommodityTradingApp.Models.Commodity>
+
+@{
+    ViewData["Title"] = "Commodity List";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="commodity-grid">
+    @foreach (var item in Model)
+    {
+        <div class="commodity-box">
+            <h3>@item.CommodityName</h3>
+            <p><strong>ID:</strong> @item.CommodityId</p>
+
+
+            <div class="commodity-info">
+                <div>
+                    <strong>Price:</strong> 10
+                </div>
+                <div>
+                    <strong>High:</strong> 10
+                </div>
+                <div>
+                    <strong>Low:</strong> 10
+                </div>
+                <div>
+                    <strong>Absolute Change:</strong> 10
+                </div>
+                <div>
+                    <strong>Relative Change:</strong> 10
+                </div>
+            </div>
+
+
+            <button class="btn btn-primary" onclick="toggleTradeForm('@item.CommodityId')">Trade</button>
+
+
+            <div class="trade-form" id="trade-form-@item.CommodityId" style="display:none; margin-top: 10px;">
+                <div>
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" />
+                </div>
+                <div>
+                    <label for="buy-sell">Buy/Sell</label>
+                    <select id="buy-sell" class="form-control">
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-success" style="margin-top: 10px;">Submit</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script>
+    function toggleTradeForm(commodityId) {
+
+        var tradeForm = document.getElementById("trade-form-" + commodityId);
+
+
+        if (tradeForm.style.display === "none" || tradeForm.style.display === "") {
+            tradeForm.style.display = "block";
+        } else {
+            tradeForm.style.display = "none";
+        }
+    }
+</script>
+<style>
+
+    .commodity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+
+    .commodity-box {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .commodity-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .commodity-box h3 {
+            margin-top: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .commodity-box p {
+            font-size: 14px;
+            color: #555;
+        }
+
+
+    .commodity-info {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #333;
+    }
+
+        .commodity-info div {
+            margin-bottom: 5px;
+        }
+
+
+    .commodity-actions {
+        text-align: center;
+    }
+
+        .commodity-actions .btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+
+    .trade-form {
+        margin-top: 20px;
+        padding: 15px;
+        border-top: 2px solid #ddd;
+    }
+
+        .trade-form .form-group {
+            margin-bottom: 10px;
+        }
+
+        .trade-form .btn {
+            width: 100%;
+        }
+</style>
+
