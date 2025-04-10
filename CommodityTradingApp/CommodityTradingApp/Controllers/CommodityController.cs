@@ -24,19 +24,19 @@ namespace CommodityTradingApp.Controllers
             {
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
                     CommodityName = "Gold"
                     
                 },
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("92d2573e-3ad1-4f38-8859-9d4d9e9e3a0e"),
                     CommodityName = "Oil"
 
                 },
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("f8c3618a-53a8-4097-871f-50a924bdcf1c") ,
                     CommodityName = "Silver"
 
                 }

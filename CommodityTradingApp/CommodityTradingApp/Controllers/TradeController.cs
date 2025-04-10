@@ -44,9 +44,19 @@ namespace CommodityTradingApp.Controllers
             //call get details for each commodity in commodities
             return View(commodities);
         }
-        public async Task<IActionResult> DeleteTrade(Guid TradeId)
+        public async Task<IActionResult> DeleteTrade(Guid id)
         {
-            //
+            //make a call to delete trade api
+            var tradeToDelete = trades.FirstOrDefault(t => t.TradeId == id);
+            if (tradeToDelete != null)
+            {
+                trades.Remove(tradeToDelete);
+            }
+            return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> UpdateTrade(Guid id)
+        {
+            //make a call to update trade
             return RedirectToAction("Index");
         }
         private static List<Commodity> GetMockCommodities()
@@ -55,18 +65,19 @@ namespace CommodityTradingApp.Controllers
             {
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
                     CommodityName = "Gold"
+
                 },
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("92d2573e-3ad1-4f38-8859-9d4d9e9e3a0e"),
                     CommodityName = "Oil"
 
                 },
                 new Commodity
                 {
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("f8c3618a-53a8-4097-871f-50a924bdcf1c") ,
                     CommodityName = "Silver"
 
                 }
@@ -80,7 +91,7 @@ namespace CommodityTradingApp.Controllers
                 {
                     TradeId = Guid.NewGuid(),
                     TraderId = Guid.NewGuid(),
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
                     PricePerUnit = 150.75m,
                     Quantity = 100,
                     IsBuy = true,
@@ -95,7 +106,7 @@ namespace CommodityTradingApp.Controllers
                 {
                     TradeId = Guid.NewGuid(),
                     TraderId = Guid.NewGuid(),
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("92d2573e-3ad1-4f38-8859-9d4d9e9e3a0e"),
                     PricePerUnit = 120.50m,
                     Quantity = 50,
                     IsBuy = false,
@@ -110,7 +121,7 @@ namespace CommodityTradingApp.Controllers
                 {
                     TradeId = Guid.NewGuid(),
                     TraderId = Guid.NewGuid(),
-                    CommodityId = Guid.NewGuid(),
+                    CommodityId = Guid.Parse("f8c3618a-53a8-4097-871f-50a924bdcf1c"),
                     PricePerUnit = 200.00m,
                     Quantity = 25,
                     IsBuy = true,

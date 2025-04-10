@@ -14,7 +14,9 @@
         public string Bourse { get; set; }       
         public Guid MitigationId { get; set; }   
         public bool IsOpen { get; set; }         
-        public string Contract { get; set; }     
+        public string Contract { get; set; }
+
+  
     }
     
 }

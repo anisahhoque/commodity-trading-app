@@ -1,46 +1,59 @@
 ﻿@model IEnumerable<CommodityTradingApp.Models.Trade>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Trade Id</th>
-            <th>Trader Id</th>
-            <th>Commodity Id</th>
-            <th>Price Per Unit</th>
-            <th>Quantity</th>
-            <th>Buy/Sell</th>
-            <th>Expiry</th>
-            <th>Created At</th>
-            <th>Bourse</th>
-            <th>Mitigation Id</th>
-            <th>Is Open</th>
-            <th>Contract</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.TradeId</td>
-                <td>@item.TraderId</td>
-                <td>@item.CommodityId</td>
-                <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@item.Quantity</td>
-                <td>@(item.IsBuy ? "Buy" : "Sell")</td>
-                <td>@item.Expiry.ToString("yyyy-MM-dd")</td>
-                <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                <td>@item.Bourse</td>
-                <td>@item.MitigationId</td>
-                <td>@(item.IsOpen ? "Yes" : "No")</td>
-                <td>@item.Contract</td>
+@{
+    ViewData["Title"] = "Trade List";
+}
 
-            </tr>
-        <td>
-            <a asp-action="Details" asp-route-id="@item.TradeId">Details</a> 
+<h2 class="text-center mt-4">All Trades</h2>
 
+<style>
+    .trade-card {
+        transition: all 0.3s ease-in-out;
+        position: relative;
+    }
 
-        </td>
-        }
-    </tbody>
-</table>
+    .trade-details {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+
+    .trade-card:hover .trade-details {
+        max-height: 500px;
+        opacity: 1;
+    }
+</style>
+
+<div class="container mt-4">
+    @foreach (var item in Model)
+    {
+        <div class="card mb-4 shadow-sm trade-card">
+            <div class="card-body">
+                <h5 class="card-title">Commodity: @item.CommodityId</h5>
+                <p class="card-text">
+                    <strong>Price Per Unit:</strong> @item.PricePerUnit.ToString("C")<br />
+                    <strong>Quantity:</strong> @item.Quantity<br />
+                    <strong>Buy/Sell:</strong> @(item.IsBuy ? "Buy" : "Sell")<br />
+                </p>
+
+                <div class="trade-details">
+                    <hr />
+                    <p class="card-text text-muted">
+                        <strong>Trader ID:</strong> @item.TraderId<br />
+                        <strong>Created At:</strong> @item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")<br />
+                        <strong>Expiry:</strong> @item.Expiry.ToString("yyyy-MM-dd")<br />
+                        <strong>Bourse:</strong> @item.Bourse<br />
+                        <strong>Mitigation ID:</strong> @item.MitigationId<br />
+                        <strong>Is Open:</strong> @(item.IsOpen ? "Yes" : "No")<br />
+                        <strong>Contract:</strong> @item.Contract
+                    </p>
+                </div>
+
+                <div class="mt-3">
+                    <a asp-action="Details" asp-route-id="@item.TradeId" class="btn btn-info btn-sm">Details</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
