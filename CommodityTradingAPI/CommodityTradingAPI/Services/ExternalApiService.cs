@@ -2,7 +2,7 @@
 using CommodityTradingAPI.Models;
 using System.Net.Http.Headers;
 
-namespace CommodityTradingAPI.Service
+namespace CommodityTradingAPI.Services
 {
     public class ExternalApiService
     {

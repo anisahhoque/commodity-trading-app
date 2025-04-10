@@ -1,6 +1,6 @@
 ﻿using CommodityTradingAPI.Data;
 using CommodityTradingAPI.Models;
-using CommodityTradingAPI.Service;
+using CommodityTradingAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
