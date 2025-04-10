@@ -1,21 +1,20 @@
 ﻿using Azure.Storage.Blobs;
 using CommodityTradingAPI.Models;
-using System;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
+using CommodityTradingAPI.Services;
 
 namespace CommodityTradingAPI.Services
 {
-    public class AuditLogService
+    public class AuditLogService : ILogger
     {
         private readonly BlobServiceClient _blobServiceClient;
-        private readonly string _containerName = "laughingstock-audit-logs";
+        private readonly string _containerName;
         private readonly string _storageConnectionString;
 
-        public AuditLogService(string connectionString)
+        public AuditLogService(IConfiguration configuration)
         {
-            _storageConnectionString = connectionString;
+            _storageConnectionString = configuration.GetConnectionString("AzureBlobStorage");
+            _containerName = configuration["LogStorageName"];
             _blobServiceClient = new BlobServiceClient(_storageConnectionString);
         }
 
@@ -32,13 +31,13 @@ namespace CommodityTradingAPI.Services
                     await containerClient.CreateAsync();
                 }
 
-                string logContent = JsonSerializer.Serialize(auditLog);
+                string logContent = JsonSerializer.Serialize(auditLog, new JsonSerializerOptions { WriteIndented = true });
 
-                // Upload
+                // Upload the log
                 BlobClient blobClient = containerClient.GetBlobClient(fileName);
                 using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(logContent)))
                 {
-                    await blobClient.UploadAsync(stream);
+                    await blobClient.UploadAsync(stream, overwrite: true);
                 }
             }
             catch (Exception ex)
@@ -48,12 +47,12 @@ namespace CommodityTradingAPI.Services
             }
         }
     }
-
 }
+
 
 namespace CommodityTradingAPI.Models
 {
-    public class AuditLog
+    public class AuditLog : ILog
     {
         public string EntityName { get; set; } // What was changed
         public string Action { get; set; } // How it was changed
