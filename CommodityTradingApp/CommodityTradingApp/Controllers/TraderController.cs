@@ -246,5 +246,27 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Details", new { id = trader.Id });
         }
 
+        // GET: Trader/Withdraw/{guid}
+        public IActionResult Withdraw(Guid id)
+        {
+            bool isManager = true;
+            if (!isManager)
+                return Unauthorized();
+
+            // Simulate finding trader (replace with DB logic)
+            var trader = new Trader
+            {
+                Id = id,
+                AccountName = "Bob",
+                Balance = 100000,
+                UserId = Guid.NewGuid()
+            };
+
+            if (trader == null)
+                return NotFound();
+
+            return View(trader);
+        }
+
     }
 }
