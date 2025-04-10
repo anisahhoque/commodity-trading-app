@@ -10,9 +10,34 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using CommodityTradingAPI.Data;
 using System.Net.Http.Json;
+using static CommodityTradingAPITests.Tests;
 
 namespace CommodityTradingAPITests
 {
+    public class TestStartup 
+    {
+        public TestStartup(IConfiguration config) : base(config) { }
+
+        public override void ConfigureServices(IServiceCollection services)
+        {
+            // Remove existing DbContext config
+            var descriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(DbContextOptions<CommoditiesDbContext>));
+
+            if (descriptor != null)
+                services.Remove(descriptor);
+
+            // Inject InMemory DB instead of SQL Server
+            services.AddDbContext<CommoditiesDbContext>(options =>
+                options.UseInMemoryDatabase("TestDB"));
+
+            // Inject your fake logger
+            services.AddScoped<CommodityTradingAPI.Services.ILogger, FakeAuditLogService>();
+
+            base.ConfigureServices(services);
+        }
+    }
+
     [TestFixture]
     public class Tests
     {
@@ -299,6 +324,15 @@ namespace CommodityTradingAPITests
         {
             _client.Dispose();
             _context.Dispose();
+        }
+
+        public class FakeAuditLogService : CommodityTradingAPI.Services.ILogger
+        {
+            public Task LogChangeAsync(AuditLog auditLog)
+            {
+                // do nothing
+                return Task.CompletedTask;
+            }
         }
     }
 }

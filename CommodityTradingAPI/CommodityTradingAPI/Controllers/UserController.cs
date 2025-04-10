@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using CommodityTradingAPI.Models;
+using CommodityTradingAPI.Services;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -13,10 +14,14 @@ namespace CommodityTradingAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly CommoditiesDbContext _context;
-        public UserController(CommoditiesDbContext context)
+        private readonly AuditLogService _auditLogService; // I think this should be ILogger?
+
+        public UserController(CommoditiesDbContext context, AuditLogService auditLogService)
         {
             _context = context;
+            _auditLogService = auditLogService;
         }
+
 
         [HttpGet]
         // TODO: Set up authentication to be able to handle this
@@ -62,16 +67,15 @@ namespace CommodityTradingAPI.Controllers
                 CountryName = newUser.Country.CountryName!
             };
 
-            // I will work on adding an audit log next so this code can be uncommented.
-            //var auditLog = new AuditLog
-            //{
-            //    EntityName = "User",
-            //    Action = "Create",
-            //    Timestamp = DateTime.UtcNow,
-            //    Details = $"User {newUser.Username} was created."
-            //};
+            var auditLog = new AuditLog
+            {
+                EntityName = "User",
+                Action = "Create",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {newUser.Username} was created."
+            };
 
-            //await _auditLogService.LogChangeAsync(auditLog);
+            await _auditLogService.LogChangeAsync(auditLog);
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, response);
         }

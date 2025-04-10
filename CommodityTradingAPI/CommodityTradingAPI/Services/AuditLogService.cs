@@ -9,20 +9,19 @@ namespace CommodityTradingAPI.Services
     {
         private readonly BlobServiceClient _blobServiceClient;
         private readonly string _containerName;
-        private readonly string _storageConnectionString;
 
-        public AuditLogService(IConfiguration configuration)
+        public AuditLogService(IConfiguration configuration, BlobServiceClient? blobServiceClient = null)
         {
-            _storageConnectionString = configuration.GetConnectionString("AzureBlobStorage");
+            string storageConnectionString = configuration["ConnectionStrings:AzureBlobStorage"];
             _containerName = configuration["LogStorageName"];
-            _blobServiceClient = new BlobServiceClient(_storageConnectionString);
+
+            _blobServiceClient = blobServiceClient ?? new BlobServiceClient(storageConnectionString);
         }
 
         public async Task LogChangeAsync(AuditLog auditLog)
         {
             try
             {
-                // Generate the log file name based on the entity name and timestamp
                 string fileName = $"{auditLog.Timestamp:yyyy_MM_dd}/{auditLog.EntityName}_{auditLog.Timestamp:yyyyMMdd_HHmmss}.log";
 
                 BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
@@ -33,7 +32,6 @@ namespace CommodityTradingAPI.Services
 
                 string logContent = JsonSerializer.Serialize(auditLog, new JsonSerializerOptions { WriteIndented = true });
 
-                // Upload the log
                 BlobClient blobClient = containerClient.GetBlobClient(fileName);
                 using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(logContent)))
                 {
@@ -42,11 +40,11 @@ namespace CommodityTradingAPI.Services
             }
             catch (Exception ex)
             {
-                // Output any logging errors to terminal
                 Console.WriteLine($"Error logging change: {ex.Message}");
             }
         }
     }
+
 }
 
 
