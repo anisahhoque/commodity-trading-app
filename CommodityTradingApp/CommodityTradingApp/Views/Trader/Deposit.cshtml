@@ -1,0 +1,21 @@
+﻿@model CommodityTradingApp.Models.Trader
+
+@{
+    ViewData["Title"] = "Deposit Funds";
+}
+
+<h2>Deposit Funds to @Model.AccountName</h2>
+
+<p>Current Balance: <strong>@Model.Balance.ToString("C")</strong></p>
+
+<form asp-action="Deposit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div>
+        <label>Deposit Amount</label>
+        <input type="number" name="depositAmount" step="0.01" required />
+    </div>
+    <br />
+    <button type="submit">Deposit</button>
+    <a asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+</form>
+
