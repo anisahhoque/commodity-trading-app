@@ -37,7 +37,7 @@ namespace CommodityTradingApp.ViewModels
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public byte CountryId { get; set; }
+        public string CountryName { get; set; }
     }
 
     public class UserEditViewModel

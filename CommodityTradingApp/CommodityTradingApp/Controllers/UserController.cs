@@ -3,6 +3,10 @@ using CommodityTradingApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BCrypt.Net;
 using System.Runtime.CompilerServices;
+using System.Net.Http.Json;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -11,11 +15,14 @@ namespace CommodityTradingApp.Controllers
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
         private readonly string _apiUrl;
+        private readonly string _apiUrlCountry;
         public UserController(IConfiguration config, HttpClient httpClient)
         {
             _config = config;
             _httpClient = httpClient;
             _apiUrl = _config["api"] + "User/";
+            _apiUrlCountry = _config["api"] + "Country/";
+
         }
         // GET: User/Details/{guid}
         private static List<User> users =
@@ -55,54 +62,41 @@ namespace CommodityTradingApp.Controllers
         //Creating a user: Potentially have this as a button in login page???
         //GET: User/Create
         [HttpGet]
-        public IActionResult Create()
+        public async Task< IActionResult> Create()//UserCreateViewModel ucvM)
         {
+            var response = await _httpClient.GetAsync(_apiUrlCountry);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var countries = JsonConvert.DeserializeObject<List<Country>>(json);
+
+                
+                ViewBag.Countries = new SelectList(countries, "CountryName", "CountryName");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
-            
+            //return View(new UserCreateViewModel { Username = "", Password = "", CountryName = ""});
+
         }
 
         //POST: User/Create
         //This is where we would hash the password and save the user to the database using BCrypt
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string username, string password, int countryId)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string username, string password, string country)
         {
 
-            //Check if model is valid (required fields). If invalid, return same view so user can correct errors
-            //if (!ModelState.IsValid)
-            //{
-            //    return View(model);
-            //}
-
-            // Hash the user's password using BCrypt for security (bcrypt creates a hashed version of the password).
-            //var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
-            // Create a new User object and populate it with data from the model.
-            //var user = new User
-            //{
-            //    UserId = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
-            //    Username = model.Username,
-            //    PasswordHash = hashedPassword,
-            //    CountryId = (byte)model.CountryId
-            //};
-
-            //TODO: Save the user to the database (DbContext).
-            // Declare a list to simulate a "database"
-            //List<User> _users = new();
-
-            // Add the newly created user to this list.
-            //users.Add(user);
-
-            // Redirect to the Details page of the newly created user.
+            //Console.WriteLine("country:" + country);
 
             var userData = new
             {
                 Username = username,
-                Password = password,
-                CountryId = countryId
+                PasswordRaw = password,
+                Country = country
             };
-
-
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(userData),
                 System.Text.Encoding.UTF8,
@@ -111,7 +105,11 @@ namespace CommodityTradingApp.Controllers
 
 
 
-            var response = await _httpClient.PostAsync(_apiUrl + "Create", jsonContent);
+            var response = await _httpClient.PostAsync(_apiUrl, jsonContent);
+
+
+
+
             if (response.IsSuccessStatusCode)
             {
                 TempData["Message"] = "New User Created!";

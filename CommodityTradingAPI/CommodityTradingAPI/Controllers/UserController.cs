@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using CommodityTradingAPI.Models;
-using ILogger = CommodityTradingAPI.Services.ILogger;
+//using ILogger = CommodityTradingAPI.Services.ILogger;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -14,12 +14,12 @@ namespace CommodityTradingAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly CommoditiesDbContext _context;
-        private ILogger _auditLogService;
+        //private ILogger _auditLogService;
 
-        public UserController(CommoditiesDbContext context, ILogger logger)
+        public UserController(CommoditiesDbContext context)//, ILogger logger)
         {
             _context = context;
-            _auditLogService = logger;
+            //_auditLogService = logger;
         }
 
         [HttpGet]
@@ -34,8 +34,8 @@ namespace CommodityTradingAPI.Controllers
 
         // No need to authorise as anyone should be able to make a new account
         [HttpPost]
-        [ValidateAntiForgeryToken] // Still don't really know what this does
-        public async Task<IActionResult> Create([FromBody] CreateUser newUserDetails)
+        //[ValidateAntiForgeryToken] // Still don't really know what this does
+        public async Task<IActionResult> Create([Bind("Username","PasswordRaw","Country")] CreateUser newUserDetails)
         {
 
             // Try to find the matching country
@@ -74,7 +74,7 @@ namespace CommodityTradingAPI.Controllers
                 Details = $"User {newUser.Username} was created."
             };
 
-            await _auditLogService.LogChangeAsync(auditLog);
+            //await _auditLogService.LogChangeAsync(auditLog);
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, response);
         }

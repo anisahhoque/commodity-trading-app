@@ -1,5 +1,6 @@
-﻿@model CommodityTradingApp.ViewModels.UserCreateViewModel
-
+﻿@{
+    ViewData["Title"] = "Create User";
+}
 
 <h2>Create User</h2>
 
@@ -7,25 +8,23 @@
     <!-- Username field -->
     <div class="form-group">
         <label for="Username">Username</label>
-        <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" required />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <input type="text" class="form-control" id="Username" name="Username" required />
+        
     </div>
 
     <!-- Password field -->
     <div class="form-group">
         <label for="Password">Password</label>
         <input type="password" class="form-control" id="Password" name="Password" required />
-        <span asp-validation-for="Password" class="text-danger"></span>
+        
     </div>
 
     <!-- Country selection (dropdown) -->
     <div class="form-group">
-        <label for="country">Country</label>
-        <select id="country" name="country" class="form-control" asp-items="ViewBag.Countries">
-            <option value="">-- Select Country --</option>
-        </select>
-        <span asp-validation-for="CountryId" class="text-danger"></span>
+        <label for="Country">Country</label>
+        <input type="text" class="form-control" id="Country" name="Country" required />
     </div>
+
 
     <!-- Submit Button -->
     <button type="submit" class="btn btn-primary">Create User</button>
