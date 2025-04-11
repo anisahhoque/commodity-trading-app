@@ -26,4 +26,10 @@ namespace CommodityTradingApp.ViewModels
         public string AccountName { get; set; }
         public decimal Balance { get; set; }
     }
+
+    public class UserDetailsViewModel
+    {
+        public User User { get; set; }
+        public List<Trader> Traders { get; set; }
+    }
 }
