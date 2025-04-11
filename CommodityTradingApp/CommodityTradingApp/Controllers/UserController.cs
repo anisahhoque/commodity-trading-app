@@ -82,5 +82,28 @@ namespace CommodityTradingApp.Controllers
             // Redirect to the Details page of the newly created user.
             return RedirectToAction("Details", new { id = user.Id });
         }
+
+        // GET: User/Edit/{guid}
+        public IActionResult Edit(Guid id)
+        {
+            //Simulate users (Replace with db call)
+            List<User> _users = new();
+
+        var user = _users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();  // If user not found, return a 404.
+            }
+
+            // Populate the view model with current user data.
+            var model = new UserEditViewModel
+            {
+                Id = user.Id,
+                Username = user.Username,
+                CountryID = user.CountryID
+            };
+
+            return View(model);  // Return the edit view with the model data.
+        }
     }
 }
