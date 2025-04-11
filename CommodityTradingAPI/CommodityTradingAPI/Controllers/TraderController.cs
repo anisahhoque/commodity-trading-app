@@ -21,7 +21,7 @@ namespace CommodityTradingAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index() 
+        public async Task<IActionResult> Index()
         {
             var traders = await _context.TraderAccounts.ToListAsync();
             if (traders == null)
@@ -51,12 +51,12 @@ namespace CommodityTradingAPI.Controllers
             {
                 return NotFound("Trader not found");
             }
-            var trades = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
-            if (trades == null)
+            var trade = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
+            if (trade == null)
             {
                 return NotFound("No open trades found for this trader");
             }
-            return Ok(trades);
+            return Ok(trade);
         }
 
         [HttpPost]
@@ -78,7 +78,6 @@ namespace CommodityTradingAPI.Controllers
             {
                 return BadRequest("Trader ID invalid.");
             }
-            _context.;
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -95,4 +94,5 @@ namespace CommodityTradingAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+    }
 }
