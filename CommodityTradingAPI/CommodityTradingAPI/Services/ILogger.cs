@@ -2,6 +2,6 @@
 {
     public interface ILogger
     {
-        Task LogChangeAsync(ILog);
+        Task LogChangeAsync(ILog auditLog);
     }
 }
