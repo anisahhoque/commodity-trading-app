@@ -105,5 +105,34 @@ namespace CommodityTradingApp.Controllers
 
             return View(model);  // Return the edit view with the model data.
         }
+
+        // POST: User/Edit/{guid}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(UserEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);  // If validation fails, return the same view with validation errors.
+            }
+
+            // Simulate users (Replace with db call)
+            List<User> _users = new();
+
+            var user = _users.FirstOrDefault(u => u.Id == model.Id);
+            if (user == null)
+            {
+                return NotFound();  // If user not found, return a 404.
+            }
+
+            // Update user details
+            user.Username = model.Username;
+            user.CountryID = model.CountryID;
+
+            //Now, need to update the database using DbContext.
+
+            // Redirect to the user details page after update.
+            return RedirectToAction("Details", new { id = user.Id });
+        }
     }
 }
