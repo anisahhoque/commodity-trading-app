@@ -34,6 +34,8 @@ builder.Services.AddHttpClient<ExternalApiService>();
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton<CommodityTradingAPI.Services.ILogger, AuditLogService>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

@@ -61,14 +61,7 @@ namespace CommodityTradingAPI.Controllers
         public async Task<ActionResult<Trade>> Create([Bind("TraderId,CommoditiyId,Quantity,Mitigations,Bourse")] CreateTradeDto trade)
         {
             // Pass user-supplied trade details into new Trade object
-            Trade tempTrade = new Trade
-            {
-                TraderId = trade.TraderId,
-                CommodityId = trade.CommodityId,
-                Quantity = trade.Quantity,
-                Bourse = trade.Bourse,
-                CreatedAt = DateTime.UtcNow
-            };
+            Trade tempTrade = new();
 
             var commodityName = tempTrade.Commodity.CommodityName;
 

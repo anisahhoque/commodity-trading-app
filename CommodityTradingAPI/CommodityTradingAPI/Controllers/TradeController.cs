@@ -1,5 +1,6 @@
 ﻿using CommodityTradingAPI.Data;
 using CommodityTradingAPI.Models;
+using CommodityTradingAPI.Models.DTOs;
 using CommodityTradingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
-using ILogger = CommodityTradingAPI.Services.ILogger;
+//using ILogger = CommodityTradingAPI.Services.ILogger;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -18,9 +19,9 @@ namespace CommodityTradingAPI.Controllers
         
         private readonly CommoditiesDbContext _context;
         private readonly ExternalApiService _api;
-        private ILogger _auditLogService;
+        private CommodityTradingAPI.Services.ILogger _auditLogService;
 
-        public TradeController(CommoditiesDbContext context, ExternalApiService api, ILogger logger)
+        public TradeController(CommoditiesDbContext context, ExternalApiService api, CommodityTradingAPI.Services.ILogger logger)
         {
             _context = context;
             _api = api;
@@ -40,11 +41,25 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> MakeTrade([Bind("TraderId, CommodityId, Quantity, IsBuy, Expiry, Bourse, MitigationId, IsOpen, Contract")] Trade trade)
+        //[Authorize(Roles = "Manager")]
+        //Trade trade
+        public async Task<IActionResult> MakeTrade(CreateTradeDto tempTrade)
         {
-            
+            //Trade trade = new();
             //bind request body to A Trade object
+            //trade.TraderId = tempTrade.TraderId;
+            //trade.CommodityId = tempTrade.CommodityId;
+            //trade.Quantity = tempTrade.Quantity;
+
+            Trade trade = new Trade
+            {
+                TraderId = tempTrade.TraderId,
+                CommodityId = tempTrade.CommodityId,
+                Quantity = (byte)tempTrade.Quantity,
+                Bourse = tempTrade.Bourse,
+                CreatedAt = DateTime.UtcNow,
+                Contract = tempTrade.contract
+            };
 
             var account = await _context.TraderAccounts.FirstOrDefaultAsync(x => x.TraderId == trade.TraderId);
             var commodity = await _context.Commodities.FirstOrDefaultAsync(x => x.CommodityId == trade.CommodityId);
@@ -114,17 +129,34 @@ namespace CommodityTradingAPI.Controllers
             //Add any other fields that need to be added to trade object
 
             var createdAt = DateTime.UtcNow;
+            var expiry = createdAt.AddDays(10); //this just needs a value
 
             trade.CreatedAt = createdAt;
             trade.PricePerUnit = priceOfCommodity;
-            
+            trade.Expiry = expiry;
+
             //Store trade in database
+            TradeMitigation tm = new()
+            {
+                SellPointLoss = 100,
+                SellPointProfit = 10
+            };
+
+            await _context.TradeMitigations.AddAsync(tm);
+
+            await _context.SaveChangesAsync();
+
+            var x = await _context.TradeMitigations.ToListAsync();
+            var tmId = x.FirstOrDefault().MitigationId;
+
+            trade.MitigationId = tmId;
 
             await _context.Trades.AddAsync(trade);
             await _context.SaveChangesAsync();
 
 
-            return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
+            //return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
+            return Created();
 
             //Smiel and bee happy :P
 
