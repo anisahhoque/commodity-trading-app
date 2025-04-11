@@ -4,6 +4,7 @@ using CommodityTradingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CommodityTradingAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddDbContext<CommoditiesDbContext>(options =>
      }
     ));
 
+builder.Services.AddHttpClient<ExternalApiService>();
 
 builder.Services.AddAuthorization();
 
