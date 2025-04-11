@@ -5,7 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using CommodityTradingAPI.Models;
+<<<<<<< HEAD
 using CommodityTradingAPI.Services;
+=======
+using ILogger = CommodityTradingAPI.Services.ILogger;
+>>>>>>> 252cbd334b18a368d8813137f79b38c8a52b47e3
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -14,11 +18,20 @@ namespace CommodityTradingAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly CommoditiesDbContext _context;
+<<<<<<< HEAD
         private readonly AuditLogService _auditLogService;
         public UserController(CommoditiesDbContext context, AuditLogService auditLogService)
         {
             _context = context;
             _auditLogService = auditLogService;
+=======
+        private ILogger _auditLogService;
+
+        public UserController(CommoditiesDbContext context, ILogger logger)
+        {
+            _context = context;
+            _auditLogService = logger;
+>>>>>>> 252cbd334b18a368d8813137f79b38c8a52b47e3
         }
 
         [HttpGet]
