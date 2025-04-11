@@ -25,7 +25,7 @@ namespace CommodityTradingAPI.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<ExternalCommodity>(json);
-                return data.price;
+                return data.price;  
                 
             } else
             {
