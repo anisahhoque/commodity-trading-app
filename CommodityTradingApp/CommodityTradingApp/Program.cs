@@ -60,18 +60,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.Use(async (context, next) =>
-{
-    // Log incoming request and cookies
-    Console.WriteLine($"\n[Request] {context.Request.Method} {context.Request.Path}");
-    Console.WriteLine($"Cookies: {string.Join(", ", context.Request.Cookies.Keys)}");
-    Console.WriteLine($"AuthToken present: {context.Request.Cookies.ContainsKey("AuthToken")}");
-
-    await next(); // Continue to the next middleware
-
-    // Optional: Log response status
-    Console.WriteLine($"[Response] Status: {context.Response.StatusCode}");
-});
 
 app.UseAuthentication();
 app.UseAuthorization();
