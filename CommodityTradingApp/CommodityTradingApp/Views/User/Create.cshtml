@@ -20,13 +20,9 @@
 
     <!-- Country selection (dropdown) -->
     <div class="form-group">
-        <label for="CountryID">Country</label>
-        <select id="CountryID" name="CountryID" class="form-control" required>
-            <option value="">Select Country</option>
-            <!-- Example countries, you might dynamically generate this list from a database -->
-            <option value="1">USA</option>
-            <option value="2">Canada</option>
-            <option value="3">UK</option>
+        <label for="country">Country</label>
+        <select id="country" name="country" class="form-control" asp-items="ViewBag.Countries">
+            <option value="">-- Select Country --</option>
         </select>
         <span asp-validation-for="CountryId" class="text-danger"></span>
     </div>
