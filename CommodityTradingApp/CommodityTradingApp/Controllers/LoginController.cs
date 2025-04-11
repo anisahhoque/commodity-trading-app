@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Json;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -33,18 +34,41 @@ namespace CommodityTradingApp.Controllers
                 System.Text.Encoding.UTF8,
                 "application/json"
             );
-
+            
             var response = await _httpClient.PostAsync(_apiUrl + "Login", jsonContent);
 
             if (response.IsSuccessStatusCode)
             {
-                return RedirectToAction("Index", "Home");
+                var cookie = Request.Cookies["AuthToken"];
+
+                TempData["Message"] = "login successful";
+                return RedirectToAction("Login", "Login");
             }
             else
             {
                 ViewBag.Error = "Login failed.";
+                return RedirectToAction("Login");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            var response = await _httpClient.PostAsync(_apiUrl + "Logout", null);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "Logged out!";
+                return RedirectToAction("Login", "Login");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Failed to log out. Please try again.");
                 return View();
             }
+        }
+        private bool IsUserLoggedIn()
+        {
+            
+            return Request.Cookies.ContainsKey("AuthToken");
         }
     }
 }

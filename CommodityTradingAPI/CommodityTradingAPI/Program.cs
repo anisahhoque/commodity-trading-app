@@ -61,6 +61,16 @@ builder.Services.AddAuthentication(options =>
             }
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMVC", policy =>
+    {
+        policy.WithOrigins("https://localhost:7131")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddAuthorization();
 
@@ -70,7 +80,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
-
+app.UseCors("AllowMVC");
 using (var scope = app.Services.CreateScope())
 {
     var CommoditiesDbContext = scope.ServiceProvider.GetRequiredService<CommoditiesDbContext>();

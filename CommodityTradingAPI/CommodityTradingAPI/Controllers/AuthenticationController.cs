@@ -41,7 +41,7 @@ namespace CommodityTradingAPI.Controllers
                 Expires = DateTime.UtcNow.AddMinutes(5)
             });
 
-            return Ok(new { message = "Login successful" });
+            return Ok(token);
         }
 
         [HttpPost("Logout")]
