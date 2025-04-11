@@ -33,34 +33,33 @@ namespace CommodityTradingApp.Controllers
                 Password = password
             };
 
-
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(loginData),
                 System.Text.Encoding.UTF8,
                 "application/json"
             );
 
-
-
             var response = await _httpClient.PostAsync(_apiUrl + "Login", jsonContent);
             User user = new User
             {
+                UserId = new Guid("28324A1F-4254-48E5-8825-1FF3594E8301"),
                 Username = username,
                 PasswordHash = password
             };
             if (response.IsSuccessStatusCode)
             {
-                var token = CreateJwt(user);
+                var token = await CreateJwtAsync(user);
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
                     Expires = DateTimeOffset.UtcNow.AddMinutes(5),
                     Secure = true,
-                    SameSite = SameSiteMode.None
+                    SameSite = SameSiteMode.Lax
                 };
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                 TempData["Message"] = "Login successful!";
-            } else
+            }
+            else
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View();
@@ -80,22 +79,38 @@ namespace CommodityTradingApp.Controllers
             {
                 TempData["Message"] = "No active session found.";
             }
-
-            
-            
             
             return RedirectToAction("Login", "Login");
         }
 
-        private string CreateJwt(User user)
+        private async Task<string> CreateJwtAsync(User user)
         {
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                };
+            var keyFromConfig = _config["JwtSettings:Key"];
+            var userID = user.UserId;
+            string fullUrl = _apiUrl + "role/" + userID.ToString();
+            var roleResponse = await _httpClient.GetAsync(fullUrl);
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
+            string role = null;
+            if (roleResponse.IsSuccessStatusCode)
+            {
+                role = await roleResponse.Content.ReadAsStringAsync();
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+            };
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var keyBytes = Encoding.UTF8.GetBytes(keyFromConfig);
+            var key = new SymmetricSecurityKey(keyBytes);
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            Console.WriteLine($"Key byte length: {keyBytes.Length}");
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

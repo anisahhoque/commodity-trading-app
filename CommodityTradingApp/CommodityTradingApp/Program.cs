@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -26,13 +27,14 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
+            ClockSkew = TimeSpan.Zero
         };
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                var accessToken = context.Request.Cookies["AuthToken"];
+                context.Request.Cookies.TryGetValue("AuthToken", out var accessToken);
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     context.Token = accessToken;
@@ -58,6 +60,18 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    // Log incoming request and cookies
+    Console.WriteLine($"\n[Request] {context.Request.Method} {context.Request.Path}");
+    Console.WriteLine($"Cookies: {string.Join(", ", context.Request.Cookies.Keys)}");
+    Console.WriteLine($"AuthToken present: {context.Request.Cookies.ContainsKey("AuthToken")}");
+
+    await next(); // Continue to the next middleware
+
+    // Optional: Log response status
+    Console.WriteLine($"[Response] Status: {context.Response.StatusCode}");
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
