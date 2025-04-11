@@ -46,7 +46,13 @@ namespace CommodityTradingApp.Controllers
             return View();
         }
 
+        //POST: User/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(UserCreateViewModel model)
+        {
 
+        }
 
     }
 }

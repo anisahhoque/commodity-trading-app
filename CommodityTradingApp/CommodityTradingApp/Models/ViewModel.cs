@@ -32,4 +32,10 @@ namespace CommodityTradingApp.ViewModels
         public User User { get; set; }
         public List<Trader> Traders { get; set; }
     }
+
+    public class UserCreateViewModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
 }
