@@ -38,5 +38,15 @@ namespace CommodityTradingApp.Controllers
 
             return View(viewModel);
         }
+
+        //Creating a user: Potentially have this as a button in login page???
+        //GET: User/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+
+
     }
 }
