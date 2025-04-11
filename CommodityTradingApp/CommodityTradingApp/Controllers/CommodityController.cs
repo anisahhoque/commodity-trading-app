@@ -1,4 +1,5 @@
-﻿using CommodityTradingApp.Models;
+﻿using System.Runtime.InteropServices;
+using CommodityTradingApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommodityTradingApp.Controllers
@@ -7,17 +8,30 @@ namespace CommodityTradingApp.Controllers
 
     {
         private readonly HttpClient _httpClient;
-        private static List<Commodity> commodities = GetMockCommodities();
+        private static List<Commodity> commodities;
+        private readonly IConfiguration _configuration;
 
-        public CommodityController(HttpClient httpClient)
+        public CommodityController(HttpClient httpClient, IConfiguration configuration)
         {
+            _configuration = configuration;
             _httpClient = httpClient;
+            string comodEndpoint = "commodity";
+            _httpClient.BaseAddress = new Uri(_configuration["api"] + comodEndpoint);
+
+            commodities = GetMockCommodities();
+
+
         }
         public async Task<IActionResult> Index()
         {
-            
+            var result = await _httpClient.GetAsync(_httpClient.BaseAddress);
+            if (result!= null)
+            {
+                var allCommods = await result.Content.ReadAsAsync<List<Commodity>>();
+                return View(allCommods);
+            }
             //call get list of commodities
-            return View(commodities);
+            return View(result);
         }
         private static List<Commodity> GetMockCommodities()
         {
