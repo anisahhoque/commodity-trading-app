@@ -31,4 +31,16 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\User\source\repos\commodity-trading-app\CommodityTradingAPI\CommodityTradingAPI\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\User\source\repos\commodity-trading-app\CommodityTradingAPI\CommodityTradingAPI\.editorconfig" />
+  </ItemGroup>
+
 </Project>
