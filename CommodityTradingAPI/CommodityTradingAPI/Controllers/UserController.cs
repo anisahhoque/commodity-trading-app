@@ -63,15 +63,15 @@ namespace CommodityTradingAPI.Controllers
             };
 
             // I will work on adding an audit log next so this code can be uncommented.
-            //var auditLog = new AuditLog
-            //{
-            //    EntityName = "User",
-            //    Action = "Create",
-            //    Timestamp = DateTime.UtcNow,
-            //    Details = $"User {newUser.Username} was created."
-            //};
+            var auditLog = new AuditLog
+            {
+                EntityName = "User",
+                Action = "Create",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {newUser.Username} was created."
+            };
 
-            //await _auditLogService.LogChangeAsync(auditLog);
+            await _auditLogService.LogChangeAsync(auditLog);
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, response);
         }
