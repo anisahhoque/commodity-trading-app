@@ -1,0 +1,43 @@
+﻿@model CommodityTradingApp.ViewModels.UserCreateViewModel
+
+
+<h2>Create User</h2>
+
+<form asp-action="Create" method="post">
+    <!-- Username field -->
+    <div class="form-group">
+        <label for="Username">Username</label>
+        <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" required />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <!-- Password field -->
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <input type="password" class="form-control" id="Password" name="Password" required />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <!-- Country selection (dropdown) -->
+    <div class="form-group">
+        <label for="CountryID">Country</label>
+        <select id="CountryID" name="CountryID" class="form-control" required>
+            <option value="">Select Country</option>
+            <!-- Example countries, you might dynamically generate this list from a database -->
+            <option value="1">USA</option>
+            <option value="2">Canada</option>
+            <option value="3">UK</option>
+        </select>
+        <span asp-validation-for="CountryId" class="text-danger"></span>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary">Create User</button>
+</form>
+
+<!-- Validation scripts -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

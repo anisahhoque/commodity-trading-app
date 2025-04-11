@@ -1,0 +1,32 @@
+﻿@model CommodityTradingApp.ViewModels.UserDetailsViewModel
+
+<h2>User Details</h2>
+
+<p><strong>Username:</strong> @Model.User.Username</p>
+<p><strong>Country ID:</strong> @Model.User.CountryId</p>
+<p><strong>Password Hash:</strong> @Model.User.PasswordHash</p>
+
+<hr />
+
+<h3>Associated Trader Accounts</h3>
+
+@if (Model.Traders != null && Model.Traders.Any())
+{
+    <table>
+        <tr>
+            <th>Account Name</th>
+            <th>Balance</th>
+        </tr>
+        @foreach (var trader in Model.Traders)
+        {
+            <tr>
+                <td>@trader.AccountName</td>
+                <td>@trader.Balance.ToString("C")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>No trader accounts associated with this user.</p>
+}

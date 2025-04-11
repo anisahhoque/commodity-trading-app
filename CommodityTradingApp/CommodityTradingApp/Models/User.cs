@@ -1,3 +1,6 @@
+
+﻿using Microsoft.AspNetCore.Mvc;
+
 ﻿namespace CommodityTradingApp.Models;
 
 public partial class User
