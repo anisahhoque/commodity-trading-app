@@ -15,6 +15,7 @@ namespace CommodityTradingApp.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            
             //call get list of commodities
             return View(commodities);
         }
