@@ -31,49 +31,9 @@ namespace CommodityTradingAPI.Controllers
             {
                 return BadRequest("Invalid login");
             }
-            var token = CreateJwt(dbUser);
 
-            Response.Cookies.Append("AuthToken", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(5)
-            });
-
-            return Ok(token);
+            return Ok();
         }
 
-        [HttpPost("Logout")]
-        public IActionResult Logout()
-        {
-            Response.Cookies.Delete("AuthToken");
-            return Ok(new { message = "Logged out successfully" });
-        }
-
-        private string CreateJwt(User user)
-        {
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(5),
-                SigningCredentials = creds,
-                Issuer = _configuration["JwtSettings:Issuer"],
-                Audience = _configuration["JwtSettings:Audience"]
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(token);
-            return jwt;
-        }
     }
 }
