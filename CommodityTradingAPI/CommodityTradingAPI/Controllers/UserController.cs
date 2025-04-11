@@ -62,7 +62,6 @@ namespace CommodityTradingAPI.Controllers
                 CountryName = newUser.Country.CountryName!
             };
 
-            // I will work on adding an audit log next so this code can be uncommented.
             var auditLog = new AuditLog
             {
                 EntityName = "User",
