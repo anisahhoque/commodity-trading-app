@@ -1,8 +1,5 @@
 ﻿@model CommodityTradingApp.ViewModels.UserCreateViewModel
 
-@{
-    ViewData["Title"] = "Create User";
-}
 
 <h2>Create User</h2>
 
@@ -31,7 +28,7 @@
             <option value="2">Canada</option>
             <option value="3">UK</option>
         </select>
-        <span asp-validation-for="CountryID" class="text-danger"></span>
+        <span asp-validation-for="CountryId" class="text-danger"></span>
     </div>
 
     <!-- Submit Button -->

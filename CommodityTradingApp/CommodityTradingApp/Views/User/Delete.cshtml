@@ -8,11 +8,11 @@
 
 <p>
     Username: @Model.Username <br />
-    Country: @Model.CountryID <br />
+    Country: @Model.CountryId <br />
     <!-- Add more user details as necessary -->
 </p>
 
-<form asp-action="DeleteConfirmed" asp-route-userId="@Model.Id" method="post">
+<form asp-action="DeleteConfirmed" asp-route-userId="@Model.UserId" method="post">
     <button type="submit" class="btn btn-danger">Delete</button>
     <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
 </form>

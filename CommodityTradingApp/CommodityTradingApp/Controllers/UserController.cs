@@ -9,27 +9,29 @@ namespace CommodityTradingApp.Controllers
     public class UserController : Controller
     {
         // GET: User/Details/{guid}
+        private static List<User> users =
+         new List<User>
+            {
+                new User { UserId = Guid.Parse("e7db167e-d1b3-4b7e-b417-72a6cb85943c"), Username = "JDM", PasswordHash = "sdljfalsdjfklasdjlkaj234daljf", CountryId = 1 },
+                new User { UserId = Guid.Parse("1d6ffbd2-5c44-4a1e-93b2-0fc690f6e2b9"), Username = "Admin", PasswordHash = "asdfdskfj3lk4j5lkj234lkj", CountryId = 2 }
+            };
         public IActionResult Details(Guid id)
         {
             // Simulate users (Replace with db call)
-            var users = new List<User>
-            {
-                new User { Id = Guid.Parse("e7db167e-d1b3-4b7e-b417-72a6cb85943c"), Username = "JDM", PasswordHash = "sdljfalsdjfklasdjlkaj234daljf", CountryID = 1 },
-                new User { Id = Guid.Parse("1d6ffbd2-5c44-4a1e-93b2-0fc690f6e2b9"), Username = "Admin", PasswordHash = "asdfdskfj3lk4j5lkj234lkj", CountryID = 2 }
-            };
+
 
             var allTraders = new List<Trader>
             {
-                new Trader { Id = Guid.NewGuid(), AccountName = "Alpha", Balance = 10000, UserId = users[0].Id },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Beta", Balance = 20000, UserId = users[0].Id },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Gamma", Balance = 5000, UserId = users[1].Id }
+                new Trader { Id = Guid.NewGuid(), AccountName = "Alpha", Balance = 10000, UserId = users[0].UserId },
+                new Trader { Id = Guid.NewGuid(), AccountName = "Beta", Balance = 20000, UserId = users[0].UserId },
+                new Trader { Id = Guid.NewGuid(), AccountName = "Gamma", Balance = 5000, UserId = users[1].UserId }
             };
 
-            var user = users.FirstOrDefault(u => u.Id == id);
+            var user = users.FirstOrDefault(u => u.UserId == id);
             if (user == null)
                 return NotFound();
 
-            var userTraders = allTraders.Where(t => t.UserId == user.Id).ToList();
+            var userTraders = allTraders.Where(t => t.UserId == user.UserId).ToList();
 
             //Passing the user and their traders to the view
             var viewModel = new UserDetailsViewModel
@@ -43,9 +45,11 @@ namespace CommodityTradingApp.Controllers
 
         //Creating a user: Potentially have this as a button in login page???
         //GET: User/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new UserCreateViewModel { Username = "", Password = "", CountryId = 1 });
+            
         }
 
         //POST: User/Create
@@ -66,21 +70,21 @@ namespace CommodityTradingApp.Controllers
             // Create a new User object and populate it with data from the model.
             var user = new User
             {
-                Id = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
+                UserId = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
                 Username = model.Username,
                 PasswordHash = hashedPassword,
-                CountryID = model.CountryID
+                CountryId = (byte)model.CountryId
             };
 
             //TODO: Save the user to the database (DbContext).
             // Declare a list to simulate a "database"
-            List<User> _users = new();
+            //List<User> _users = new();
 
             // Add the newly created user to this list.
-            _users.Add(user);
+            users.Add(user);
 
             // Redirect to the Details page of the newly created user.
-            return RedirectToAction("Details", new { id = user.Id });
+            return RedirectToAction("Details", new { id = user.UserId });
         }
 
         // GET: User/Edit/{guid}
@@ -89,7 +93,7 @@ namespace CommodityTradingApp.Controllers
             //Simulate users (Replace with db call)
             List<User> _users = new();
 
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = _users.FirstOrDefault(u => u.UserId == id);
             if (user == null)
             {
                 return NotFound();  // If user not found, return a 404.
@@ -98,9 +102,9 @@ namespace CommodityTradingApp.Controllers
             // Populate the view model with current user data.
             var model = new UserEditViewModel
             {
-                Id = user.Id,
+                Id = user.UserId,
                 Username = user.Username,
-                CountryID = user.CountryID
+                CountryId = user.CountryId
             };
 
             return View(model);  // Return the edit view with the model data.
@@ -119,7 +123,7 @@ namespace CommodityTradingApp.Controllers
             // Simulate users (Replace with db call)
             List<User> _users = new();
 
-            var user = _users.FirstOrDefault(u => u.Id == model.Id);
+            var user = _users.FirstOrDefault(u => u.UserId == model.Id);
             if (user == null)
             {
                 return NotFound();  // If user not found, return a 404.
@@ -127,12 +131,12 @@ namespace CommodityTradingApp.Controllers
 
             // Update user details
             user.Username = model.Username;
-            user.CountryID = model.CountryID;
+            user.CountryId = model.CountryId;
 
             //Now, need to update the database using DbContext.
 
             // Redirect to the user details page after update.
-            return RedirectToAction("Details", new { id = user.Id });
+            return RedirectToAction("Details", "User/"+new { id = user.UserId });
         }
 
         // GET: User/Delete/{guid} (Shows confirmation view)
@@ -141,7 +145,7 @@ namespace CommodityTradingApp.Controllers
             // Simulate users (Replace with db call)
             List<User> _users = new();
 
-            var user = _users.FirstOrDefault(u => u.Id == userId);
+            var user = _users.FirstOrDefault(u => u.UserId == userId);
             if (user == null)
             {
                 return NotFound();  // User not found
@@ -166,7 +170,7 @@ namespace CommodityTradingApp.Controllers
                 return Unauthorized();  // Return unauthorized if not a manager
             }
 
-            var user = _users.FirstOrDefault(u => u.Id == userId);
+            var user = _users.FirstOrDefault(u => u.UserId == userId);
             if (user == null)
             {
                 return NotFound();  // User not found

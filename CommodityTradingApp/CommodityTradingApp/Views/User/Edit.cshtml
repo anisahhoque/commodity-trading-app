@@ -20,13 +20,13 @@
     <!-- Country Selection (Dropdown) -->
     <div class="form-group">
         <label for="CountryID">Country</label>
-        <select id="CountryID" name="CountryID" class="form-control" asp-for="CountryID" required>
+        <select id="CountryID" name="CountryID" class="form-control" asp-for="CountryId" required>
             <option value="1">USA</option>
             <option value="2">Canada</option>
             <option value="3">UK</option>
         </select>
 
-        <span asp-validation-for="CountryID" class="text-danger"></span>
+        <span asp-validation-for="CountryId" class="text-danger"></span>
     </div>
 
     <!-- Submit Button -->
