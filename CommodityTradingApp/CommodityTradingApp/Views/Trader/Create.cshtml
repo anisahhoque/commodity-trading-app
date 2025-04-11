@@ -1,0 +1,20 @@
+﻿@model CommodityTradingApp.ViewModels.CreateTraderViewModel
+
+<h2>Create New Trader</h2>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label>Account Name</label>
+        <input asp-for="AccountName" />
+    </div>
+    <div>
+        <label>Balance</label>
+        <input asp-for="Balance" type="number" step="0.01" />
+    </div>
+    <div>
+        <label>User ID</label>
+        <input asp-for="UserId" />
+        <small>Use a valid GUID like: a67c1bde-32ff-4c60-89ef-90b7dbd45f2e</small>
+    </div>
+    <button type="submit">Create</button>
+</form>

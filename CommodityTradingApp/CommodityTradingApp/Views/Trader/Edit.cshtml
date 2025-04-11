@@ -1,0 +1,25 @@
+﻿@model CommodityTradingApp.ViewModels.EditTraderViewModel
+
+@{
+    ViewData["Title"] = "Edit Trader";
+}
+
+<h2>Edit Trader</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="AccountName"></label>
+        <input asp-for="AccountName" />
+        <span asp-validation-for="AccountName" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Balance"></label>
+        <input asp-for="Balance" type="number" step="0.01" />
+        <span asp-validation-for="Balance" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Save</button>
+</form>
