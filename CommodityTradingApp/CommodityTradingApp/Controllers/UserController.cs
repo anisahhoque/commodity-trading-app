@@ -134,5 +134,49 @@ namespace CommodityTradingApp.Controllers
             // Redirect to the user details page after update.
             return RedirectToAction("Details", new { id = user.Id });
         }
+
+        // GET: User/Delete/{guid} (Shows confirmation view)
+        public IActionResult Delete(Guid userId)
+        {
+            // Simulate users (Replace with db call)
+            List<User> _users = new();
+
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound();  // User not found
+            }
+
+            // Return confirmation view
+            return View(user);
+        }
+
+        // POST: User/Delete/5 (Perform the delete)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(Guid userId)
+        {
+            bool isManager = true;  // This should be checked from session or user role
+
+            // Simulate users (Replace with db call)
+            List<User> _users = new();
+
+            if (!isManager)
+            {
+                return Unauthorized();  // Return unauthorized if not a manager
+            }
+
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound();  // User not found
+            }
+
+            _users.Remove(user);  // Delete the user
+
+            // Redirect to a success page or the user list
+            TempData["Message"] = "User deleted successfully!";
+            return RedirectToAction("Index");  // Assuming Index shows the list of users
+        }
     }
 }
