@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using CommodityTradingAPI.Models;
+using CommodityTradingAPI.Services;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -13,9 +14,11 @@ namespace CommodityTradingAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly CommoditiesDbContext _context;
-        public UserController(CommoditiesDbContext context)
+        private readonly AuditLogService _auditLogService;
+        public UserController(CommoditiesDbContext context, AuditLogService auditLogService)
         {
             _context = context;
+            _auditLogService = auditLogService;
         }
 
         [HttpGet]

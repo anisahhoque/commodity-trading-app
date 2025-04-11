@@ -8,6 +8,15 @@ namespace CommodityTradingApp.Controllers
 {
     public class UserController : Controller
     {
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        public UserController(IConfiguration config, HttpClient httpClient)
+        {
+            _config = config;
+            _httpClient = httpClient;
+            _apiUrl = _config["api"] + "User/";
+        }
         // GET: User/Details/{guid}
         private static List<User> users =
          new List<User>
@@ -48,7 +57,7 @@ namespace CommodityTradingApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new UserCreateViewModel { Username = "", Password = "", CountryId = 1 });
+            return View();
             
         }
 
@@ -56,35 +65,64 @@ namespace CommodityTradingApp.Controllers
         //This is where we would hash the password and save the user to the database using BCrypt
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(UserCreateViewModel model)
+        public async Task<IActionResult> Create(string username, string password, int countryId)
         {
+
             //Check if model is valid (required fields). If invalid, return same view so user can correct errors
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(model);
+            //}
 
             // Hash the user's password using BCrypt for security (bcrypt creates a hashed version of the password).
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            //var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
             // Create a new User object and populate it with data from the model.
-            var user = new User
-            {
-                UserId = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
-                Username = model.Username,
-                PasswordHash = hashedPassword,
-                CountryId = (byte)model.CountryId
-            };
+            //var user = new User
+            //{
+            //    UserId = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
+            //    Username = model.Username,
+            //    PasswordHash = hashedPassword,
+            //    CountryId = (byte)model.CountryId
+            //};
 
             //TODO: Save the user to the database (DbContext).
             // Declare a list to simulate a "database"
             //List<User> _users = new();
 
             // Add the newly created user to this list.
-            users.Add(user);
+            //users.Add(user);
 
             // Redirect to the Details page of the newly created user.
-            return RedirectToAction("Details", new { id = user.UserId });
+
+            var userData = new
+            {
+                Username = username,
+                Password = password,
+                CountryId = countryId
+            };
+
+
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(userData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Create", jsonContent);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "New User Created!";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Could not create user");
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Login", "Login");
         }
 
         // GET: User/Edit/{guid}
