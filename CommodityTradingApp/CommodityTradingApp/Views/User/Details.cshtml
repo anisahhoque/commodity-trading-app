@@ -1,0 +1,12 @@
+﻿@model CommodityTradingApp.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h2>User Details</h2>
+
+<p><strong>Username:</strong> @Model.Username</p>
+<p><strong>Password Hash:</strong> @Model.PasswordHash</p>
+
+<a asp-controller="Trader" asp-action="Index">Back to Traders</a>
