@@ -40,20 +40,7 @@ namespace CommodityTradingApp.Controllers
                 "application/json"
             );
 
-            //var response = await _httpClient.PostAsync(_apiUrl + "Login", jsonContent);
 
-            //if (response.IsSuccessStatusCode)
-            //{
-            //    var cookie = Request.Cookies["AuthToken"];
-
-            //    TempData["Message"] = "login successful";
-            //    return RedirectToAction("Login", "Login");
-            //}
-            //else
-            //{
-            //    ViewBag.Error = "Login failed.";
-            //    return RedirectToAction("Login");
-            //}
 
             var response = await _httpClient.PostAsync(_apiUrl + "Login", jsonContent);
             User user = new User
@@ -84,19 +71,19 @@ namespace CommodityTradingApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            //var response = await _httpClient.PostAsync(_apiUrl + "Logout", null);
-            //if (response.IsSuccessStatusCode)
-            //{
-            //    TempData["Message"] = "Logged out!";
-            //    return RedirectToAction("Login", "Login");
-            //}
-            //else
-            //{
-            //    ModelState.AddModelError(string.Empty, "Failed to log out. Please try again.");
-            //    return View();
-            //}
-            Response.Cookies.Delete("AuthToken");
-            TempData["Message"] = "Logged out!";
+            if (Request.Cookies.ContainsKey("AuthToken"))
+            {
+                Response.Cookies.Delete("AuthToken");
+                TempData["Message"] = "Logged out!";
+            }
+            else
+            {
+                TempData["Message"] = "No active session found.";
+            }
+
+            
+            
+            
             return RedirectToAction("Login", "Login");
         }
 
