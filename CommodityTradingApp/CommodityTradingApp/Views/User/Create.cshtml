@@ -4,7 +4,7 @@
 
 <h2>Create User</h2>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" asp-controller="User">
     <!-- Username field -->
     <div class="form-group">
         <label for="Username">Username</label>
@@ -20,9 +20,19 @@
     </div>
 
     <!-- Country selection (dropdown) -->
+    <!-- Country selection (dropdown) -->
     <div class="form-group">
-        <label for="Country">Country</label>
-        <input type="text" class="form-control" id="Country" name="Country" required />
+        <label for="country">Country</label>
+        <select class="form-control" id="country" name="country" required>
+            <option value="">-- Select a Country --</option>
+            @if (ViewBag.Countries != null)
+            {
+                @foreach (var item in ViewBag.Countries)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
     </div>
 
 

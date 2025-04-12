@@ -105,7 +105,7 @@ namespace CommodityTradingApp.Controllers
 
 
 
-            var response = await _httpClient.PostAsync(_apiUrl, jsonContent);
+            var response = await _httpClient.PostAsync(_apiUrl + "Create", jsonContent);
 
 
 
