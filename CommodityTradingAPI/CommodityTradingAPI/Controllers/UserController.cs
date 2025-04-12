@@ -43,7 +43,7 @@ namespace CommodityTradingAPI.Controllers
                 .FirstOrDefaultAsync(c => c.CountryName!.ToLower() == newUserDetails.Country.ToLower());
 
             var role = newUserDetails.Role.ToLower().Trim();
-            if (role != "manager" && role != "trader")
+            if (role != "manager" || role != "trader")
                 return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'." );
 
             if (matchedCountry == null)
