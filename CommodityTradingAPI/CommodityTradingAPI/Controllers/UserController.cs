@@ -46,6 +46,10 @@ namespace CommodityTradingAPI.Controllers
             var matchedCountry = await _context.Countries
                 .FirstOrDefaultAsync(c => c.CountryName!.ToLower() == newUserDetails.Country.ToLower());
 
+            var role = newUserDetails.Role.ToLower().Trim();
+            if (role != "manager" || role != "trader")
+                return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'." );
+
             if (matchedCountry == null)
             {
                 return BadRequest(new { error = "Invalid country name." });
@@ -60,14 +64,23 @@ namespace CommodityTradingAPI.Controllers
 
             };
 
+            RoleAssignment roleAssignment = new RoleAssignment
+            {
+                AssignmentId = Guid.NewGuid(),
+                UserId = newUser.UserId,
+                RoleId = _context.Roles.First(r => r.RoleName.ToLower() == role).RoleId
+            };
+
             _context.Add(newUser);
+            _context.Add(roleAssignment);
             await _context.SaveChangesAsync();
 
             var response = new UserResponse
             {
                 UserId = newUser.UserId,
                 Username = newUser.Username,
-                CountryName = newUser.Country.CountryName!
+                CountryName = newUser.Country.CountryName!,
+                Role = role
             };
 
             var auditLog = new AuditLog
@@ -75,7 +88,7 @@ namespace CommodityTradingAPI.Controllers
                 EntityName = "User",
                 Action = "Create",
                 Timestamp = DateTime.UtcNow,
-                Details = $"User {newUser.Username} was created."
+                Details = $"User {newUser.Username} with role {role.ToLower()} was created."
             };
 
             //await _auditLogService.LogChangeAsync(auditLog);
@@ -109,6 +122,7 @@ namespace CommodityTradingAPI.Controllers
             public Guid UserId { get; set; }
             public string Username { get; set; }
             public string CountryName { get; set; }
+            public string Role { get; set; }
         }
     }
 }
