@@ -28,7 +28,9 @@ namespace CommodityTradingAPI.Controllers
         // Returns a json of all users
         public async Task<string> Index()
         {
-            var users = await _context.Users.Include(static u => u.Country).ToListAsync();
+            var users = await _context.Users.Include(static u => u.Country)
+                    .Include(u => u.RoleAssignments)
+        .ThenInclude(ra => ra.Role).ToListAsync();
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
