@@ -35,6 +35,19 @@
         </select>
     </div>
 
+    <div class="form-group">
+        <label for="role">Role</label>
+        <select class="form-control" id="role" name="role" required>
+            <option value="">-- Select a Role --</option>
+            @if (ViewBag.Roles != null)
+            {
+                @foreach (var item in ViewBag.Roles)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+    </div>
 
     <!-- Submit Button -->
     <button type="submit" class="btn btn-primary">Create User</button>

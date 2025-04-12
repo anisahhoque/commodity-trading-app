@@ -39,7 +39,7 @@ namespace CommodityTradingAPI.Controllers
         // No need to authorise as anyone should be able to make a new account
         [HttpPost("Create")]
         //[ValidateAntiForgeryToken] // Still don't really know what this does
-        public async Task<IActionResult> Create([Bind("Username","PasswordRaw","Country")] CreateUser newUserDetails)
+        public async Task<IActionResult> Create([Bind("Username","PasswordRaw","Country", "Role")] CreateUser newUserDetails)
         {
 
             // Try to find the matching country
@@ -47,7 +47,7 @@ namespace CommodityTradingAPI.Controllers
                 .FirstOrDefaultAsync(c => c.CountryName!.ToLower() == newUserDetails.Country.ToLower());
 
             var role = newUserDetails.Role.ToLower().Trim();
-            if (role != "manager" || role != "trader")
+            if (role != "manager" && role != "trader")
                 return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'." );
 
             if (matchedCountry == null)

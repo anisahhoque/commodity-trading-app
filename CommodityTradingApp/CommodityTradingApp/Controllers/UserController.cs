@@ -16,12 +16,14 @@ namespace CommodityTradingApp.Controllers
         private readonly IConfiguration _config;
         private readonly string _apiUrl;
         private readonly string _apiUrlCountry;
+        private readonly string _apiUrlRole;
         public UserController(IConfiguration config, HttpClient httpClient)
         {
             _config = config;
             _httpClient = httpClient;
             _apiUrl = _config["api"] + "User/";
             _apiUrlCountry = _config["api"] + "Country/";
+            _apiUrlRole = _config["api"] + "Role";
 
         }
         // GET: User/Details/{guid}
@@ -94,8 +96,21 @@ namespace CommodityTradingApp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+            var responseRole = await _httpClient.GetAsync(_apiUrlRole);
+            if (responseRole.IsSuccessStatusCode)
+            {
+                var json = await responseRole.Content.ReadAsStringAsync();
+                var roles = JsonConvert.DeserializeObject<List<Role>>(json);
+
+
+                ViewBag.Roles = new SelectList(roles, "RoleName", "RoleName");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
-            //return View(new UserCreateViewModel { Username = "", Password = "", CountryName = ""});
+            
 
         }
 
@@ -103,7 +118,7 @@ namespace CommodityTradingApp.Controllers
         //This is where we would hash the password and save the user to the database using BCrypt
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string username, string password, string country)
+        public async Task<IActionResult> Create(string username, string password, string country, string role)
         {
 
             //Console.WriteLine("country:" + country);
@@ -112,7 +127,8 @@ namespace CommodityTradingApp.Controllers
             {
                 Username = username,
                 PasswordRaw = password,
-                Country = country
+                Country = country,
+                Role = role
             };
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(userData),
