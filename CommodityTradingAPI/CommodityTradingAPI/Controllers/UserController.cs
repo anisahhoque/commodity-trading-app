@@ -28,8 +28,12 @@ namespace CommodityTradingAPI.Controllers
         // Returns a json of all users
         public async Task<string> Index()
         {
-            var users = await _context.Users.ToListAsync();
-            return JsonConvert.SerializeObject(users);
+            var users = await _context.Users.Include(static u => u.Country).ToListAsync();
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            return JsonConvert.SerializeObject(users, settings);
         }
 
         // No need to authorise as anyone should be able to make a new account
