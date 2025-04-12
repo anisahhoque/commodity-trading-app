@@ -31,6 +31,23 @@ namespace CommodityTradingApp.Controllers
                 new User { UserId = Guid.Parse("e7db167e-d1b3-4b7e-b417-72a6cb85943c"), Username = "JDM", PasswordHash = "sdljfalsdjfklasdjlkaj234daljf", CountryId = 1 },
                 new User { UserId = Guid.Parse("1d6ffbd2-5c44-4a1e-93b2-0fc690f6e2b9"), Username = "Admin", PasswordHash = "asdfdskfj3lk4j5lkj234lkj", CountryId = 2 }
             };
+
+        public async Task<IActionResult> Index()
+        {
+            var response = await _httpClient.GetAsync(_apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<List<User>>(json);
+                return View(users);
+            }
+            else
+            {
+                
+                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+                return View(new List<User>());
+            }
+        }
         public IActionResult Details(Guid id)
         {
             // Simulate users (Replace with db call)

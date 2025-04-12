@@ -1,0 +1,44 @@
+﻿@model List<User>
+
+@{
+    ViewData["Title"] = "User List";
+}
+
+<h2>User List</h2>
+
+@if (Model.Count == 0)
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User Id</th>
+                <th>Username</th>
+                <th>Country</th>
+                <th>Roles</th>
+                <th>Trader Accounts</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserId</td>
+                    <td>@user.Username</td>
+                    <td>@(user.Country?.CountryName ?? "N/A")</td>
+                    <td>@(user.RoleAssignments?.Count ?? 0)</td>
+                    <td>@(user.TraderAccounts?.Count ?? 0)</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@user.UserId" class="btn btn-info btn-sm">Details</a>
+                        <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@user.UserId" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -24,7 +24,7 @@ namespace CommodityTradingAPI.Controllers
 
         [HttpGet]
         // TODO: Set up authentication to be able to handle this
-        [Authorize(Roles = "Manager")]
+        //[Authorize(Roles = "Manager")]
         // Returns a json of all users
         public async Task<string> Index()
         {
