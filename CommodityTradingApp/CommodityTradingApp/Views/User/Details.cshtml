@@ -57,15 +57,15 @@
                 }
                 else
                 {
-                    <span>No roles</span>
+                    <span>None found.</span>
                 }
             </td>
-            <td>@(Model.TraderAccounts?.Count ?? 0)</td>
-                    <td>
-                <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-info btn-sm">Details</a>
-                <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary btn-sm">Edit</a>
-                <a asp-action="Delete" asp-route-id="@Model.UserId" class="btn btn-danger btn-sm">Delete</a>
-                    </td>
+
+            <td>
+                <a asp-action="Details" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-info btn-sm">Details</a>
+                <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-action="Delete" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
                 </tr>
             
         </tbody>

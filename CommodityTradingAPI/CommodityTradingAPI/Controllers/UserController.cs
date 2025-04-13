@@ -23,9 +23,7 @@ namespace CommodityTradingAPI.Controllers
         }
 
         [HttpGet]
-        // TODO: Set up authentication to be able to handle this
         //[Authorize(Roles = "Manager")]
-        // Returns a json of all users
         public async Task<string> Index()
         {
             var users = await _context.Users
@@ -41,7 +39,7 @@ namespace CommodityTradingAPI.Controllers
 
         // No need to authorise as anyone should be able to make a new account
         [HttpPost("Create")]
-        //[ValidateAntiForgeryToken] // Still don't really know what this does
+        [ValidateAntiForgeryToken] // Still don't really know what this does
         public async Task<IActionResult> Create([Bind("Username", "PasswordRaw", "Country", "Role")] CreateUser newUserDetails)
         {
 
@@ -119,7 +117,29 @@ namespace CommodityTradingAPI.Controllers
             return JsonConvert.SerializeObject(user, settings);
             
         }
+        //suspend?
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> Delete(Guid id, [FromQuery] bool confirm = false)
+        {
+            var user = await _context.Users
+                .Include(u => u.RoleAssignments)
+                .Include(u => u.TraderAccounts)
+                .FirstOrDefaultAsync(u => u.UserId == id);
 
+            if (user == null)
+                return NotFound("User not found.");
+
+            if (user.TraderAccounts.Any() && !confirm)
+            {
+                return BadRequest("User has active trader accounts. Confirm deletion by adding '?confirm=true'.");
+            }
+
+            _context.RoleAssignments.RemoveRange(user.RoleAssignments);
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         public class UserResponse // DTO, basically a response object to put in the body
         {

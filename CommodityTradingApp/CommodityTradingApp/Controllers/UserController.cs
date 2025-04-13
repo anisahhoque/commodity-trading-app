@@ -104,11 +104,10 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string username, string password, string country, string role)
         {
 
-            //Console.WriteLine("country:" + country);
 
             var userData = new
             {
@@ -158,22 +157,42 @@ namespace CommodityTradingApp.Controllers
 
             return RedirectToAction("Details", "User");
         }
+        [HttpGet("Delete/{id}")]
 
-        public IActionResult Delete(Guid userId)
+        public async Task<IActionResult> Delete(Guid id)
         {
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            return View();
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonConvert.DeserializeObject<User>(json);
+
+            return View(user);
+            
         }
 
-       
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid userId)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
+            var response = await _httpClient.DeleteAsync($"{_apiUrl}{id}?confirm=true");
 
-            TempData["Message"] = "User deleted successfully!";
-            return RedirectToAction("Index"); 
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "User deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            TempData["Error"] = $"Deletion failed: {error}";
+            return RedirectToAction(nameof(Delete), new { id });
         }
+
 
 
     }
