@@ -225,7 +225,7 @@ namespace CommodityTradingApp.Controllers
                 return View(model);
             }
 
-            // Create the payload to send in the PUT request to your API
+            
             var updateUser = new
             {
                 UserId = id,
@@ -237,13 +237,13 @@ namespace CommodityTradingApp.Controllers
 
             var content = new StringContent(JsonConvert.SerializeObject(updateUser), Encoding.UTF8, "application/json");
 
-            // Send the PUT request to the API
+           
             var response = await _httpClient.PutAsync($"{_apiUrl}{id}", content);
 
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "User updated successfully.";
-                return RedirectToAction(nameof(Index)); // Redirect to an appropriate view after success
+                return RedirectToAction(nameof(Index)); 
             }
             else
             {
@@ -251,7 +251,7 @@ namespace CommodityTradingApp.Controllers
                 TempData["Error"] = $"Update failed: {error}";
                 model.AllCountries = countries;
                 model.AllRoles = roles;
-                return View(model); // Return back to the edit form with error message
+                return View(model); 
             }
         }
 
