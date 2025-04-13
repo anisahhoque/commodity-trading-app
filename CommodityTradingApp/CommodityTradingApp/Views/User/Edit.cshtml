@@ -1,40 +1,32 @@
-﻿@model CommodityTradingApp.ViewModels.UserEditViewModel
-
-@{
-    ViewData["Title"] = "Edit User";
-}
+﻿@model EditUser
 
 <h2>Edit User</h2>
 
-<form asp-action="Edit" method="post">
-    <!-- Hidden Field for User ID -->
-    <input type="hidden" asp-for="Id" />
-
-    <!-- Username Field -->
+<form asp-action="Edit" asp-route-id="@Model.UserId" method="post">
     <div class="form-group">
-        <label for="Username">Username</label>
-        <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" required />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <label asp-for="Username">Username</label>
+        <input asp-for="Username" class="form-control" disabled />
     </div>
 
-    <!-- Country Selection (Dropdown) -->
     <div class="form-group">
-        <label for="CountryID">Country</label>
-        <select id="CountryID" name="CountryID" class="form-control" asp-for="CountryId" required>
-            <option value="1">USA</option>
-            <option value="2">Canada</option>
-            <option value="3">UK</option>
-        </select>
+        <label asp-for="Password">New Password</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
 
+    <div class="form-group">
+        <label asp-for="CountryId">Country</label>
+        <select asp-for="CountryId" class="form-control" asp-items="Model.AllCountries"></select>
         <span asp-validation-for="CountryId" class="text-danger"></span>
     </div>
 
-    <!-- Submit Button -->
-    <button type="submit" class="btn btn-primary">Update User</button>
+    <div class="form-group">
+        <label>Roles</label>
+        <select asp-for="SelectedRoleIds" class="form-control" multiple="multiple" asp-items="Model.AllRoles"></select>
+        <span asp-validation-for="SelectedRoleIds" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 
-<!-- Validation scripts -->
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
-
+<a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>

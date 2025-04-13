@@ -142,21 +142,71 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Login", "Login");
         }
 
-   
-        public IActionResult Edit(Guid id)
-        {
 
-            return View();  
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var response = await _httpClient.GetAsync($"{_apiUrl}{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonConvert.DeserializeObject<EditUser>(json);
+
+     
+            user.AllCountries = await GetCountries();
+            user.AllRoles = await GetRoles();
+
+            return View(user);
         }
 
-       
-        [HttpPost]
+
+
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit()
+        public async Task<IActionResult> Edit(Guid id, EditUser model)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Invalid input.";
+                model.AllCountries = await GetCountries(); 
+                model.AllRoles = await GetRoles();
+                return View(model);
+            }
 
-            return RedirectToAction("Details", "User");
+            
+            var updateUser = new
+            {
+                UserId = model.UserId,
+                Password = model.Password, 
+                CountryId = model.CountryId,
+                SelectedRoleIds = model.SelectedRoleIds
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(updateUser), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"{_apiUrl}{model.UserId}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "User updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                TempData["Error"] = $"Update failed: {error}";
+                model.AllCountries = await GetCountries(); 
+                model.AllRoles = await GetRoles();
+                return View(model);
+            }
         }
+
+
+
         [HttpGet("Delete/{id}")]
 
         public async Task<IActionResult> Delete(Guid id)
@@ -192,7 +242,29 @@ namespace CommodityTradingApp.Controllers
             TempData["Error"] = $"Deletion failed: {error}";
             return RedirectToAction(nameof(Delete), new { id });
         }
+        private async Task<IEnumerable<SelectListItem>> GetCountries()
+        {
+            var response = await _httpClient.GetAsync(_apiUrlCountry);
+            var countriesJson = await response.Content.ReadAsStringAsync();
+            var countries = JsonConvert.DeserializeObject<List<Country>>(countriesJson);
+            return countries.Select(c => new SelectListItem
+            {
+                Value = c.CountryId.ToString(),
+                Text = c.CountryName
+            });
+        }
 
+        private async Task<IEnumerable<SelectListItem>> GetRoles()
+        {
+            var response = await _httpClient.GetAsync(_apiUrlRole);
+            var rolesJson = await response.Content.ReadAsStringAsync();
+            var roles = JsonConvert.DeserializeObject<List<Role>>(rolesJson);
+            return roles.Select(r => new SelectListItem
+            {
+                Value = r.RoleId.ToString(),
+                Text = r.RoleName
+            });
+        }
 
 
     }

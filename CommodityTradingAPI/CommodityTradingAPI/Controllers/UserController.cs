@@ -118,7 +118,7 @@ namespace CommodityTradingAPI.Controllers
             
         }
         //suspend?
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, [FromQuery] bool confirm = false)
         {
             var user = await _context.Users
@@ -139,6 +139,52 @@ namespace CommodityTradingAPI.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] EditUser model)
+        {
+            if (id != model.UserId)
+            {
+                return BadRequest("User ID mismatch.");
+            }
+
+            var user = await _context.Users
+                .Include(u => u.RoleAssignments)
+                .Include(u => u.Country)  
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            }
+
+            
+            if (model.CountryId != user.CountryId)
+            {
+                user.CountryId = model.CountryId;
+            }
+
+            
+            _context.RoleAssignments.RemoveRange(user.RoleAssignments);
+            foreach (var roleId in model.SelectedRoleIds)
+            {
+                _context.RoleAssignments.Add(new RoleAssignment
+                {
+                    UserId = user.UserId,
+                    RoleId = roleId
+                });
+            }
+
+            
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User updated successfully." });
         }
 
         public class UserResponse // DTO, basically a response object to put in the body
