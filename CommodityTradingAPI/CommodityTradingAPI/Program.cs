@@ -54,7 +54,11 @@ builder.Services.AddDbContext<CommoditiesDbContext>(options =>
     ));
 
 builder.Services.AddHttpClient<ExternalApiService>();
-
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        });
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<CommodityTradingAPI.Services.ILogger, AuditLogService>();

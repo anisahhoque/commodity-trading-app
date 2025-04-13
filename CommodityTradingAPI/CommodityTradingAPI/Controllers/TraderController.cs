@@ -89,6 +89,11 @@ namespace CommodityTradingAPI.Controllers
             {
                 return BadRequest("Invalid trader account");
             }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
             var traderAccount = new TraderAccount
             {
                 TraderId = Guid.NewGuid(), 
@@ -96,6 +101,7 @@ namespace CommodityTradingAPI.Controllers
                 Balance = model.Balance,
                 AccountName = model.AccountName
             };
+            user.TraderAccounts.Add(traderAccount);
             _context.TraderAccounts.Add(traderAccount);
             await _context.SaveChangesAsync();
             return Ok(traderAccount);
