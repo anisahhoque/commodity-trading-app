@@ -26,13 +26,7 @@ namespace CommodityTradingApp.Controllers
             _apiUrlRole = _config["api"] + "Role";
 
         }
-        // GET: User/Details/{guid}
-        private static List<User> users =
-         new List<User>
-            {
-                new User { UserId = Guid.Parse("e7db167e-d1b3-4b7e-b417-72a6cb85943c"), Username = "JDM", PasswordHash = "sdljfalsdjfklasdjlkaj234daljf", CountryId = 1 },
-                new User { UserId = Guid.Parse("1d6ffbd2-5c44-4a1e-93b2-0fc690f6e2b9"), Username = "Admin", PasswordHash = "asdfdskfj3lk4j5lkj234lkj", CountryId = 2 }
-            };
+
 
         public async Task<IActionResult> Index()
         {
@@ -149,100 +143,36 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Login", "Login");
         }
 
-        // GET: User/Edit/{guid}
+   
         public IActionResult Edit(Guid id)
         {
-            //Simulate users (Replace with db call)
-            List<User> _users = new();
 
-        var user = _users.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
-            {
-                return NotFound();  // If user not found, return a 404.
-            }
-
-            // Populate the view model with current user data.
-            var model = new UserEditViewModel
-            {
-                Id = user.UserId,
-                Username = user.Username,
-                CountryId = user.CountryId
-            };
-
-            return View(model);  // Return the edit view with the model data.
+            return View();  
         }
 
-        // POST: User/Edit/{guid}
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(UserEditViewModel model)
+        public IActionResult Edit()
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);  // If validation fails, return the same view with validation errors.
-            }
 
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
-
-            var user = _users.FirstOrDefault(u => u.UserId == model.Id);
-            if (user == null)
-            {
-                return NotFound();  // If user not found, return a 404.
-            }
-
-            // Update user details
-            user.Username = model.Username;
-            user.CountryId = model.CountryId;
-
-            //Now, need to update the database using DbContext.
-
-            // Redirect to the user details page after update.
-            return RedirectToAction("Details", "User/"+new { id = user.UserId });
+            return RedirectToAction("Details", "User");
         }
 
-        // GET: User/Delete/{guid} (Shows confirmation view)
         public IActionResult Delete(Guid userId)
         {
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
 
-            var user = _users.FirstOrDefault(u => u.UserId == userId);
-            if (user == null)
-            {
-                return NotFound();  // User not found
-            }
-
-            // Return confirmation view
-            return View(user);
+            return View();
         }
 
-        // POST: User/Delete/5 (Perform the delete)
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid userId)
         {
-            bool isManager = true;  // This should be checked from session or user role
 
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
-
-            if (!isManager)
-            {
-                return Unauthorized();  // Return unauthorized if not a manager
-            }
-
-            var user = _users.FirstOrDefault(u => u.UserId == userId);
-            if (user == null)
-            {
-                return NotFound();  // User not found
-            }
-
-            _users.Remove(user);  // Delete the user
-
-            // Redirect to a success page or the user list
             TempData["Message"] = "User deleted successfully!";
-            return RedirectToAction("Index");  // Assuming Index shows the list of users
+            return RedirectToAction("Index"); 
         }
 
 
