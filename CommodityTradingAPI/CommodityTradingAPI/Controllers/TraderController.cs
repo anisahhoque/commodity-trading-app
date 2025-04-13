@@ -36,24 +36,17 @@ namespace CommodityTradingAPI.Controllers
             return JsonConvert.SerializeObject(traders, settings);
         }
 
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id)
-        {
-            var trader = await _context.TraderAccounts.FindAsync(id);
-            if (trader == null)
-            {
-                return NotFound("Trader not found");
-            }
-            return Ok(trader);
-        }
-
-        [HttpGet("{id}/portfolio")]
-        public async Task<IActionResult> Portfolio(Guid id)
 
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
-            var trader = await _context.TraderAccounts.FindAsync(id);
-            var user = trader.User;
+            var trader = await _context.TraderAccounts
+                                .Include(t => t.User) 
+                                .FirstOrDefaultAsync(t => t.TraderId == id);
+
 
 
             //var trades = trader.Trades.ToList();
@@ -61,6 +54,7 @@ namespace CommodityTradingAPI.Controllers
             {
                 return NotFound("Trader not found");
             }
+            var user = trader.User;
             var trades = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
             if (trades == null)
             {
