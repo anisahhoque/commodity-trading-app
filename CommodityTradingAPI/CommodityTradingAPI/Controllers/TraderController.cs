@@ -2,9 +2,11 @@
 using CommodityTradingAPI.Models;
 using CommodityTradingAPI.Models.DTOs;
 using CommodityTradingAPI.Services;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -18,18 +20,20 @@ namespace CommodityTradingAPI.Controllers
         public TraderController(CommoditiesDbContext context, ExternalApiService externalApiService)
         {
             _context = context;
-            _externalApiService = externalApiService;
+           _externalApiService = externalApiService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<string> Index()
         {
-            var traders = await _context.TraderAccounts.ToListAsync();
-            if (traders == null)
+            var traders = await _context.TraderAccounts
+                .Include(u => u.User).ToListAsync();
+ 
+            var settings = new JsonSerializerSettings
             {
-                return NotFound("No traders found");
-            }
-            return Ok(traders);
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            return JsonConvert.SerializeObject(traders, settings);
         }
 
         [HttpGet("{id}")]
@@ -79,12 +83,19 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TraderAccount traderAccount)
+        public async Task<IActionResult> Create([Bind("UserId","Balance","AccountName")] CreateTraderAccount model)
         {
-            if (traderAccount == null)
+            if (model == null)
             {
                 return BadRequest("Invalid trader account");
             }
+            var traderAccount = new TraderAccount
+            {
+                TraderId = Guid.NewGuid(), 
+                UserId = model.UserId,
+                Balance = model.Balance,
+                AccountName = model.AccountName
+            };
             _context.TraderAccounts.Add(traderAccount);
             await _context.SaveChangesAsync();
             return Ok(traderAccount);

@@ -1,16 +1,52 @@
-﻿@model IEnumerable<CommodityTradingApp.Models.Trader>
+﻿@model List<CommodityTradingApp.Models.TraderAccount>
 
-<h2>All Traders</h2>
-<table>
-    <tr>
-        <th>Account Name</th>
-        <th>Balance</th>
-    </tr>
-    @foreach (var trader in Model)
-    {
-        <tr>
-            <td>@trader.AccountName</td>
-            <td>@trader.Balance</td>
-        </tr>
-    }
-</table>
+@{
+    ViewData["Title"] = "Trader Accounts";
+}
+
+<h2>Trader Accounts</h2>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Trader ID</th>
+                <th>Account Name</th>
+                <th>Balance</th>
+                <th>User</th>
+                <th>Number of Trades</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var trader in Model)
+            {
+                <tr>
+                    <td>@trader.TraderId</td>
+                    <td>@trader.AccountName</td>
+                    <td>@trader.Balance.ToString("C")</td>
+                    <td>
+                        @trader.User?.Username ?? "N/A" 
+                    </td>
+                    <td>@trader.Trades?.Count()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        No trader accounts found.
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}

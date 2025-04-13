@@ -1,42 +1,41 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CommodityTradingApp.Models;
 using CommodityTradingApp.ViewModels;
+using Newtonsoft.Json;
 
 namespace CommodityTradingApp.Controllers
 {
-    //Need to ensure i have DBContext, and inject it into controller
-    //DBcontext must have class that represents DbSet<Trader> Traders
 
 
     public class TraderController : Controller
     {
-        // GET: Trader/Index
-        public IActionResult Index()
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        public TraderController(IConfiguration config, HttpClient httpClient)
         {
-            //TODO: DELETE WHEN CONNECTED TO DB
-            // Simulate current user and role
-            bool isManager = true; // Change to false to test user view
-            Guid currentUserId = Guid.Parse("a67c1bde-32ff-4c60-89ef-90b7dbd45f2e");
+            _config = config;
+            _httpClient = httpClient;
+            _apiUrl = _config["api"] + "Trader/";
 
-            var allTraders = new List<Trader>
-    {
-        new Trader { Id = Guid.NewGuid(), AccountName = "Alice", Balance = 5000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Bob", Balance = 10000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Charlie", Balance = 7500, UserId = Guid.NewGuid() }
-    };
-
-            IEnumerable<Trader> visibleTraders;
-
-            if (isManager)
+        }
+        public async Task<IActionResult> Index()
+        {
+            var response = _httpClient.GetAsync(_apiUrl).Result;
+            if (response.IsSuccessStatusCode)
             {
-                visibleTraders = allTraders;
+                var json = await response.Content.ReadAsStringAsync();
+                var traders = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
+                return View(traders);
             }
             else
             {
-                visibleTraders = allTraders.Where(t => t.UserId == currentUserId);
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
+                return View(new List<TraderAccount>());
             }
 
-            return View(visibleTraders);
+           
         }
 
 
