@@ -1,32 +1,50 @@
-﻿@model CommodityTradingApp.ViewModels.UserDetailsViewModel
+﻿@model User
+
+@{
+    ViewData["Title"] = "User List";
+}
 
 <h2>User Details</h2>
 
-<p><strong>Username:</strong> @Model.User.Username</p>
-<p><strong>Country ID:</strong> @Model.User.CountryId</p>
-<p><strong>Password Hash:</strong> @Model.User.PasswordHash</p>
 
-<hr />
-
-<h3>Associated Trader Accounts</h3>
-
-@if (Model.Traders != null && Model.Traders.Any())
-{
-    <table>
-        <tr>
-            <th>Account Name</th>
-            <th>Balance</th>
-        </tr>
-        @foreach (var trader in Model.Traders)
-        {
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@trader.AccountName</td>
-                <td>@trader.Balance.ToString("C")</td>
+                <th>User Id</th>
+                <th>Username</th>
+                <th>Country</th>
+                <th>Roles</th>
+                <th>Trader Accounts</th>
+                <th>Actions</th>
             </tr>
-        }
+        </thead>
+        <tbody>
+
+                <tr>
+                    <td>@Model.UserId</td>
+            <td>@Model.Username</td>
+            <td>@(Model.Country?.CountryName ?? "N/A")</td>
+                    <td>
+                @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
+                        {
+                    foreach (var assignment in Model.RoleAssignments)
+                            {
+                                @assignment.Role.RoleName <br />
+                            }
+                        }
+                        else
+                        {
+                            <span>No roles</span>
+                        }
+                    </td>
+
+            <td>@(Model.TraderAccounts?.Count ?? 0)</td>
+                    <td>
+                <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-info btn-sm">Details</a>
+                <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-action="Delete" asp-route-id="@Model.UserId" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            
+        </tbody>
     </table>
-}
-else
-{
-    <p>No trader accounts associated with this user.</p>
-}

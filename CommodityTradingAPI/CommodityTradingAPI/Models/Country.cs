@@ -11,6 +11,6 @@ public partial class Country
     public string? CountryName { get; set; }
 
 
-    [JsonIgnore]
+    
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

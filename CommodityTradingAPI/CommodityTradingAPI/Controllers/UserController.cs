@@ -28,9 +28,10 @@ namespace CommodityTradingAPI.Controllers
         // Returns a json of all users
         public async Task<string> Index()
         {
-            var users = await _context.Users.Include(static u => u.Country)
+            var users = await _context.Users
+                    .Include(static u => u.Country)
                     .Include(u => u.RoleAssignments)
-        .ThenInclude(ra => ra.Role).ToListAsync();
+                    .ThenInclude(ra => ra.Role).ToListAsync();
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -41,7 +42,7 @@ namespace CommodityTradingAPI.Controllers
         // No need to authorise as anyone should be able to make a new account
         [HttpPost("Create")]
         //[ValidateAntiForgeryToken] // Still don't really know what this does
-        public async Task<IActionResult> Create([Bind("Username","PasswordRaw","Country", "Role")] CreateUser newUserDetails)
+        public async Task<IActionResult> Create([Bind("Username", "PasswordRaw", "Country", "Role")] CreateUser newUserDetails)
         {
 
             // Try to find the matching country
@@ -50,7 +51,7 @@ namespace CommodityTradingAPI.Controllers
 
             var role = newUserDetails.Role.ToLower().Trim();
             if (role != "manager" && role != "trader")
-                return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'." );
+                return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'.");
 
             if (matchedCountry == null)
             {
@@ -82,7 +83,7 @@ namespace CommodityTradingAPI.Controllers
                 UserId = newUser.UserId,
                 Username = newUser.Username,
                 CountryName = newUser.Country.CountryName!,
-                Role = role
+                Roles = newUser.RoleAssignments.Select(ra => ra.Role.RoleName).ToList()
             };
 
             var auditLog = new AuditLog
@@ -100,31 +101,33 @@ namespace CommodityTradingAPI.Controllers
 
         // Get a user from ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(Guid id)
+        public async Task<string> GetUserById(Guid id)
         {
             var user = await _context.Users
                 .Include(u => u.Country)
+                .Include(u => u.RoleAssignments)
+                    .ThenInclude(ra => ra.Role)
+                .Include(u => u.TraderAccounts)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (user == null)
-                return NotFound();
 
-            var response = new UserResponse
+
+            var settings = new JsonSerializerSettings
             {
-                UserId = user.UserId,
-                Username = user.Username,
-                CountryName = user.Country.CountryName!
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-
-            return Ok(response);
+            return JsonConvert.SerializeObject(user, settings);
+            
         }
+
 
         public class UserResponse // DTO, basically a response object to put in the body
         {
             public Guid UserId { get; set; }
             public string Username { get; set; }
             public string CountryName { get; set; }
-            public string Role { get; set; }
+            public List<string> Roles { get; set; } = new();
         }
     }
+
 }

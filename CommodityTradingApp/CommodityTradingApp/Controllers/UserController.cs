@@ -50,38 +50,32 @@ namespace CommodityTradingApp.Controllers
                 return View(new List<User>());
             }
         }
-        public IActionResult Details(Guid id)
+      
+        public async Task<IActionResult> Details(Guid id)
+        
         {
-            // Simulate users (Replace with db call)
 
-
-            var allTraders = new List<Trader>
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (response.IsSuccessStatusCode)
             {
-                new Trader { Id = Guid.NewGuid(), AccountName = "Alpha", Balance = 10000, UserId = users[0].UserId },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Beta", Balance = 20000, UserId = users[0].UserId },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Gamma", Balance = 5000, UserId = users[1].UserId }
-            };
-
-            var user = users.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
-                return NotFound();
-
-            var userTraders = allTraders.Where(t => t.UserId == user.UserId).ToList();
-
-            //Passing the user and their traders to the view
-            var viewModel = new UserDetailsViewModel
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<User>(json);
+                return View(user);
+            }
+            else
             {
-                User = user,
-                Traders = userTraders
-            };
 
-            return View(viewModel);
+                ModelState.AddModelError(string.Empty, "Unable to retrieve user from the API");
+                return View(new User());
+            }
+        
+
+            
         }
 
-        //Creating a user: Potentially have this as a button in login page???
-        //GET: User/Create
+
         [HttpGet]
-        public async Task< IActionResult> Create()//UserCreateViewModel ucvM)
+        public async Task< IActionResult> Create()
         {
             var response = await _httpClient.GetAsync(_apiUrlCountry);
             if (response.IsSuccessStatusCode)
@@ -114,8 +108,7 @@ namespace CommodityTradingApp.Controllers
 
         }
 
-        //POST: User/Create
-        //This is where we would hash the password and save the user to the database using BCrypt
+
         [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string username, string password, string country, string role)
@@ -251,5 +244,7 @@ namespace CommodityTradingApp.Controllers
             TempData["Message"] = "User deleted successfully!";
             return RedirectToAction("Index");  // Assuming Index shows the list of users
         }
+
+
     }
 }
