@@ -27,22 +27,11 @@ else
             @foreach (var user in Model)
             {
                 <tr>
-                    <td>@user.UserId</td>
+                    
                     <td>@user.Username</td>
                     <td>@(user.Country?.CountryName ?? "N/A")</td>
-                    <td>
-                        @if (user.RoleAssignments != null && user.RoleAssignments.Any())
-                        {
-                            foreach (var assignment in user.RoleAssignments)
-                            {
-                                @assignment.Role.RoleName <br />
-                            }
-                        }
-                        else
-                        {
-                            <span>No roles</span>
-                        }
-                    </td>
+                    <td>@(user.RoleAssignments?.Count ?? 0)</td>
+ 
 
                     <td>@(user.TraderAccounts?.Count ?? 0)</td>
                     <td>

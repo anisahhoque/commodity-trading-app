@@ -7,37 +7,59 @@
 <h2>User Details</h2>
 
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>User Id</th>
-                <th>Username</th>
-                <th>Country</th>
-                <th>Roles</th>
-                <th>Trader Accounts</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User Id</th>
+            <th>Username</th>
+            <th>Country</th>
+            <th>Roles</th>
+            <th>Trader Accounts</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
 
-                <tr>
-                    <td>@Model.UserId</td>
+        <tr>
+            <td>@Model.UserId</td>
             <td>@Model.Username</td>
             <td>@(Model.Country?.CountryName ?? "N/A")</td>
-                    <td>
+            <td>
                 @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
-                        {
+                {
                     foreach (var assignment in Model.RoleAssignments)
+                    {
+                        @assignment.Role.RoleName <br />
+                    }
+                }
+                else
+                {
+                    <span>No roles</span>
+                }
+            </td>
+            <td>
+                @if (Model.TraderAccounts != null && Model.TraderAccounts.Any())
+                {
+                    foreach (var trader in Model.TraderAccounts)
+                    {
+                        @trader.TraderId <br />
+                        @trader.AccountName <br />
+                        @trader.Balance <br />
+                        @trader.Balance <br />
+                        @if (trader.Trades != null && trader.Trades.Any())
+                        {
+                            foreach (var trade in trader.Trades)
                             {
-                                @assignment.Role.RoleName <br />
+                                <p>uh idk what to put here for now will link to another page i reckon</p>
                             }
                         }
-                        else
-                        {
-                            <span>No roles</span>
-                        }
-                    </td>
-
+                    }
+                }
+                else
+                {
+                    <span>No roles</span>
+                }
+            </td>
             <td>@(Model.TraderAccounts?.Count ?? 0)</td>
                     <td>
                 <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-info btn-sm">Details</a>
