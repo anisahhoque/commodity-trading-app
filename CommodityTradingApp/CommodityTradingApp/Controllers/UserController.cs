@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -143,44 +144,92 @@ namespace CommodityTradingApp.Controllers
         }
 
 
-        [HttpGet("Edit/{id}")]
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var response = await _httpClient.GetAsync($"{_apiUrl}{id}");
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                TempData["Error"] = "User not found.";
+                
+                var userResponse = await _httpClient.GetAsync($"{_apiUrl}{id}");
+                userResponse.EnsureSuccessStatusCode();
+
+                var userContent = await userResponse.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<User>(userContent);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                
+                var editUser = new EditUser
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    CountryId = user.CountryId,
+                    CurrentCountryName = user.Country?.CountryName,
+                    SelectedRoleIds = user.RoleAssignments.Select(ra => ra.RoleId).ToList()
+                };
+
+                
+                var countriesResponse = await _httpClient.GetAsync(_apiUrlCountry);
+                countriesResponse.EnsureSuccessStatusCode();
+
+                var countriesContent = await countriesResponse.Content.ReadAsStringAsync();
+                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesContent);
+
+
+                editUser.AllCountries = countries;
+
+               
+                var rolesResponse = await _httpClient.GetAsync(_apiUrlRole);
+                rolesResponse.EnsureSuccessStatusCode();
+
+                var rolesContent = await rolesResponse.Content.ReadAsStringAsync();
+                var roles = JsonConvert.DeserializeObject<List<Role>>(rolesContent);
+
+                
+                var userRoleIds = user.RoleAssignments.Select(ra => ra.RoleId).ToList();
+                editUser.AllRoles = roles;
+                return View(editUser);
+            }
+            catch (Exception ex)
+            {
+              
+                TempData["ErrorMessage"] = $"Failed to retrieve user data: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<EditUser>(json);
-
-     
-            user.AllCountries = await GetCountries();
-            user.AllRoles = await GetRoles();
-
-            return View(user);
         }
 
-
-
-        [HttpPost("Edit/{id}")]
+        [HttpPost("User/Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, EditUser model)
         {
+            var rolesResponse = await _httpClient.GetAsync(_apiUrlRole);
+            rolesResponse.EnsureSuccessStatusCode();
+
+            var rolesContent = await rolesResponse.Content.ReadAsStringAsync();
+            var roles = JsonConvert.DeserializeObject<List<Role>>(rolesContent);
+            var countriesResponse = await _httpClient.GetAsync(_apiUrlCountry);
+            countriesResponse.EnsureSuccessStatusCode();
+
+            var countriesContent = await countriesResponse.Content.ReadAsStringAsync();
+            var countries = JsonConvert.DeserializeObject<List<Country>>(countriesContent);
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Invalid input.";
-                model.AllCountries = await GetCountries(); 
-                model.AllRoles = await GetRoles();
+
+                model.AllCountries = countries;
+
+                model.AllRoles = roles;
                 return View(model);
             }
 
-            
+            // Create the payload to send in the PUT request to your API
             var updateUser = new
             {
-                UserId = model.UserId,
+                UserId = id,
+                Username = model.Username,
                 Password = model.Password, 
                 CountryId = model.CountryId,
                 SelectedRoleIds = model.SelectedRoleIds
@@ -188,20 +237,21 @@ namespace CommodityTradingApp.Controllers
 
             var content = new StringContent(JsonConvert.SerializeObject(updateUser), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"{_apiUrl}{model.UserId}", content);
+            // Send the PUT request to the API
+            var response = await _httpClient.PutAsync($"{_apiUrl}{id}", content);
 
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "User updated successfully.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); // Redirect to an appropriate view after success
             }
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
                 TempData["Error"] = $"Update failed: {error}";
-                model.AllCountries = await GetCountries(); 
-                model.AllRoles = await GetRoles();
-                return View(model);
+                model.AllCountries = countries;
+                model.AllRoles = roles;
+                return View(model); // Return back to the edit form with error message
             }
         }
 

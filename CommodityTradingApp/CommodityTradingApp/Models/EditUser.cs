@@ -13,17 +13,17 @@ namespace CommodityTradingApp.Models
 
         public byte CountryId { get; set; }
 
-
-        public IEnumerable<SelectListItem> AllCountries { get; set; } = new List<SelectListItem>();
-
-        public IEnumerable<SelectListItem> AllRoles { get; set; } = new List<SelectListItem>();
+        public List<Country> AllCountries { get; set; } = new List<Country>();  
+        public List<Role> AllRoles { get; set; } = new List<Role>();
 
 
         public List<Guid> SelectedRoleIds { get; set; } = new List<Guid>();
 
 
         public string? CurrentCountryName { get; set; }
-    }
 
+
+
+    }
     
 }
