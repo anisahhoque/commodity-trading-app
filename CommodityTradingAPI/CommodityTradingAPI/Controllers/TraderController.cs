@@ -44,8 +44,8 @@ namespace CommodityTradingAPI.Controllers
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
             var trader = await _context.TraderAccounts
-                                .Include(t => t.User) 
-                                .FirstOrDefaultAsync(t => t.TraderId == id);
+                            .Include(t => t.User) 
+                            .FirstOrDefaultAsync(t => t.TraderId == id);
 
 
 
@@ -124,5 +124,31 @@ namespace CommodityTradingAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPost("Deposit")]
+        public async Task<IActionResult> Deposit([Bind("TraderId","Amount")] DepositDto deposit)
+        {
+            if (deposit == null || deposit.Amount <= 0)
+            {
+                return BadRequest("Invalid deposit request.");
+            }
+
+            var trader = await _context.TraderAccounts.FindAsync(deposit.TraderId);
+            if (trader == null)
+            {
+                return NotFound("Trader not found.");
+            }
+
+            trader.Balance += deposit.Amount;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Deposit successful",
+                NewBalance = trader.Balance
+            });
+        }
+
+
     }
 }
