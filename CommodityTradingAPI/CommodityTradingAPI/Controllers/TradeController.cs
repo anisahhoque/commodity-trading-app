@@ -51,7 +51,6 @@ namespace CommodityTradingAPI.Controllers
             //trade.CommodityId = tempTrade.CommodityId;
             //trade.Quantity = tempTrade.Quantity;
 
-            //TODO: fix is open bug
 
             Trade trade = new Trade
             {
@@ -62,6 +61,8 @@ namespace CommodityTradingAPI.Controllers
                 CreatedAt = DateTime.UtcNow,
                 Contract = tempTrade.contract
             };
+
+            //TODO: may need to add separate logic if trade is a sell???
 
             var account = await _context.TraderAccounts.FirstOrDefaultAsync(x => x.TraderId == trade.TraderId);
             var commodity = await _context.Commodities.FirstOrDefaultAsync(x => x.CommodityId == trade.CommodityId);
@@ -136,7 +137,8 @@ namespace CommodityTradingAPI.Controllers
             trade.CreatedAt = createdAt;
             trade.PricePerUnit = priceOfCommodity;
             trade.Expiry = expiry;
-
+            trade.IsOpen = tempTrade.IsOpen == "True";
+            trade.IsBuy = tempTrade.IsBuy == "True";
 
             //TODO: allow user to create their own trade mitigation for the position
 
