@@ -10,6 +10,7 @@ using System.Data;
 
 namespace CommodityTradingAPI.Controllers
 {
+    [Route("")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
