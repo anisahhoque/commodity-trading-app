@@ -33,7 +33,7 @@ namespace CommodityTradingAPI.Controllers
                 return BadRequest("Invalid login");
             }
 
-            return Ok();
+            return Ok(dbUser);
         }
 
         [HttpGet("role/{userId}")]
