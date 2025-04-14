@@ -1,4 +1,5 @@
 ﻿using CommodityTradingApp.Models;
+using CommodityTradingApp.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,21 +70,35 @@ namespace CommodityTradingApp.Controllers
         public async Task<IActionResult> DisplayCommodities()
         {
             var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}commodity");
-            var commodities = await result.Content.ReadAsAsync<List<Commodity>>(); 
+            var commodities = await result.Content.ReadAsAsync<List<Commodity>>();
+
+            //get user id from jwt token
+
+            var userId = "28324A1F-4254-48E5-8825-1FF3594E8301";
+
+            //get all trade accounts associated with that user
+            //var tradeAccounts = await _httpClient.GetAsync(_httpClient.BaseAddress + "");
+
+
+
             //call get details for each commodity in commodities
             return View(commodities);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
+        public async Task<IActionResult> CreateTrade([Bind("TraderId, CommodityId, Quantity, IsBuy, IsOpen, contract, Bourse")] CreateTradeDto tempTrade)
         {
 
-           //Bind data to dto
-           
+            //Bind data to dto
+            var result = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, tempTrade);
+            if (result.IsSuccessStatusCode)
+            {
+                Console.WriteLine("good");
+                RedirectToAction("index");
+            }
+            //Send data over to api
 
-           //Send data over to api
 
-
-           //smile
+            //smile
 
             //var newTrade = new Trade
             //{

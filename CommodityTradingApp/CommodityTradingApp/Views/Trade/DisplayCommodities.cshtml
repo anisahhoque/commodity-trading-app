@@ -34,7 +34,7 @@
             
 
             <div class="commodity-actions">
-                <form class="trade-form" id="trade-form-@item.CommodityId" method="post" action="@Url.Action("CreateTrade", "Trade")">
+                <form class="trade-form" id="trade-form-@item.CommodityId" method="post" asp-action= "CreateTrade" >
                     <div>
                         <label for="quantity-@item.CommodityId">Quantity</label>
                         <input type="number" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
@@ -46,6 +46,10 @@
                             <option value="false">Sell</option>
                         </select>
                     </div>
+                    <div>
+                        <input type="hidden" id="CommodityId" name="CommodityId" value=@item.CommodityId />
+                    </div>
+                    
                     <div>
                         <button class="btn btn-success" style="margin-top: 10px;" type="submit">Trade</button>
                     </div>
