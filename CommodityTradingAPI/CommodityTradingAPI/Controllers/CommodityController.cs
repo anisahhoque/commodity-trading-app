@@ -20,6 +20,7 @@ namespace CommodityTradingAPI.Controllers
         private static readonly List<String> SupportedCommodities = new()
         {
             "gold"
+            , "platinum", "lean_hogs", "oat", "aluminium", "soybean_meal", "lumber", "micro_gold", "feeder_cattle", "rough_rice", "palladium"
         };
 
         public CommodityController(IHttpClientFactory httpClientFactory, IConfiguration configuration, CommoditiesDbContext context)
