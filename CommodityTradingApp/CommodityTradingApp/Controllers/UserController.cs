@@ -9,10 +9,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CommodityTradingApp.Controllers
 {
-    [Authorize(Roles = "Manager")]
+    [Authorize]
     public class UserController : Controller
     {
         private readonly HttpClient _httpClient;
@@ -32,25 +34,49 @@ namespace CommodityTradingApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var response = await _httpClient.GetAsync(_apiUrl);
-            if (response.IsSuccessStatusCode)
+            //var response = await _httpClient.GetAsync(_apiUrl);
+            //if (response.IsSuccessStatusCode)
+            //{
+            //    var json = await response.Content.ReadAsStringAsync();
+            //    var users = JsonConvert.DeserializeObject<List<User>>(json);
+            //    return View(users);
+            //}
+            //else
+            //{
+
+            //    ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+            //    return View(new List<User>());
+            //}
+
+            var token = Request.Cookies["AuthToken"];
+            if (string.IsNullOrEmpty(token))
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var users = JsonConvert.DeserializeObject<List<User>>(json);
-                return View(users);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+
+
+            if (role == "Manager")
+            {
+                var response = await _httpClient.GetAsync(_apiUrl);
+                var allUsers = await response.Content.ReadFromJsonAsync<List<User>>();
+                return View(allUsers);
             }
             else
             {
-                
-                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
-                return View(new List<User>());
+                var response = await _httpClient.GetAsync(_apiUrl + userId);
+                var individualUser = await response.Content.ReadFromJsonAsync<User>();
+                return View(new List<User> { individualUser });
             }
-        }
-      
-        public async Task<IActionResult> Details(Guid id)
-        
-        {
 
+        }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
             var response = await _httpClient.GetAsync(_apiUrl + id);
             if (response.IsSuccessStatusCode)
             {
@@ -64,9 +90,6 @@ namespace CommodityTradingApp.Controllers
                 ModelState.AddModelError(string.Empty, "Unable to retrieve user from the API");
                 return View(new User());
             }
-        
-
-            
         }
 
 
