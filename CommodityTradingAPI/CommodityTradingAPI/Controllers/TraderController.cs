@@ -2,9 +2,11 @@
 using CommodityTradingAPI.Models;
 using CommodityTradingAPI.Models.DTOs;
 using CommodityTradingAPI.Services;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace CommodityTradingAPI.Controllers
 {
@@ -18,38 +20,33 @@ namespace CommodityTradingAPI.Controllers
         public TraderController(CommoditiesDbContext context, ExternalApiService externalApiService)
         {
             _context = context;
-            _externalApiService = externalApiService;
+           _externalApiService = externalApiService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<string> Index()
         {
-            var traders = await _context.TraderAccounts.ToListAsync();
-            if (traders == null)
+            var traders = await _context.TraderAccounts
+                .Include(u => u.User).ToListAsync();
+ 
+            var settings = new JsonSerializerSettings
             {
-                return NotFound("No traders found");
-            }
-            return Ok(traders);
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            return JsonConvert.SerializeObject(traders, settings);
         }
+
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(Guid id)
-        {
-            var trader = await _context.TraderAccounts.FindAsync(id);
-            if (trader == null)
-            {
-                return NotFound("Trader not found");
-            }
-            return Ok(trader);
-        }
-
-        [HttpGet("{id}/portfolio")]
-        public async Task<IActionResult> Portfolio(Guid id)
 
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
-            var trader = await _context.TraderAccounts.FindAsync(id);
-            var user = trader.User;
+            var trader = await _context.TraderAccounts
+                            .Include(t => t.User) 
+                            .FirstOrDefaultAsync(t => t.TraderId == id);
+
 
 
             //var trades = trader.Trades.ToList();
@@ -57,6 +54,7 @@ namespace CommodityTradingAPI.Controllers
             {
                 return NotFound("Trader not found");
             }
+            var user = trader.User;
             var trades = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
             if (trades == null)
             {
@@ -79,12 +77,25 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TraderAccount traderAccount)
+        public async Task<IActionResult> Create([Bind("UserId","Balance","AccountName")] CreateTraderAccount model)
         {
-            if (traderAccount == null)
+            if (model == null)
             {
                 return BadRequest("Invalid trader account");
             }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+            var traderAccount = new TraderAccount
+            {
+                TraderId = Guid.NewGuid(), 
+                UserId = model.UserId,
+                Balance = model.Balance,
+                AccountName = model.AccountName
+            };
+            user.TraderAccounts.Add(traderAccount);
             _context.TraderAccounts.Add(traderAccount);
             await _context.SaveChangesAsync();
             return Ok(traderAccount);
@@ -113,5 +124,59 @@ namespace CommodityTradingAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPost("Deposit/{id}")]
+        public async Task<IActionResult> Deposit([Bind("TraderId","Amount")] DepositDto deposit)
+        {
+            if (deposit == null || deposit.Amount <= 0)
+            {
+                return BadRequest("Invalid deposit request.");
+            }
+
+            var trader = await _context.TraderAccounts.FindAsync(deposit.TraderId);
+            if (trader == null)
+            {
+                return NotFound("Trader not found.");
+            }
+
+            trader.Balance += deposit.Amount;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Deposit successful",
+                NewBalance = trader.Balance
+            });
+        }
+        [HttpPost("Withdraw/{id}")]
+        public async Task<IActionResult> Withdraw([Bind("TraderId", "Amount")] DepositDto withdraw)
+        {
+            if (withdraw == null || withdraw.Amount <= 0)
+            {
+                return BadRequest("Invalid withdrawal request.");
+            }
+
+            var trader = await _context.TraderAccounts.FindAsync(withdraw.TraderId);
+            if (trader == null)
+            {
+                return NotFound("Trader not found.");
+            }
+
+            if (trader.Balance < withdraw.Amount)
+            {
+                return BadRequest("Insufficient balance.");
+            }
+
+            trader.Balance -= withdraw.Amount;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Withdrawal successful",
+                NewBalance = trader.Balance
+            });
+        }
+
+
     }
 }
