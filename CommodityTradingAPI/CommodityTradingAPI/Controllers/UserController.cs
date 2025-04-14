@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using CommodityTradingAPI.Models;
+using System.Data;
 //using ILogger = CommodityTradingAPI.Services.ILogger;
 
 namespace CommodityTradingAPI.Controllers
@@ -14,12 +15,12 @@ namespace CommodityTradingAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly CommoditiesDbContext _context;
-        //private ILogger _auditLogService;
+        private CommodityTradingAPI.Services.ILogger _auditLogService;
 
-        public UserController(CommoditiesDbContext context)//, ILogger logger)
+        public UserController(CommoditiesDbContext context, CommodityTradingAPI.Services.ILogger logger)
         {
             _context = context;
-            //_auditLogService = logger;
+            _auditLogService = logger;
         }
 
         [HttpGet]
@@ -87,15 +88,13 @@ namespace CommodityTradingAPI.Controllers
                 Roles = newUser.RoleAssignments.Select(ra => ra.Role.RoleName).ToList()
             };
 
-            var auditLog = new AuditLog
-            {
-                EntityName = "User",
-                Action = "Create",
-                Timestamp = DateTime.UtcNow,
-                Details = $"User {newUser.Username} with role {role.ToLower()} was created."
-            };
-
-            //await _auditLogService.LogChangeAsync(auditLog);
+            await _auditLogService.CreateNewLogAsync(
+                "User", // Entity
+                "Create", // Change
+                newUser.Username,
+                $"New user created",
+                newUser.Country.CountryName == "Russia"
+                );
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, response);
         }
@@ -136,6 +135,14 @@ namespace CommodityTradingAPI.Controllers
             {
                 return BadRequest("User has active trader accounts. Confirm deletion by adding '?confirm=true'.");
             }
+
+            await _auditLogService.CreateNewLogAsync(
+            "User", // Entity
+            "Delete", // Change
+            user.Username,
+            $"User {user.Username} deleted",
+            user.Country.CountryName == "Russia"
+            );
 
             _context.RoleAssignments.RemoveRange(user.RoleAssignments);
             _context.Users.Remove(user);
@@ -184,8 +191,15 @@ namespace CommodityTradingAPI.Controllers
                 });
             }
 
-            
             await _context.SaveChangesAsync();
+
+            await _auditLogService.CreateNewLogAsync(
+            "User", // Entity
+            "Update", // Change
+            user.Username,
+            $"User {user.Username} updated",
+            user.Country.CountryName == "Russia"
+            );
 
             return Ok(new { message = "User updated successfully." });
         }
