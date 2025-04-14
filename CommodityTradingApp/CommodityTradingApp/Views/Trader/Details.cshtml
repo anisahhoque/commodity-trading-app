@@ -9,6 +9,8 @@
 <div class="card">
     <div class="card-header">
         <h3>@Model.UserName - @Model.AccountName</h3>
+        <a asp-action="Edit" asp-controller="Trader" asp-route-id="@ViewBag.traderId" class="btn btn-primary btn-sm">Edit</a>
+        <a asp-action="Delete" asp-controller="Trader" asp-route-id="@ViewBag.traderId" class="btn btn-danger btn-sm">Delete</a>
     </div>
     <div class="card-body">
         <h4>Balance: @Model.Balance.ToString("C")</h4>

@@ -238,13 +238,14 @@ namespace CommodityTradingApp.Controllers
 
             var content = new StringContent(JsonConvert.SerializeObject(updateUser), Encoding.UTF8, "application/json");
 
-           
             var response = await _httpClient.PutAsync($"{_apiUrl}{id}", content);
 
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "User updated successfully.";
-                return RedirectToAction(nameof(Index)); 
+
+                return RedirectToAction(nameof(Index));
+
             }
             else
             {

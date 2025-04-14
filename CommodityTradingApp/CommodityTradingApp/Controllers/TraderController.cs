@@ -121,41 +121,77 @@ namespace CommodityTradingApp.Controllers
 
         }
 
-        // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
-        //This is the view for editing a trader
-        public IActionResult Edit(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
         {
-
-
-
             return View();
         }
 
-        // POST: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
+
+        [HttpPost("Trader/Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, EditTrader model)
+        {
+            var updatedAccount = new
+            {
+                TraderId = id,
+                AccountName = model.AccountName
+            };
+
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(updatedAccount),
+                Encoding.UTF8,
+                "application/json"
+            );
+            var response = await _httpClient.PutAsync(_apiUrl + id, jsonContent);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "Trader account updated successfully.";
+            }
+            else
+            {
+                TempData["Message"] = "Failed to update trader account.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Trader not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+            ViewBag.traderId = id;
+            return View(trader);
+
+        }
+
+
         [HttpPost]
-        public IActionResult Edit(EditTraderViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
 
-            return RedirectToAction("Index");
-        }
+            var response = await _httpClient.DeleteAsync($"{_apiUrl}{id}?confirm=true");
 
-        // GET: Trader/Delete/{guid}
-        //This is the view for deleting a trader
-        public IActionResult Delete(Guid id)
-        {
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Trader account deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            var error = await response.Content.ReadAsStringAsync();
+            TempData["Error"] = $"Deletion failed: {error}";
+            return RedirectToAction(nameof(Delete), new { id });
 
-            return View(); // Confirm delete
-        }
-
-
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(Guid id)
-        {
-            
-
-
-            return RedirectToAction("Index");
+         
         }
 
 
