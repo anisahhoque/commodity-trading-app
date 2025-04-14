@@ -93,7 +93,6 @@ namespace CommodityTradingAPI.Controllers
 
 
 
-
             //Store trade in database
             TradeMitigation tm = new()
             {
@@ -113,6 +112,26 @@ namespace CommodityTradingAPI.Controllers
             await _context.Trades.AddAsync(trade);
             await _context.SaveChangesAsync();
 
+            await _auditLogService.CreateNewLogAsync(
+                "Trade", // Entity
+                "Create (Open)", // Change
+                trade.TraderId.ToString() + " which is a trade account of " +
+                await _context.TraderAccounts
+                .Where(t => t.TraderId == trade.TraderId)
+                .Select(t => new
+                { t.User.UserId, t.User.Username })
+                .FirstOrDefaultAsync(), // Who changed
+                $"User {await _context.TraderAccounts // Full detail
+                .Where(t => t.TraderId == trade.TraderId)
+                .Select(t => new
+                { t.User.UserId, t.User.Username })
+                .FirstOrDefaultAsync()} created a {(trade.IsBuy ? "buy" : "sell")} of {trade.Quantity} of {commodity} on their account" +
+                $"{await _context.TraderAccounts
+                .Where(t => t.TraderId == trade.TraderId)
+                .Select(t => t.AccountName)
+                .FirstOrDefaultAsync()}",
+                trade.Trader.User.Country.CountryName == "Russia"
+                );
 
             //return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
             return Created();
@@ -146,9 +165,17 @@ namespace CommodityTradingAPI.Controllers
 
             await _context.SaveChangesAsync();
 
+            await _auditLogService.CreateNewLogAsync(
+                "Trade", // Entity
+                "Create (Close)", // Change
+                trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
+                $"User {trade.Trader.User.Username} created a sell of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
+                $"{trade.Trader.AccountName}",
+                trade.Trader.User.Country.CountryName == "Russia"
+                );
+
             return Ok();
 
-           
 
 
             //really only thing that changes about a trade is whether the user has opened or closed it
@@ -197,46 +224,40 @@ namespace CommodityTradingAPI.Controllers
 
             if (account is null)
             {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {Request.Headers} attempted to create a trade but failed due to a null account."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
+                await _auditLogService.CreateNewLogAsync(
+                    "Trade", // Entity
+                    "Create", // Change
+                    trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
+                    $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
+                    $"{trade.Trader.AccountName} but failed due to a null account",
+                    trade.Trader.User.Country.CountryName == "Russia"
+                    );
                 //return BadRequest("Failed to create trade due to a null account.");
             }
 
             if (commodity is null)
             {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a null commodity."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
+                await _auditLogService.CreateNewLogAsync(
+                "Trade", // Entity
+                "Create", // Change
+                trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
+                $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
+                $"{trade.Trader.AccountName} but failed due to a null commodity",
+                trade.Trader.User.Country.CountryName == "Russia"
+    );
                 //return BadRequest("Failed to create trade due to a null commodity.");
             }
 
             if (trade.Quantity <= 0)
             {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a quantity of 0 or less."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
+                await _auditLogService.CreateNewLogAsync(
+                    "Trade", // Entity
+                    "Create", // Change
+                    trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
+                    $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
+                    $"{trade.Trader.AccountName} but failed due to 0 or less quantity",
+                    trade.Trader.User.Country.CountryName == "Russia"
+                    );
                 //return BadRequest("Failed to create trade due to a 0 quantity purchased.");
             }
 
@@ -244,16 +265,14 @@ namespace CommodityTradingAPI.Controllers
 
             if ((account.Balance - priceOfCommodity * trade.Quantity) < 0)
             {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due putting balance in negative."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
+                await _auditLogService.CreateNewLogAsync(
+                    "Trade", // Entity
+                    "Create", // Change
+                    trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
+                    $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
+                    $"{trade.Trader.AccountName} but failed due to a lack of funds in the account",
+                    trade.Trader.User.Country.CountryName == "Russia"
+                    );
                 //return BadRequest("Failed to create trade due to account not having enough money for trade.");
             }
         }

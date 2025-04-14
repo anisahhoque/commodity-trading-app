@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CommodityTradingApp.Models.Commodity>
+﻿@model IEnumerable<CommodityTradingApp.Models.CommodityWithPriceViewModel>
 
 @{
     ViewData["Title"] = "Commodity List";
@@ -10,24 +10,24 @@
     @foreach (var item in Model)
     {
         <div class="commodity-box">
-            <h3>@item.CommodityName</h3>
-            <p><strong>ID:</strong> @item.CommodityId</p>
+            <h3>@item.Commodity.CommodityName</h3>
+            <p><strong>ID:</strong> @item.Commodity.CommodityId</p>
 
             <div class="commodity-info">
                 <div>
-                    <strong>Price:</strong> 10
+                    <strong>Price:</strong> @item.Price.ToString("C")  
                 </div>
                 <div>
-                    <strong>High:</strong> 10
+                    <strong>High:</strong> @item.High.ToString("C")  
                 </div>
                 <div>
-                    <strong>Low:</strong> 10
+                    <strong>Low:</strong> @item.Low.ToString("C")  
                 </div>
                 <div>
-                    <strong>Absolute Change:</strong> 10
+                    <strong>Absolute Change:</strong> @item.AbsoluteChange.ToString("C")  
                 </div>
                 <div>
-                    <strong>Relative Change:</strong> 10
+                    <strong>Relative Change:</strong> @item.RelativeChange.ToString("F2") %  
                 </div>
             </div>
 
@@ -36,12 +36,12 @@
             <div class="commodity-actions">
                 <form class="trade-form" id="trade-form-@item.CommodityId" method="post" asp-action= "CreateTrade" >
                     <div>
-                        <label for="quantity-@item.CommodityId">Quantity</label>
-                        <input type="number" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
+                        <label for="quantity-@item.Commodity.CommodityId">Quantity</label>
+                        <input type="number" min="1" id="quantity-@item.Commodity.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
                     </div>
                     <div>
-                        <label for="buy-sell-@item.CommodityId">Buy/Sell</label>
-                        <select id="buy-sell-@item.CommodityId" name="IsBuy" class="form-control" required>
+                        <label for="buy-sell-@item.Commodity.CommodityId">Buy/Sell</label>
+                        <select id="buy-sell-@item.Commodity.CommodityId" name="IsBuy" class="form-control" required>
                             <option value="true">Buy</option>
                             <option value="false">Sell</option>
                         </select>

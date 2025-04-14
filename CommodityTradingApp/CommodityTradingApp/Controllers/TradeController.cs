@@ -2,8 +2,11 @@
 using CommodityTradingApp.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
+
+using Newtonsoft.Json;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -15,10 +18,18 @@ namespace CommodityTradingApp.Controllers
         //private static List<Trade> trades = GetMockTrades();
         //private static List<Commodity> commodities = GetMockCommodities();
         public TradeController(HttpClient httpClient, IConfiguration configuration)
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        private readonly string _apiUrlCommodity;
+        public TradeController(HttpClient httpClient, IConfiguration config )
         {
             _configuration = configuration;
             _httpClient = httpClient;
+
             _httpClient.BaseAddress = new Uri(_configuration["api"]);
+            _config = config;
+            _apiUrl = _config["api"] + "Trade/";
+            _apiUrlCommodity = _config["api"] + "Commodity/";
         }
         public async Task<IActionResult> Index()
         {
@@ -92,6 +103,56 @@ namespace CommodityTradingApp.Controllers
 
             //call get details for each commodity in commodities
             return View(commodities);
+            var commodityPrices = new List<CommodityWithPriceViewModel>();
+            var response = await _httpClient.GetAsync(_apiUrlCommodity);
+            long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long unixMidnight = new DateTimeOffset(
+                                    DateTime.UtcNow.Date, 
+                                    TimeSpan.Zero         
+                                ).ToUnixTimeSeconds();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var commodities = JsonConvert.DeserializeObject<List<Commodity>>(json);
+                foreach (var commodity in commodities)
+                {
+                    var currentPrice = await _httpClient.GetAsync(_apiUrlCommodity + commodity.CommodityName);
+                    var priceResponse = await _httpClient.GetAsync(_apiUrlCommodity + $"{commodity.CommodityName}/1m/{unixMidnight}/{unixTime}");
+                    if (priceResponse.IsSuccessStatusCode)
+                    {
+                        var currentPriceJson = await currentPrice.Content.ReadAsStringAsync();
+                        var currentPriceObj = JsonConvert.DeserializeObject<CurrentCommodityPrice>(currentPriceJson);
+
+                        var priceJson = await priceResponse.Content.ReadAsStringAsync();
+                        var priceList = JsonConvert.DeserializeObject<List<CommodityPrice>>(priceJson);
+
+                        var currPrice = currentPriceObj.Price;
+                        var latest = priceList?.FirstOrDefault();
+                        var midnight = priceList?.Last();
+                        commodityPrices.Add(new CommodityWithPriceViewModel
+                        {
+                            Commodity = commodity,
+                            Price = currentPriceObj.Price,
+                            High = latest?.High ?? 0,
+                            Low = latest?.Low ?? 0,
+                            AbsoluteChange = (midnight != null) ? latest.Close - midnight.Open : 0,
+                            RelativeChange = (midnight != null && midnight.Open != 0)
+                        ? ((latest.Close - midnight.Open) / midnight.Open) * 100
+                        : 0
+                        });
+                    }
+                }
+                return View(commodityPrices);
+                
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve commodities from the API");
+                return View(new List<CommodityWithPriceViewModel>());
+            }
+          
         }
         [HttpPost]
         public async Task<IActionResult> CreateTrade([Bind("TraderId, CommodityId, Quantity, IsBuy, IsOpen, contract, Bourse")] CreateTradeDto tempTrade)
