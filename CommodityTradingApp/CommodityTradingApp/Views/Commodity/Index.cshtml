@@ -6,6 +6,17 @@
 
 <h2>@ViewData["Title"]</h2>
 
+<div>
+    @Html.Raw(ViewBag.ChartHtml)
+</div>
+
+
+@{
+    ViewData["Title"] = "Commodity List";
+}
+
+<h2>@ViewData["Title"]</h2>
+
 <div class="commodity-grid">
     @foreach (var item in Model)
     {

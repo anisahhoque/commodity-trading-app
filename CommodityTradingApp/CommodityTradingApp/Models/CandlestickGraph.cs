@@ -1,59 +1,101 @@
 ﻿using System;
+using System.Net.Http;
+using System.Collections.Generic;
 using ChartDirector;
-using System.IO;
-using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
-namespace CSharpChartExplorer
+namespace CommodityTradingApp
 {
-    // "OUR API URL/api/commodity/{commodityName}/{timePeriod}/{startTime}/{endTime}"
-    public class candlestick
+    public class Candlestick
     {
-        static string CreateChartHtml(string commodityName, string timePeriod, string startTime, string endTime)
+        private readonly IConfiguration _configuration;
+
+        // Constructor that takes IConfiguration to be injected
+        public Candlestick(IConfiguration configuration)
         {
-            var data = GET [OUR API URL/ api / commodity /{ commodityName}/{ timePeriod}/{ startTime}/{ endTime} ]
+            _configuration = configuration;
+        }
 
-            // Unpack data into high, low, open, close
+        public async Task<string> CreateChartHtmlAsync(string commodityName, string timePeriod, string startTime, string endTime)
+        {
+            string apiUrl = $"{_configuration["api"]}commodity/{commodityName}/{timePeriod}/{startTime}/{endTime}";
 
-            // Count length map to labels
+            List<CandleData> candles;
 
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(apiUrl);
 
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to fetch data from API: {response.StatusCode}, {apiUrl}");
+                }
 
-            // Chart data
-            double[] highData = 
-                { 2043, 2039, 2076, 2064, 2048, 2058, 2070, 2033, 2027, 2029, 2071, 2085, 2034, 2031, 2056, 2128, 2180, 2183, 2192, 2213, 2230, 2281, 2272 };
-            double[] lowData = { 1931, 1921, 1985, 2028, 1986, 1994, 1999, 1958, 1943, 1944, 1962, 2011, 1975, 1962, 1928, 2059, 2112, 2103, 2151, 2127, 2123, 2152, 2212 };
-            double[] openData = { 2000, 1957, 1993, 2037, 2018, 2021, 2045, 2009, 1959, 1985, 2008, 2048, 2006, 2010, 1971, 2080, 2116, 2137, 2170, 2172, 2171, 2191, 2240 };
-            double[] closeData = { 1950, 1991, 2026, 2029, 2004, 2053, 2011, 1962, 1987, 2019, 2040, 2016, 1996, 1985, 2006, 2113, 2142, 2167, 2158, 2201, 2188, 2231, 2242 };
-            string[] labels = { "Mon 1", "Tue 2", "Wed 3", "Thu 4", "Fri 5", "Mon 8", "Tue 9", "Wed 10", "Thu 11", "Fri 12", "Mon 15", "Tue 16", "Wed 17", "Thu 18", "Fri 19", "Mon 22", "Tue 23", "Wed 24", "Thu 25", "Fri 26", "Mon 29", "Tue 30", "Wed 31" };
+                string jsonString = await response.Content.ReadAsStringAsync();
+                candles = JsonConvert.DeserializeObject<List<CandleData>>(jsonString);
+                candles.Reverse();
+            }
+
+            if (candles == null || candles.Count == 0)
+            {
+                throw new Exception("No candle data returned from API.");
+            }
+
+            // Unpack data
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            int count = candles.Count;
+            double[] highData = new double[count];
+            double[] lowData = new double[count];
+            double[] openData = new double[count];
+            double[] closeData = new double[count];
+            string[] labels = new string[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                var candle = candles[i];
+
+                highData[i] = candle.high;
+                lowData[i] = candle.low;
+                openData[i] = candle.open;
+                closeData[i] = candle.close;
+
+                // Convert Unix timestamp to DateTime and format
+                DateTimeOffset dto = DateTimeOffset.FromUnixTimeSeconds(candle.time);
+                labels[i] = dto.ToLocalTime().ToString("ddd d MMM HH:mm");
+            }
+
+            commodityName = textInfo.ToTitleCase(commodityName);
 
             // Create chart
-            XYChart c = new XYChart(600, 350);
-            c.setPlotArea(50, 25, 500, 250).setGridColor(0xc0c0c0, 0xc0c0c0);
-            c.addTitle($"{commodityName} on Jan 2001"); // change to be relevant date
+            XYChart c = new XYChart(1200, 800); // Size of chart
+            c.setPlotArea(50, 25, 900, 600).setGridColor(0xc0c0c0, 0xc0c0c0); // Size of the plot itself (the actual graph), last two numbers are size
+            c.addTitle($"{commodityName} Chart");
             c.addText(50, 25, $"{commodityName}", "Arial Bold", 12, 0x4040c0);
-            c.xAxis().setTitle("Jan 2001"); // change this to be relevant
+            c.xAxis().setTitle($"Data in steps of {timePeriod}");
             c.xAxis().setLabels(labels).setFontAngle(45);
             c.yAxis().setTitle($"{commodityName} Price");
             c.setYAxisOnRight(true);
             CandleStickLayer layer = c.addCandleStickLayer(highData, lowData, openData, closeData, 0x00ff00, 0xff0000);
             layer.setLineWidth(2);
 
-            // Create base64 image
+            // Generate chart image
             byte[] imageBytes = c.makeChart2(Chart.PNG);
-            string base64Image = Convert.ToBase64String(imageBytes);// Change the below html to correspond to relevant code
+            string base64Image = Convert.ToBase64String(imageBytes);
             string imageMap = c.getHTMLImageMap("clickable", "",
-                "title='{xLabel} Jan 2001\nHigh:{high}\nOpen:{open}\nClose:{close}\nLow:{low}'");
+                "title='{xLabel}\nHigh:{high}\nOpen:{open}\nClose:{close}\nLow:{low}'");
 
-            // Assemble HTML
+            // Make HTML
             string html = $@"
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset='UTF-8'>
-                    <title>Candlestick Chart</title>
+                    <title>{commodityName} Candlestick Chart</title>
                 </head>
                 <body>
-                    <h2>Candlestick Chart</h2>
+                    <h2>{commodityName} Candlestick Chart</h2>
                     <img src='data:image/png;base64,{base64Image}' usemap='#clickable' border='0'>
                     {imageMap}
                 </body>
@@ -61,5 +103,14 @@ namespace CSharpChartExplorer
 
             return html;
         }
+    }
+
+    public class CandleData
+    {
+        public double open { get; set; }
+        public double low { get; set; }
+        public double high { get; set; }
+        public double close { get; set; }
+        public long time { get; set; } // Unix time in seconds
     }
 }
