@@ -12,5 +12,9 @@
 
         public string contract { get; set; }
         public string Bourse { get; set; }
+
+        //Not sure how this one should be done, WIP atm
+        public virtual TradeMitigation Mitigations { get; set; }
+
     }
 }
