@@ -73,11 +73,11 @@ namespace CommodityTradingAPI.Controllers
 
         //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
         [HttpGet("User/{userId}")]
-        public async Task<IActionResult> GetAllUserTraderAccounts(Guid userId)
+        public async Task<ActionResult<List<TraderAccount>>> GetAllUserTraderAccounts(Guid userId)
         {
             //Get all accoutns associated with a specific user
-            var userAccounts = _context.TraderAccounts.Where(x => x.UserId == userId);
-            return Ok(userAccounts);
+            var userAccounts = await _context.TraderAccounts.Where(x => x.UserId == userId).ToListAsync();
+            return userAccounts;
         }
 
         [HttpPost]

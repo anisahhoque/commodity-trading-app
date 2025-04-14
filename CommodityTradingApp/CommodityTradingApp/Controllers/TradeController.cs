@@ -2,6 +2,7 @@
 using CommodityTradingApp.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -77,9 +78,16 @@ namespace CommodityTradingApp.Controllers
             var userId = "28324A1F-4254-48E5-8825-1FF3594E8301";
 
             //get all trade accounts associated with that user
-            //var tradeAccounts = await _httpClient.GetAsync(_httpClient.BaseAddress + "");
+            var request = await _httpClient.GetAsync(_httpClient.BaseAddress + "Trader/User/" + userId);
 
+            if (!request.IsSuccessStatusCode)
+            {
+                return NotFound("invalid"); 
+            }
 
+            var accounts = await request.Content.ReadAsAsync<List<TraderAccount>>();
+
+            ViewBag.traderAccounts = new SelectList(accounts, "TraderId", "AccountName");
 
             //call get details for each commodity in commodities
             return View(commodities);
