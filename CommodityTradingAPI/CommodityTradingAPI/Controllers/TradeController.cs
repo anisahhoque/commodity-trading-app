@@ -123,7 +123,8 @@ namespace CommodityTradingAPI.Controllers
                 $"{await _context.TraderAccounts
                 .Where(t => t.TraderId == trade.TraderId)
                 .Select(t => t.AccountName)
-                .FirstOrDefaultAsync()}"
+                .FirstOrDefaultAsync()}",
+                trade.Trader.User.Country.CountryName == "Russia"
                 );
 
             //return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
@@ -163,7 +164,8 @@ namespace CommodityTradingAPI.Controllers
                 "Create (Close)", // Change
                 trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
                 $"User {trade.Trader.User.Username} created a sell of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
-                $"{trade.Trader.AccountName}"
+                $"{trade.Trader.AccountName}",
+                trade.Trader.User.Country.CountryName == "Russia"
                 );
 
             return Ok();
@@ -207,7 +209,8 @@ namespace CommodityTradingAPI.Controllers
                     "Create", // Change
                     trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
                     $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
-                    $"{trade.Trader.AccountName} but failed due to a null account"
+                    $"{trade.Trader.AccountName} but failed due to a null account",
+                    trade.Trader.User.Country.CountryName == "Russia"
                     );
                 //return BadRequest("Failed to create trade due to a null account.");
             }
@@ -219,7 +222,8 @@ namespace CommodityTradingAPI.Controllers
                 "Create", // Change
                 trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
                 $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
-                $"{trade.Trader.AccountName} but failed due to a null commodity"
+                $"{trade.Trader.AccountName} but failed due to a null commodity",
+                trade.Trader.User.Country.CountryName == "Russia"
     );
                 //return BadRequest("Failed to create trade due to a null commodity.");
             }
@@ -231,7 +235,8 @@ namespace CommodityTradingAPI.Controllers
                     "Create", // Change
                     trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
                     $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
-                    $"{trade.Trader.AccountName} but failed due to 0 or less quantity"
+                    $"{trade.Trader.AccountName} but failed due to 0 or less quantity",
+                    trade.Trader.User.Country.CountryName == "Russia"
                     );
                 //return BadRequest("Failed to create trade due to a 0 quantity purchased.");
             }
@@ -245,7 +250,8 @@ namespace CommodityTradingAPI.Controllers
                     "Create", // Change
                     trade.TraderId.ToString() + " which is a trade account of " + trade.Trader.User.Username, // Who changed
                     $"User {trade.Trader.User.Username} tried to create a trade of {trade.Quantity} of {trade.Commodity.CommodityName} on their account" +
-                    $"{trade.Trader.AccountName} but failed due to a lack of funds in the account"
+                    $"{trade.Trader.AccountName} but failed due to a lack of funds in the account",
+                    trade.Trader.User.Country.CountryName == "Russia"
                     );
                 //return BadRequest("Failed to create trade due to account not having enough money for trade.");
             }

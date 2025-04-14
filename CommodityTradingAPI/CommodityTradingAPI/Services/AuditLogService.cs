@@ -39,7 +39,7 @@ namespace CommodityTradingAPI.Services
             }
         }
 
-        public async Task CreateNewLogAsync(string entityName, string action, string changedBy, string details)
+        public async Task CreateNewLogAsync(string entityName, string action, string changedBy, string details, bool sus)
         {
             var auditLog = new AuditLog
             {
@@ -47,7 +47,8 @@ namespace CommodityTradingAPI.Services
                 Action = action,
                 ChangedBy = changedBy,
                 Timestamp = DateTime.UtcNow,
-                Details = details
+                Details = details,
+                Suspicious = sus
             };
 
             await LogChangeAsync(auditLog);
@@ -66,6 +67,7 @@ namespace CommodityTradingAPI.Models
         public string ChangedBy { get; set; } // Who changed it
         public DateTime Timestamp { get; set; } // When did it get changed
         public string Details { get; set; } // Extra info
+        public bool Suspicious { get; set; } // Is sus?
     }
 
 }

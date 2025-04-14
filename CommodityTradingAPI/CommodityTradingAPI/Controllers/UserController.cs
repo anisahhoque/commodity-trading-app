@@ -92,7 +92,8 @@ namespace CommodityTradingAPI.Controllers
                 "User", // Entity
                 "Create", // Change
                 newUser.Username,
-                $"New user created"
+                $"New user created",
+                newUser.Country.CountryName == "Russia"
                 );
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, response);
@@ -139,7 +140,8 @@ namespace CommodityTradingAPI.Controllers
             "User", // Entity
             "Delete", // Change
             user.Username,
-            $"User {user.Username} deleted"
+            $"User {user.Username} deleted",
+            user.Country.CountryName == "Russia"
             );
 
             _context.RoleAssignments.RemoveRange(user.RoleAssignments);
@@ -195,7 +197,8 @@ namespace CommodityTradingAPI.Controllers
             "User", // Entity
             "Update", // Change
             user.Username,
-            $"User {user.Username} updated"
+            $"User {user.Username} updated",
+            user.Country.CountryName == "Russia"
             );
 
             return Ok(new { message = "User updated successfully." });
