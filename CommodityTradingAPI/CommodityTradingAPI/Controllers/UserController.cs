@@ -41,7 +41,6 @@ namespace CommodityTradingAPI.Controllers
 
         // No need to authorise as anyone should be able to make a new account
         [HttpPost("Create")]
-        
         public async Task<IActionResult> Create([Bind("Username", "PasswordRaw", "Country", "Role")] CreateUser newUserDetails)
         {
 
@@ -52,6 +51,8 @@ namespace CommodityTradingAPI.Controllers
             var role = newUserDetails.Role.ToLower().Trim();
             if (role != "manager" && role != "trader")
                 return BadRequest("Invalid role. Must be either 'Manager' or 'Trader'.");
+
+            Guid RoleId = _context.Roles.First(r => r.RoleName.ToLower() == role).RoleId;
 
             if (matchedCountry == null)
             {
@@ -71,7 +72,7 @@ namespace CommodityTradingAPI.Controllers
             {
                 AssignmentId = Guid.NewGuid(),
                 UserId = newUser.UserId,
-                RoleId = _context.Roles.First(r => r.RoleName.ToLower() == role).RoleId
+                RoleId = RoleId
             };
 
             _context.Add(newUser);

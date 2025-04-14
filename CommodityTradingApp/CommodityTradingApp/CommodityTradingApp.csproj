@@ -8,6 +8,8 @@
 
   <ItemGroup>
 
+    <PackageReference Include="ChartDirector.Net" Version="7.1.0" />
+
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
 
 

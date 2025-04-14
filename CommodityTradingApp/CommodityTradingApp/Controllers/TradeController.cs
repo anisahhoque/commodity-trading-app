@@ -1,8 +1,10 @@
 ﻿using CommodityTradingApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommodityTradingApp.Controllers
 {
+    [Authorize]
     public class TradeController : Controller
     {
         private readonly HttpClient _httpClient;
@@ -16,14 +18,12 @@ namespace CommodityTradingApp.Controllers
         {
             return View(trades);
         }
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> TradeHistory(int page = 1, int pageSize = 10,bool? isOpen = false)
         {
             var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
             var totalTrades = filteredTrades.Count();
             var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            
-            
 
             return View(pagedTrades);
         }
@@ -65,6 +65,8 @@ namespace CommodityTradingApp.Controllers
             trades.Add(newTrade);
             return RedirectToAction("Index");
         }
+
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> DeleteTrade(Guid id)
         {
             //make a call to delete trade api

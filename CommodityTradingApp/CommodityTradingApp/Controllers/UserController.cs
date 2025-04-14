@@ -8,9 +8,11 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CommodityTradingApp.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class UserController : Controller
     {
         private readonly HttpClient _httpClient;
@@ -27,7 +29,6 @@ namespace CommodityTradingApp.Controllers
             _apiUrlRole = _config["api"] + "Role";
 
         }
-
 
         public async Task<IActionResult> Index()
         {
@@ -242,7 +243,9 @@ namespace CommodityTradingApp.Controllers
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "User updated successfully.";
+
                 return RedirectToAction(nameof(Index));
+
             }
             else
             {

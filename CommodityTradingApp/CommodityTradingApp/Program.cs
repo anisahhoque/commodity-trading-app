@@ -1,3 +1,4 @@
+using CommodityTradingApp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
-
+builder.Services.AddSingleton<Candlestick>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -62,6 +63,19 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseStatusCodePages(async context =>
+{
+    var response = context.HttpContext.Response;
+
+    if (response.StatusCode == 403)
+    {
+        response.Redirect("Login/AccessDenied");
+    }
+    if (response.StatusCode == 401)
+    {
+        response.Redirect("/Login/Login?message=You must be logged in to access this page.");
+    }
+});
 app.UseAuthorization();
 
 app.MapStaticAssets();

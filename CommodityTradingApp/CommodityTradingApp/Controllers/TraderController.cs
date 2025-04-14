@@ -6,11 +6,12 @@ using System.Data;
 using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace CommodityTradingApp.Controllers
 {
-
-
+    [Authorize]
     public class TraderController : Controller
     {
         private readonly HttpClient _httpClient;
