@@ -8,84 +8,110 @@ namespace CommodityTradingApp.Controllers
     public class TradeController : Controller
     {
         private readonly HttpClient _httpClient;
-        private static List<Trade> trades = GetMockTrades();
-        private static List<Commodity> commodities = GetMockCommodities();
-        public TradeController(HttpClient httpClient)
+        private readonly IConfiguration _configuration;
+        //private static List<Trade> trades = GetMockTrades();
+        //private static List<Commodity> commodities = GetMockCommodities();
+        public TradeController(HttpClient httpClient, IConfiguration configuration)
         {
+            _configuration = configuration;
             _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri(_configuration["api"]);
         }
         public async Task<IActionResult> Index()
         {
-            return View(trades);
+
+            var trades = await _httpClient.GetAsync($"{_httpClient.BaseAddress}trade");
+            //trades.
+            var tradeView = await trades.Content.ReadAsAsync<List<Trade>>();
+            return View(tradeView);
         }
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> TradeHistory(int page = 1, int pageSize = 10,bool? isOpen = false)
         {
-            var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
-            var totalTrades = filteredTrades.Count();
-            var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return View(pagedTrades);
+            var trades = _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+
+            return View();
+
+            //var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
+            //var totalTrades = filteredTrades.Count();
+            //var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            //return View(pagedTrades);
         }
 
         public async Task<IActionResult> ActiveTrades(int page = 1, int pageSize = 10, bool? isOpen = true)
         {
-            var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
-            var totalTrades = filteredTrades.Count();
-            var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var trades = _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+
+
+            //var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
+            //var totalTrades = filteredTrades.Count();
+            //var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
 
 
 
-            return View(pagedTrades);
+            //return View(pagedTrades);
+
+            throw new NotImplementedException("hkjashdkjafhsfk");
         }
         public async Task<IActionResult> DisplayCommodities()
         {
+            var commodities = _httpClient.GetAsync($"{_httpClient.BaseAddress}/commodity");
+
             //call get details for each commodity in commodities
             return View(commodities);
         }
         [HttpPost]
         public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
         {
-            var newTrade = new Trade
-            {
-                TradeId = Guid.NewGuid(),
-                TraderId = Guid.NewGuid(), 
-                CommodityId = CommodityId,
-                PricePerUnit = 100.0m, // will obtain price using api
-                Quantity = Quantity,
-                IsBuy = IsBuy,
-                Expiry = DateTime.Now.AddDays(30),
-                CreatedAt = DateTime.Now,
-                Bourse = "NYSE", //grab from api
-                MitigationId = Guid.NewGuid(),
-                IsOpen = true,
-                Contract = "ABC01"
-            };
-            trades.Add(newTrade);
-            return RedirectToAction("Index");
+            //var newTrade = new Trade
+            //{
+            //    TradeId = Guid.NewGuid(),
+            //    TraderId = Guid.NewGuid(), 
+            //    CommodityId = CommodityId,
+            //    PricePerUnit = 100.0m, // will obtain price using api
+            //    Quantity = Quantity,
+            //    IsBuy = IsBuy,
+            //    Expiry = DateTime.Now.AddDays(30),
+            //    CreatedAt = DateTime.Now,
+            //    Bourse = "NYSE", //grab from api
+            //    MitigationId = Guid.NewGuid(),
+            //    IsOpen = true,
+            //    Contract = "ABC01"
+            //};
+            //trades.Add(newTrade);
+            //return RedirectToAction("Index");
+
+            return View();
         }
 
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> DeleteTrade(Guid id)
         {
-            //make a call to delete trade api
-            var tradeToDelete = trades.FirstOrDefault(t => t.TradeId == id);
-            if (tradeToDelete != null)
-            {
-                trades.Remove(tradeToDelete);
-            }
-            return RedirectToAction("Index");
+            return View();
+
+
+        //    //make a call to delete trade api
+        //    var tradeToDelete = trades.FirstOrDefault(t => t.TradeId == id);
+        //    if (tradeToDelete != null)
+        //    {
+        //        trades.Remove(tradeToDelete);
+        //    }
+        //    return RedirectToAction("Index");
         }
         public async Task<IActionResult> UpdateTrade(Guid id)
         {
-            var tradeToUpdate = trades.FirstOrDefault(t => t.TradeId == id);
-            if (tradeToUpdate != null)
-            {
-                tradeToUpdate.IsOpen = false; 
-            }
-            //make a call to update trade
-            return RedirectToAction("Index");
+
+            return View();
+            //var tradeToUpdate = trades.FirstOrDefault(t => t.TradeId == id);
+            //if (tradeToUpdate != null)
+            //{
+            //    tradeToUpdate.IsOpen = false; 
+            //}
+            ////make a call to update trade
+            //return RedirectToAction("Index");
         }
         private static List<Commodity> GetMockCommodities()
         {

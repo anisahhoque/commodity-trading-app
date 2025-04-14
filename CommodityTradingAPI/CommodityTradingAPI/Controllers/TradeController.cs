@@ -30,11 +30,17 @@ namespace CommodityTradingAPI.Controllers
         }
 
         
+        //Add route to get all trades for a specific trader (by Id)
+
+
         [HttpGet]
-        [Authorize(Roles = "Manager")]
+        //[Authorize(Roles = "Manager")]
         public async Task<IActionResult> Index()
         {
-            return Ok();
+            var allTrades = await _context.Trades.ToListAsync();
+
+            return Ok(allTrades);
+            
             //all trades?? or maybe just not needed
             //shows all trades (if you are the manager???)
 
