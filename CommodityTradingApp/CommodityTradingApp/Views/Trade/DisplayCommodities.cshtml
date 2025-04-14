@@ -37,7 +37,7 @@
                 <form class="trade-form" id="trade-form-@item.CommodityId" method="post" action="@Url.Action("CreateTrade", "Trade")">
                     <div>
                         <label for="quantity-@item.CommodityId">Quantity</label>
-                        <input type="number" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
+                        <input type="number" min="1" id="quantity-@item.CommodityId" name="Quantity" class="form-control" placeholder="Enter quantity" required />
                     </div>
                     <div>
                         <label for="buy-sell-@item.CommodityId">Buy/Sell</label>
