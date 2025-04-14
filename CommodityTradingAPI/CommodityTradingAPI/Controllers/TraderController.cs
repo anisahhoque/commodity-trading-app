@@ -27,6 +27,7 @@ namespace CommodityTradingAPI.Controllers
         public async Task<string> Index()
         {
             var traders = await _context.TraderAccounts
+                .Include(t => t.Trades)
                 .Include(u => u.User).ToListAsync();
  
             var settings = new JsonSerializerSettings
@@ -149,33 +150,33 @@ namespace CommodityTradingAPI.Controllers
             });
         }
         [HttpPost("Withdraw/{id}")]
-        public async Task<IActionResult> Withdraw([Bind("TraderId", "Amount")] DepositDto withdraw)
-        {
-            if (withdraw == null || withdraw.Amount <= 0)
-            {
-                return BadRequest("Invalid withdrawal request.");
-            }
+public async Task<IActionResult> Withdraw([Bind("TraderId", "Amount")] DepositDto withdraw)
+{
+    if (withdraw == null || withdraw.Amount <= 0)
+    {
+        return BadRequest("Invalid withdrawal request.");
+    }
 
-            var trader = await _context.TraderAccounts.FindAsync(withdraw.TraderId);
-            if (trader == null)
-            {
-                return NotFound("Trader not found.");
-            }
+    var trader = await _context.TraderAccounts.FindAsync(withdraw.TraderId);
+    if (trader == null)
+    {
+        return NotFound("Trader not found.");
+    }
 
-            if (trader.Balance < withdraw.Amount)
-            {
-                return BadRequest("Insufficient balance.");
-            }
+    if (trader.Balance < withdraw.Amount)
+    {
+        return BadRequest("Insufficient balance.");
+    }
 
-            trader.Balance -= withdraw.Amount;
-            await _context.SaveChangesAsync();
+    trader.Balance -= withdraw.Amount;
+    await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                Message = "Withdrawal successful",
-                NewBalance = trader.Balance
-            });
-        }
+    return Ok(new
+    {
+        Message = "Withdrawal successful",
+        NewBalance = trader.Balance
+    });
+}
 
 
     }
