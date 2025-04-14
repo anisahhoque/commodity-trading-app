@@ -31,6 +31,8 @@
                                 @trader.TraderId
                             </a>
                         </td>
+                        <a asp-action="Edit" asp-controller="Trader" asp-route-id="@trader.TraderId" class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Delete" asp-controller="Trader" asp-route-id="@trader.TraderId" class="btn btn-danger btn-sm">Delete</a>
                         <td>@trader.AccountName</td>
                         <td>@trader.Balance.ToString("C")</td>
                         <td>@trader.Trades?.Count()</td>
