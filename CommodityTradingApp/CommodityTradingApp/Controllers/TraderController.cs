@@ -149,8 +149,8 @@ namespace CommodityTradingApp.Controllers
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            var trader = JsonConvert.DeserializeObject<TraderAccount>(json);
-
+            var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+            ViewBag.traderId = id;
             return View(trader);
 
         }

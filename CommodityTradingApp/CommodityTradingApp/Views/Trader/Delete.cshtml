@@ -1,9 +1,9 @@
 ﻿
-@model TraderAccount
+@model TraderAccountPortfolioDto
 
 <h2>Are you sure you want to delete this trader?</h2>
 
-@if (Model.Trades.Any() && Model.Trades.Any(t => t.IsOpen))
+@if (Model.OpenAccountTrades.Any())
 {
     <div class="alert alert-warning">
         This trader has open trades. Deletion may affect related data.
@@ -15,7 +15,7 @@
         This trader has an outstanding balance of @Model.Balance.ToString("C").
     </div>
 }
-<form asp-action="DeleteConfirmed" asp-route-id="@Model.UserId" method="post">
+<form asp-action="DeleteConfirmed" asp-route-id="@ViewBag.traderId" method="post">
     @Html.AntiForgeryToken()
 
     <button type="submit" class="btn btn-danger">Yes, Delete</button>
