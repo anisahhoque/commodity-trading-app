@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using Newtonsoft.Json.Bson;
 //using ILogger = CommodityTradingAPI.Services.ILogger;
 
 namespace CommodityTradingAPI.Controllers
@@ -45,12 +46,6 @@ namespace CommodityTradingAPI.Controllers
         //Trade trade
         public async Task<IActionResult> MakeTrade(CreateTradeDto tempTrade)
         {
-            //Trade trade = new();
-            //bind request body to A Trade object
-            //trade.TraderId = tempTrade.TraderId;
-            //trade.CommodityId = tempTrade.CommodityId;
-            //trade.Quantity = tempTrade.Quantity;
-
 
             Trade trade = new Trade
             {
@@ -67,72 +62,19 @@ namespace CommodityTradingAPI.Controllers
             var account = await _context.TraderAccounts.FirstOrDefaultAsync(x => x.TraderId == trade.TraderId);
             var commodity = await _context.Commodities.FirstOrDefaultAsync(x => x.CommodityId == trade.CommodityId);
 
-            if (account is null)
-            {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {Request.Headers} attempted to create a trade but failed due to a null account."
-                };
 
-                await _auditLogService.LogChangeAsync(auditLog);
-                return BadRequest("Failed to create trade due to a null account.");
-            }
-
-            if (commodity is null)
-            {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a null commodity."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
-                return BadRequest("Failed to create trade due to a null commodity.");
-            }
-
-            if (trade.Quantity <= 0)
-            {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a quantity of 0 or less."
-                };
-
-                await _auditLogService.LogChangeAsync(auditLog);
-                return BadRequest("Failed to create trade due to a 0 quantity purchased.");
-            }
+            //TODO: separate out validation logic
+            await ValidateCreatedTrade(account, commodity, trade);
 
             var priceOfCommodity = await _api.GetCommodityPrice(commodity.CommodityName);
 
-            if ((account.Balance - priceOfCommodity * trade.Quantity) < 0)
-            {
-                var auditLog = new AuditLog
-                {
-                    EntityName = "Trade",
-                    Action = "Failed Create",
-                    Timestamp = DateTime.UtcNow,
-                    ChangedBy = "CHANGE ME",
-                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due putting balance in negative."
-                };
 
-                await _auditLogService.LogChangeAsync(auditLog);
-                return BadRequest("Failed to create trade due to account not having enough money for trade.");
-            }
+            //return BadRequest("Failed to create trade due to a null commodity.");
 
             //Add any other fields that need to be added to trade object
 
             var createdAt = DateTime.UtcNow;
-            var expiry = createdAt.AddDays(10); //this just needs a value
+            var expiry = createdAt.AddDays(10); 
 
             trade.CreatedAt = createdAt;
             trade.PricePerUnit = priceOfCommodity;
@@ -142,11 +84,15 @@ namespace CommodityTradingAPI.Controllers
 
             //TODO: allow user to create their own trade mitigation for the position
 
+
+
+
+
             //Store trade in database
             TradeMitigation tm = new()
             {
-                SellPointLoss = 100,
-                SellPointProfit = 10
+                SellPointLoss = tempTrade.Mitigations.SellPointLoss,
+                SellPointProfit = tempTrade.Mitigations.SellPointProfit
             };
 
             await _context.TradeMitigations.AddAsync(tm);
@@ -154,7 +100,7 @@ namespace CommodityTradingAPI.Controllers
             await _context.SaveChangesAsync();
 
             var x = await _context.TradeMitigations.ToListAsync();
-            var tmId = x.FirstOrDefault().MitigationId;
+            var tmId = x.LastOrDefault().MitigationId;
 
             trade.MitigationId = tmId;
 
@@ -220,6 +166,76 @@ namespace CommodityTradingAPI.Controllers
                 return NotFound();
             }
             return Ok(trade);
+        }
+
+
+        [NonAction]
+        public async Task ValidateCreatedTrade(TraderAccount account, Commodity commodity, Trade trade)
+        {
+
+            //could make this return Iactionresult, and then check in main logic whether it's passed validation
+
+            if (account is null)
+            {
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Trade",
+                    Action = "Failed Create",
+                    Timestamp = DateTime.UtcNow,
+                    ChangedBy = "CHANGE ME",
+                    Details = $"User {Request.Headers} attempted to create a trade but failed due to a null account."
+                };
+
+                await _auditLogService.LogChangeAsync(auditLog);
+                //return BadRequest("Failed to create trade due to a null account.");
+            }
+
+            if (commodity is null)
+            {
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Trade",
+                    Action = "Failed Create",
+                    Timestamp = DateTime.UtcNow,
+                    ChangedBy = "CHANGE ME",
+                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a null commodity."
+                };
+
+                await _auditLogService.LogChangeAsync(auditLog);
+                //return BadRequest("Failed to create trade due to a null commodity.");
+            }
+
+            if (trade.Quantity <= 0)
+            {
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Trade",
+                    Action = "Failed Create",
+                    Timestamp = DateTime.UtcNow,
+                    ChangedBy = "CHANGE ME",
+                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due to a quantity of 0 or less."
+                };
+
+                await _auditLogService.LogChangeAsync(auditLog);
+                //return BadRequest("Failed to create trade due to a 0 quantity purchased.");
+            }
+
+            var priceOfCommodity = await _api.GetCommodityPrice(commodity.CommodityName);
+
+            if ((account.Balance - priceOfCommodity * trade.Quantity) < 0)
+            {
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Trade",
+                    Action = "Failed Create",
+                    Timestamp = DateTime.UtcNow,
+                    ChangedBy = "CHANGE ME",
+                    Details = $"User {"CHANGEME"} attempted to create a trade but failed due putting balance in negative."
+                };
+
+                await _auditLogService.LogChangeAsync(auditLog);
+                //return BadRequest("Failed to create trade due to account not having enough money for trade.");
+            }
         }
 
 
