@@ -21,6 +21,7 @@ namespace CommodityTradingAPI.Controllers
         {
             var roles= _context.Roles.ToList();
 
+            //just added comment
             return Ok(roles);
         }
 
