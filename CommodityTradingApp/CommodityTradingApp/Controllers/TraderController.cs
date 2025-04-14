@@ -2,6 +2,9 @@
 using CommodityTradingApp.Models;
 using CommodityTradingApp.ViewModels;
 using Newtonsoft.Json;
+using System.Data;
+using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -46,44 +49,73 @@ namespace CommodityTradingApp.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var traders = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
-                return View(traders);
+                var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+                return View(trader);
             }
             else
             {
 
-                ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
-                return View(new List<TraderAccount>());
+                ModelState.AddModelError(string.Empty, "Unable to retrieve trader account from the API");
+                return View(new TraderAccountPortfolioDto());
             }
            
         }
 
-        // GET: Trader/Create
-        //This is the view for creating a new trader
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
+            var response = await _httpClient.GetAsync(_config["api"] + "User/");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<List<User>>(json);
+                ViewBag.Users = new SelectList(users, "UserId", "Username");
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+                return View(new List<User>());
+            }
             return View();
         }
 
-        // POST: Trader/Create
-        //This is the action that handles the form submission for creating a new trader
-        [HttpPost]
-        public IActionResult Create(CreateTraderViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var newTrader = new Trader
-                {
-                    Id = Guid.NewGuid(),
-                    AccountName = model.AccountName,
-                    Balance = model.Balance,
-                    UserId = model.UserId
-                };
 
-                return RedirectToAction("Index");
+        [HttpPost]
+        public async Task<IActionResult> Create(Guid userid,string accountname,decimal balance)
+        {
+            var userData = new
+            {
+                UserId = userid,
+                Balance = balance,
+                AccountName = accountname
+            };
+                
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(userData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Create", jsonContent);
+
+
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "New Trader Account Created!";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Could not create trader account");
+                return RedirectToAction("Index", "Home");
             }
 
-            return View(model);
+            return RedirectToAction("Index");
+
         }
 
         // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
