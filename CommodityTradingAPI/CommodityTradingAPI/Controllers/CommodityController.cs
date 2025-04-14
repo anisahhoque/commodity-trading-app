@@ -49,7 +49,7 @@ namespace CommodityTradingAPI.Controllers
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"https://api.api-ninjas.com/v1/commodityprice?name={commodityName}");
-        
+
 
             request.Headers.Add("X-Api-Key", apiKey);
 
