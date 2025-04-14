@@ -174,6 +174,20 @@ namespace CommodityTradingAPI.Controllers
             return Ok(trade);
         }
 
+        [HttpGet("trader/{traderId}")]
+        public async Task<IActionResult> GetTradesByTraderId(Guid traderId)
+        {
+            var trades = await _context.Trades
+                .Where(t => t.TraderId == traderId)
+                .ToListAsync();
+
+            if (trades == null)
+            {
+                return NotFound("No trades found for the given trader.");
+            }
+
+            return Ok(trades);
+        }
 
         [NonAction]
         public async Task ValidateCreatedTrade(TraderAccount account, Commodity commodity, Trade trade)
