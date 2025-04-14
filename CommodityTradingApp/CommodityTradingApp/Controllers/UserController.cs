@@ -3,184 +3,319 @@ using CommodityTradingApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BCrypt.Net;
 using System.Runtime.CompilerServices;
+using System.Net.Http.Json;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace CommodityTradingApp.Controllers
 {
     public class UserController : Controller
     {
-        // GET: User/Details/{guid}
-        private static List<User> users =
-         new List<User>
-            {
-                new User { UserId = Guid.Parse("e7db167e-d1b3-4b7e-b417-72a6cb85943c"), Username = "JDM", PasswordHash = "sdljfalsdjfklasdjlkaj234daljf", CountryId = 1 },
-                new User { UserId = Guid.Parse("1d6ffbd2-5c44-4a1e-93b2-0fc690f6e2b9"), Username = "Admin", PasswordHash = "asdfdskfj3lk4j5lkj234lkj", CountryId = 2 }
-            };
-        public IActionResult Details(Guid id)
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        private readonly string _apiUrlCountry;
+        private readonly string _apiUrlRole;
+        public UserController(IConfiguration config, HttpClient httpClient)
         {
-            // Simulate users (Replace with db call)
+            _config = config;
+            _httpClient = httpClient;
+            _apiUrl = _config["api"] + "User/";
+            _apiUrlCountry = _config["api"] + "Country/";
+            _apiUrlRole = _config["api"] + "Role";
 
-
-            var allTraders = new List<Trader>
-            {
-                new Trader { Id = Guid.NewGuid(), AccountName = "Alpha", Balance = 10000, UserId = users[0].UserId },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Beta", Balance = 20000, UserId = users[0].UserId },
-                new Trader { Id = Guid.NewGuid(), AccountName = "Gamma", Balance = 5000, UserId = users[1].UserId }
-            };
-
-            var user = users.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
-                return NotFound();
-
-            var userTraders = allTraders.Where(t => t.UserId == user.UserId).ToList();
-
-            //Passing the user and their traders to the view
-            var viewModel = new UserDetailsViewModel
-            {
-                User = user,
-                Traders = userTraders
-            };
-
-            return View(viewModel);
         }
 
-        //Creating a user: Potentially have this as a button in login page???
-        //GET: User/Create
-        [HttpGet]
-        public IActionResult Create()
+
+        public async Task<IActionResult> Index()
         {
-            return View(new UserCreateViewModel { Username = "", Password = "", CountryId = 1 });
+            var response = await _httpClient.GetAsync(_apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<List<User>>(json);
+                return View(users);
+            }
+            else
+            {
+                
+                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+                return View(new List<User>());
+            }
+        }
+      
+        public async Task<IActionResult> Details(Guid id)
+        
+        {
+
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<User>(json);
+                return View(user);
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve user from the API");
+                return View(new User());
+            }
+        
+
             
         }
 
-        //POST: User/Create
-        //This is where we would hash the password and save the user to the database using BCrypt
+
+        [HttpGet]
+        public async Task< IActionResult> Create()
+        {
+            var response = await _httpClient.GetAsync(_apiUrlCountry);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var countries = JsonConvert.DeserializeObject<List<Country>>(json);
+
+                
+                ViewBag.Countries = new SelectList(countries, "CountryName", "CountryName");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var responseRole = await _httpClient.GetAsync(_apiUrlRole);
+            if (responseRole.IsSuccessStatusCode)
+            {
+                var json = await responseRole.Content.ReadAsStringAsync();
+                var roles = JsonConvert.DeserializeObject<List<Role>>(json);
+
+
+                ViewBag.Roles = new SelectList(roles, "RoleName", "RoleName");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+            
+
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(UserCreateViewModel model)
+        public async Task<IActionResult> Create(string username, string password, string country, string role)
         {
-            //Check if model is valid (required fields). If invalid, return same view so user can correct errors
+
+
+            var userData = new
+            {
+                Username = username,
+                PasswordRaw = password,
+                Country = country,
+                Role = role
+            };
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(userData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Create", jsonContent);
+
+
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "New User Created!";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Could not create user");
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Login", "Login");
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            try
+            {
+                
+                var userResponse = await _httpClient.GetAsync($"{_apiUrl}{id}");
+                userResponse.EnsureSuccessStatusCode();
+
+                var userContent = await userResponse.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<User>(userContent);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                
+                var editUser = new EditUser
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    CountryId = user.CountryId,
+                    CurrentCountryName = user.Country?.CountryName,
+                    SelectedRoleIds = user.RoleAssignments.Select(ra => ra.RoleId).ToList()
+                };
+
+                
+                var countriesResponse = await _httpClient.GetAsync(_apiUrlCountry);
+                countriesResponse.EnsureSuccessStatusCode();
+
+                var countriesContent = await countriesResponse.Content.ReadAsStringAsync();
+                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesContent);
+
+
+                editUser.AllCountries = countries;
+
+               
+                var rolesResponse = await _httpClient.GetAsync(_apiUrlRole);
+                rolesResponse.EnsureSuccessStatusCode();
+
+                var rolesContent = await rolesResponse.Content.ReadAsStringAsync();
+                var roles = JsonConvert.DeserializeObject<List<Role>>(rolesContent);
+
+                
+                var userRoleIds = user.RoleAssignments.Select(ra => ra.RoleId).ToList();
+                editUser.AllRoles = roles;
+                return View(editUser);
+            }
+            catch (Exception ex)
+            {
+              
+                TempData["ErrorMessage"] = $"Failed to retrieve user data: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost("User/Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, EditUser model)
+        {
+            var rolesResponse = await _httpClient.GetAsync(_apiUrlRole);
+            rolesResponse.EnsureSuccessStatusCode();
+
+            var rolesContent = await rolesResponse.Content.ReadAsStringAsync();
+            var roles = JsonConvert.DeserializeObject<List<Role>>(rolesContent);
+            var countriesResponse = await _httpClient.GetAsync(_apiUrlCountry);
+            countriesResponse.EnsureSuccessStatusCode();
+
+            var countriesContent = await countriesResponse.Content.ReadAsStringAsync();
+            var countries = JsonConvert.DeserializeObject<List<Country>>(countriesContent);
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Invalid input.";
+
+                model.AllCountries = countries;
+
+                model.AllRoles = roles;
                 return View(model);
             }
 
-            // Hash the user's password using BCrypt for security (bcrypt creates a hashed version of the password).
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
-            // Create a new User object and populate it with data from the model.
-            var user = new User
+            
+            var updateUser = new
             {
-                UserId = Guid.NewGuid(), // Assign a new unique GUID as the user's ID.
+                UserId = id,
                 Username = model.Username,
-                PasswordHash = hashedPassword,
-                CountryId = (byte)model.CountryId
+                Password = model.Password, 
+                CountryId = model.CountryId,
+                SelectedRoleIds = model.SelectedRoleIds
             };
 
-            //TODO: Save the user to the database (DbContext).
-            // Declare a list to simulate a "database"
-            //List<User> _users = new();
+            var content = new StringContent(JsonConvert.SerializeObject(updateUser), Encoding.UTF8, "application/json");
 
-            // Add the newly created user to this list.
-            users.Add(user);
+           
+            var response = await _httpClient.PutAsync($"{_apiUrl}{id}", content);
 
-            // Redirect to the Details page of the newly created user.
-            return RedirectToAction("Details", new { id = user.UserId });
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "User updated successfully.";
+                return RedirectToAction(nameof(Index)); 
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                TempData["Error"] = $"Update failed: {error}";
+                model.AllCountries = countries;
+                model.AllRoles = roles;
+                return View(model); 
+            }
         }
 
-        // GET: User/Edit/{guid}
-        public IActionResult Edit(Guid id)
+
+
+        [HttpGet("Delete/{id}")]
+
+        public async Task<IActionResult> Delete(Guid id)
         {
-            //Simulate users (Replace with db call)
-            List<User> _users = new();
-
-        var user = _users.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (!response.IsSuccessStatusCode)
             {
-                return NotFound();  // If user not found, return a 404.
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
             }
 
-            // Populate the view model with current user data.
-            var model = new UserEditViewModel
-            {
-                Id = user.UserId,
-                Username = user.Username,
-                CountryId = user.CountryId
-            };
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonConvert.DeserializeObject<User>(json);
 
-            return View(model);  // Return the edit view with the model data.
-        }
-
-        // POST: User/Edit/{guid}
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(UserEditViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);  // If validation fails, return the same view with validation errors.
-            }
-
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
-
-            var user = _users.FirstOrDefault(u => u.UserId == model.Id);
-            if (user == null)
-            {
-                return NotFound();  // If user not found, return a 404.
-            }
-
-            // Update user details
-            user.Username = model.Username;
-            user.CountryId = model.CountryId;
-
-            //Now, need to update the database using DbContext.
-
-            // Redirect to the user details page after update.
-            return RedirectToAction("Details", "User/"+new { id = user.UserId });
-        }
-
-        // GET: User/Delete/{guid} (Shows confirmation view)
-        public IActionResult Delete(Guid userId)
-        {
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
-
-            var user = _users.FirstOrDefault(u => u.UserId == userId);
-            if (user == null)
-            {
-                return NotFound();  // User not found
-            }
-
-            // Return confirmation view
             return View(user);
+            
         }
 
-        // POST: User/Delete/5 (Perform the delete)
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid userId)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            bool isManager = true;  // This should be checked from session or user role
+            var response = await _httpClient.DeleteAsync($"{_apiUrl}{id}?confirm=true");
 
-            // Simulate users (Replace with db call)
-            List<User> _users = new();
-
-            if (!isManager)
+            if (response.IsSuccessStatusCode)
             {
-                return Unauthorized();  // Return unauthorized if not a manager
+                TempData["Success"] = "User deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var user = _users.FirstOrDefault(u => u.UserId == userId);
-            if (user == null)
-            {
-                return NotFound();  // User not found
-            }
-
-            _users.Remove(user);  // Delete the user
-
-            // Redirect to a success page or the user list
-            TempData["Message"] = "User deleted successfully!";
-            return RedirectToAction("Index");  // Assuming Index shows the list of users
+            var error = await response.Content.ReadAsStringAsync();
+            TempData["Error"] = $"Deletion failed: {error}";
+            return RedirectToAction(nameof(Delete), new { id });
         }
+        private async Task<IEnumerable<SelectListItem>> GetCountries()
+        {
+            var response = await _httpClient.GetAsync(_apiUrlCountry);
+            var countriesJson = await response.Content.ReadAsStringAsync();
+            var countries = JsonConvert.DeserializeObject<List<Country>>(countriesJson);
+            return countries.Select(c => new SelectListItem
+            {
+                Value = c.CountryId.ToString(),
+                Text = c.CountryName
+            });
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetRoles()
+        {
+            var response = await _httpClient.GetAsync(_apiUrlRole);
+            var rolesJson = await response.Content.ReadAsStringAsync();
+            var roles = JsonConvert.DeserializeObject<List<Role>>(rolesJson);
+            return roles.Select(r => new SelectListItem
+            {
+                Value = r.RoleId.ToString(),
+                Text = r.RoleName
+            });
+        }
+
+
     }
 }
