@@ -41,7 +41,7 @@ namespace CommodityTradingAPI.Controllers
 
         // No need to authorise as anyone should be able to make a new account
         [HttpPost("Create")]
-        [ValidateAntiForgeryToken] // Still don't really know what this does
+        
         public async Task<IActionResult> Create([Bind("Username", "PasswordRaw", "Country", "Role")] CreateUser newUserDetails)
         {
 
