@@ -51,6 +51,8 @@ namespace CommodityTradingAPI.Controllers
             //trade.CommodityId = tempTrade.CommodityId;
             //trade.Quantity = tempTrade.Quantity;
 
+            //TODO: fix is open bug
+
             Trade trade = new Trade
             {
                 TraderId = tempTrade.TraderId,
@@ -135,6 +137,9 @@ namespace CommodityTradingAPI.Controllers
             trade.PricePerUnit = priceOfCommodity;
             trade.Expiry = expiry;
 
+
+            //TODO: allow user to create their own trade mitigation for the position
+
             //Store trade in database
             TradeMitigation tm = new()
             {
@@ -164,10 +169,38 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpPatch]//may have to change to post am not sure yet
-        public async Task<IActionResult> UpdateTrade()
+        public async Task<IActionResult> CloseTrade(Guid id)
         {
+            //Find trade
+
+            var trade = await _context.Trades.FirstOrDefaultAsync(x => x.TradeId == id);
+
+            if (trade == null)
+                return BadRequest("Trade could not be found");
+
+            trade.IsOpen = false;
+
+            //get commodoties price, and update user's balance accordingly
+
+            var startPrice = trade.PricePerUnit;
+            var currentPrice = await _api.GetCommodityPrice(trade.Commodity.CommodityName);
+
+            var total = (currentPrice - startPrice) * trade.Quantity;
+
+
+            trade.Trader.Balance += total;
+
+            await _context.SaveChangesAsync();
+
             return Ok();
+
+           
+
+
             //really only thing that changes about a trade is whether the user has opened or closed it
+
+
+
         }
 
         public async Task<IActionResult> DeleteTrade()
