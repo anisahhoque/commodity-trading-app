@@ -1,9 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 using CommodityTradingApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommodityTradingApp.Controllers
 {
+    [Authorize]
     public class CommodityController : Controller
 
     {
@@ -22,6 +24,7 @@ namespace CommodityTradingApp.Controllers
 
 
         }
+
         public async Task<IActionResult> Index()
         {
             var result = await _httpClient.GetAsync(_httpClient.BaseAddress);

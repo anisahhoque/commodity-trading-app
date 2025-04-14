@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -70,6 +71,7 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Manager")]
         public async Task< IActionResult> Create()
         {
             var response = await _httpClient.GetAsync(_apiUrlCountry);

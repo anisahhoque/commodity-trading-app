@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using CommodityTradingApp.Models;
+using System.Text.Json;
 
 
 namespace CommodityTradingApp.Controllers
@@ -24,6 +25,8 @@ namespace CommodityTradingApp.Controllers
         {
             return View();
         }
+
+
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -40,15 +43,24 @@ namespace CommodityTradingApp.Controllers
             );
 
             var response = await _httpClient.PostAsync(_apiUrl + "Login", jsonContent);
-            User user = new User
-            {
-                UserId = new Guid("28324A1F-4254-48E5-8825-1FF3594E8301"),
-                Username = username,
-                PasswordHash = password
-            };
+
             if (response.IsSuccessStatusCode)
             {
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                var user = JsonSerializer.Deserialize<LoginResponseDto>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Login failed: user not found.");
+                    return View();
+                }
+
                 var token = await CreateJwtAsync(user);
+
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -56,16 +68,18 @@ namespace CommodityTradingApp.Controllers
                     Secure = true,
                     SameSite = SameSiteMode.Lax
                 };
+
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                 TempData["Message"] = "Login successful!";
+                return RedirectToAction("Index", "Home");
             }
             else
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View();
             }
-            return RedirectToAction("Login", "Login");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Logout()
@@ -83,7 +97,12 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Login", "Login");
         }
 
-        private async Task<string> CreateJwtAsync(User user)
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        private async Task<string> CreateJwtAsync(LoginResponseDto user)
         {
             var keyFromConfig = _config["JwtSettings:Key"];
             var userID = user.UserId;

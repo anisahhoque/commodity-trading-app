@@ -62,6 +62,19 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseStatusCodePages(async context =>
+{
+    var response = context.HttpContext.Response;
+
+    if (response.StatusCode == 403)
+    {
+        response.Redirect("Login/AccessDenied");
+    }
+    if (response.StatusCode == 401)
+    {
+        response.Redirect("/Login/Login");
+    }
+});
 app.UseAuthorization();
 
 app.MapStaticAssets();

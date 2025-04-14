@@ -1,8 +1,10 @@
 ﻿using CommodityTradingApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommodityTradingApp.Controllers
 {
+    [Authorize]
     public class TradeController : Controller
     {
         private readonly HttpClient _httpClient;
