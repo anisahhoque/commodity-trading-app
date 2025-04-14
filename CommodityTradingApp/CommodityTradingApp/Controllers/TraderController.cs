@@ -1,161 +1,139 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CommodityTradingApp.Models;
 using CommodityTradingApp.ViewModels;
+using Newtonsoft.Json;
+using System.Data;
+using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text;
 
 namespace CommodityTradingApp.Controllers
 {
-    //Need to ensure i have DBContext, and inject it into controller
-    //DBcontext must have class that represents DbSet<Trader> Traders
 
 
     public class TraderController : Controller
     {
-        // GET: Trader/Index
-        public IActionResult Index()
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        public TraderController(IConfiguration config, HttpClient httpClient)
         {
-            //TODO: DELETE WHEN CONNECTED TO DB
-            // Simulate current user and role
-            bool isManager = true; // Change to false to test user view
-            Guid currentUserId = Guid.Parse("a67c1bde-32ff-4c60-89ef-90b7dbd45f2e");
+            _config = config;
+            _httpClient = httpClient;
+            _apiUrl = _config["api"] + "Trader/";
 
-            var allTraders = new List<Trader>
-    {
-        new Trader { Id = Guid.NewGuid(), AccountName = "Alice", Balance = 5000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Bob", Balance = 10000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Charlie", Balance = 7500, UserId = Guid.NewGuid() }
-    };
-
-            IEnumerable<Trader> visibleTraders;
-
-            if (isManager)
+        }
+        public async Task<IActionResult> Index()
+        {
+            var response = _httpClient.GetAsync(_apiUrl).Result;
+            if (response.IsSuccessStatusCode)
             {
-                visibleTraders = allTraders;
+                var json = await response.Content.ReadAsStringAsync();
+                var traders = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
+                return View(traders);
             }
             else
             {
-                visibleTraders = allTraders.Where(t => t.UserId == currentUserId);
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
+                return View(new List<TraderAccount>());
             }
 
-            return View(visibleTraders);
+           
         }
 
 
-        // GET: Trader/Details/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
-        public IActionResult Details(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
         {
-            //TODO: DELETE WHEN CONNECTED TO DB
-            //Simulate current user and role
-            bool isManager = true;
-            Guid currentUserId = Guid.Parse("a67c1bde-32ff-4c60-89ef-90b7dbd45f2e");
-
-            var allTraders = new List<Trader>
-        {
-            new Trader { Id = Guid.Parse("c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4"), AccountName = "Alice", Balance = 5000, UserId = Guid.NewGuid() },
-            new Trader { Id = Guid.Parse("a9b7e68d-6b16-4f8d-ae88-9b64a9392e44"), AccountName = "Bob", Balance = 10000, UserId = Guid.NewGuid() },
-            new Trader { Id = Guid.Parse("d2db8f71-e6a1-4f3b-b1b3-b8d50b7cb327"), AccountName = "Charlie", Balance = 7500, UserId = Guid.NewGuid()}
-        };
-
-            var trader = allTraders.FirstOrDefault(t => t.Id == id); // Simulate fetching trader by ID
-
-            if (trader == null)
+            var response = _httpClient.GetAsync(_apiUrl + id).Result;
+            if (response.IsSuccessStatusCode)
             {
-                return NotFound();
+                var json = await response.Content.ReadAsStringAsync();
+                var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+                ViewBag.traderId = id;
+                return View(trader);
             }
-
-            //if not a manager, block access to other traders
-            if (!isManager && trader.UserId != currentUserId)
-                return Unauthorized();
-
-            //TODO: DELETE WHEN CONNECTED TO DB
-            //Simulate active and historical trades
-            var activeTrades = new List<Trade>
+            else
             {
-                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Buy Gold", IsOpen = true}
-            };
-            var historicalTrades = new List<Trade>
-            {
-                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Sell Silver", IsOpen = false}
-            };
 
-            //Passing all of this information into the view
-            var model = new TraderDetailsViewModel
-            {
-                Trader = trader,
-                ActiveTrades = activeTrades,
-                HistoricalTrades = historicalTrades
-            };
-
-            return View(model);
+                ModelState.AddModelError(string.Empty, "Unable to retrieve trader account from the API");
+                return View(new TraderAccountPortfolioDto());
+            }
+           
         }
 
-        // GET: Trader/Create
-        //This is the view for creating a new trader
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
+            var response = await _httpClient.GetAsync(_config["api"] + "User/");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<List<User>>(json);
+                ViewBag.Users = new SelectList(users, "UserId", "Username");
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+                return View(new List<User>());
+            }
             return View();
         }
 
-        // POST: Trader/Create
-        //This is the action that handles the form submission for creating a new trader
-        [HttpPost]
-        public IActionResult Create(CreateTraderViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var newTrader = new Trader
-                {
-                    Id = Guid.NewGuid(),
-                    AccountName = model.AccountName,
-                    Balance = model.Balance,
-                    UserId = model.UserId
-                };
 
-                return RedirectToAction("Index");
+        [HttpPost]
+        public async Task<IActionResult> Create(Guid userid,string accountname,decimal balance)
+        {
+            var userData = new
+            {
+                UserId = userid,
+                Balance = balance,
+                AccountName = accountname
+            };
+                
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(userData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+
+
+            var response = await _httpClient.PostAsync(_apiUrl , jsonContent);
+
+
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "New Trader Account Created!";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Could not create trader account");
+                return RedirectToAction("Index", "Home");
             }
 
-            return View(model);
+            return RedirectToAction("Index");
+
         }
 
         // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
         //This is the view for editing a trader
         public IActionResult Edit(Guid id)
         {
-            // Simulated data (replace with DB context query in real app)
-            var trader = new Trader
-            {
-                Id = id,
-                AccountName = "Alice",
-                Balance = 5000,
-                UserId = Guid.NewGuid()
-            };
 
-            if (trader == null)
-            {
-                return NotFound();
-            }
 
-            var viewModel = new EditTraderViewModel
-            {
-                Id = trader.Id,
-                AccountName = trader.AccountName,
-                Balance = trader.Balance
-            };
 
-            return View(viewModel);
+            return View();
         }
 
         // POST: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
         [HttpPost]
         public IActionResult Edit(EditTraderViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            // In real app: fetch trader from DB by ID and update fields
-            // Simulate update success
-            Console.WriteLine($"Updated Trader {model.Id}: Name={model.AccountName}, Balance={model.Balance}");
 
             return RedirectToAction("Index");
         }
@@ -164,147 +142,112 @@ namespace CommodityTradingApp.Controllers
         //This is the view for deleting a trader
         public IActionResult Delete(Guid id)
         {
-            // Simulated manager check
-            bool isManager = true;
 
-            if (!isManager)
-                return Unauthorized();
 
-            // Simulated data (replace with DB call in real implementation)
-            var trader = new Trader
-            {
-                Id = id,
-                AccountName = "Bob",
-                Balance = 10000,
-                UserId = Guid.NewGuid()
-            };
-
-            if (trader == null)
-                return NotFound();
-
-            return View(trader); // Confirm delete
+            return View(); // Confirm delete
         }
 
-        // POST: Trader/Delete/{guid}
-        //This is the action that handles the form submission for deleting a trader
+
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmed(Guid id)
         {
-            // Simulated manager check
-            bool isManager = true;
+            
 
-            if (!isManager)
-                return Unauthorized();
-
-            // Here you'd remove the trader from DB
-            Console.WriteLine($"Deleted Trader with ID: {id}");
 
             return RedirectToAction("Index");
         }
 
-        // GET: Trader/Deposit/{guid}
-        public IActionResult Deposit(Guid id)
-        {
-            // Simulated data fetch - replace with DB context
-            var trader = new Trader
-            {
-                Id = id,
-                AccountName = "Alice",
-                Balance = 100000,
-                UserId = Guid.NewGuid()
-            };
 
-            if (trader == null)
-                return NotFound();
 
-            return View(trader); // Show deposit form
-        }
-
-        // POST: Trader/Deposit/{guid}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Deposit(Guid id, decimal depositAmount)
+        public async Task<IActionResult> Deposit(Guid id, decimal amount)
         {
-            // Simulated data fetch - replace with DB context
-            var trader = new Trader
+            if (amount <= 0)
             {
-                Id = id,
-                AccountName = "Alice",
-                Balance = 100000,
-                UserId = Guid.NewGuid()
+                ModelState.AddModelError("", "Deposit amount must be greater than zero.");
+                return RedirectToAction("Details", new { id });
+
+            }
+
+            var depositData = new
+            {
+                TraderId = id,
+                Amount = amount
             };
 
-            if (trader == null)
-                return NotFound();
+            
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
 
-            // Update balance
-            trader.Balance += depositAmount;
+            
+            var response = await _httpClient.PostAsync(_apiUrl + "Deposit/" + id, jsonContent);
 
-            // In real app, save changes to DB here
-
-            TempData["SuccessMessage"] = $"Successfully deposited {depositAmount:C} into {trader.AccountName}'s account.";
-            return RedirectToAction("Details", new { id = trader.Id });
-        }
-
-        // GET: Trader/Withdraw/{guid}
-        public IActionResult Withdraw(Guid id)
-        {
-            bool isManager = true;
-            if (!isManager)
-                return Unauthorized();
-
-            // Simulate finding trader (replace with DB logic)
-            var trader = new Trader
+            if (response.IsSuccessStatusCode)
             {
-                Id = id,
-                AccountName = "Bob",
-                Balance = 100000,
-                UserId = Guid.NewGuid()
-            };
+                
+                TempData["Message"] = "Deposit successful!";
+                return RedirectToAction("Details", new { id });
 
-            if (trader == null)
-                return NotFound();
-
-            return View(trader);
+            }
+            else
+            {
+                
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
         }
 
 
-        // POST: Trader/Withdraw/{guid}
-        [HttpPost]
-        public IActionResult Withdraw(Guid id, decimal withdrawAmount)
+        public async Task<IActionResult> Withdraw(Guid id, decimal amount)
         {
-            // Simulate finding trader
-            var trader = new Trader
-            {
-                Id = id,
-                AccountName = "Bob",
-                Balance = 100000,
-                UserId = Guid.NewGuid()
-            };
 
-            if (trader == null)
-                return NotFound();
-
-            if (withdrawAmount <= 0)
+            if (amount <= 0)
             {
                 ModelState.AddModelError("", "Withdraw amount must be greater than zero.");
-                return View(trader);
+                return RedirectToAction("Details", new { id });
+
             }
 
-            if (withdrawAmount > trader.Balance)
+            var depositData = new
             {
-                ModelState.AddModelError("", "Insufficient balance.");
-                return View(trader);
+                TraderId = id,
+                Amount = amount
+            };
+
+
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Withdraw/" + id, jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+
+                TempData["Message"] = "Withdrawal successful!";
+                return RedirectToAction("Details", new { id });
+
             }
+            else
+            {
 
-            // Apply withdrawal
-            trader.Balance -= withdrawAmount;
-
-            // Simulate DB save
-            Console.WriteLine($"Updated Trader {trader.AccountName}'s balance: {trader.Balance}");
-
-            return RedirectToAction("Index");
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
         }
+
+
+       
+ 
 
     }
 }

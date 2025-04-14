@@ -28,7 +28,9 @@ namespace CommodityTradingAPI.Controllers
         {
             var users = await _context.Users
                     .Include(static u => u.Country)
+                    .Include(u => u.TraderAccounts)
                     .Include(u => u.RoleAssignments)
+                    
                     .ThenInclude(ra => ra.Role).ToListAsync();
             var settings = new JsonSerializerSettings
             {
