@@ -68,8 +68,8 @@ namespace CommodityTradingApp.Controllers
 
         public async Task<IActionResult> DisplayCommodities()
         {
-            var commodities = _httpClient.GetAsync($"{_httpClient.BaseAddress}/commodity");
-
+            var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}commodity");
+            var commodities = await result.Content.ReadAsAsync<List<Commodity>>(); 
             //call get details for each commodity in commodities
             return View(commodities);
         }
@@ -77,7 +77,13 @@ namespace CommodityTradingApp.Controllers
         public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
         {
 
+           //Bind data to dto
            
+
+           //Send data over to api
+
+
+           //smile
 
             //var newTrade = new Trade
             //{
