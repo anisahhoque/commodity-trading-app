@@ -26,7 +26,11 @@
                 @foreach (var trader in group)
                 {
                     <tr>
-                        <td>@trader.TraderId</td>
+                        <td>
+                            <a asp-controller="Trader" asp-action="Details" asp-route-id="@trader.TraderId">
+                                @trader.TraderId
+                            </a>
+                        </td>
                         <td>@trader.AccountName</td>
                         <td>@trader.Balance.ToString("C")</td>
                         <td>@trader.Trades?.Count()</td>

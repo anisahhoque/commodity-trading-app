@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Data;
 using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -50,6 +51,7 @@ namespace CommodityTradingApp.Controllers
             {
                 var json = await response.Content.ReadAsStringAsync();
                 var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+                ViewBag.traderId = id;
                 return View(trader);
             }
             else
@@ -155,43 +157,97 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet]        
-        
-        public IActionResult Deposit(Guid id)
-        {
 
-            return View(); 
-        }
 
-       
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Deposit(Guid id, decimal depositAmount)
+        public async Task<IActionResult> Deposit(Guid id, decimal amount)
         {
+            if (amount <= 0)
+            {
+                ModelState.AddModelError("", "Deposit amount must be greater than zero.");
+                return RedirectToAction("Details", new { id });
 
+            }
 
-            return View();
+            var depositData = new
+            {
+                TraderId = id,
+                Amount = amount
+            };
+
+            
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            
+            var response = await _httpClient.PostAsync(_apiUrl + "Deposit/" + id, jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                
+                TempData["Message"] = "Deposit successful!";
+                return RedirectToAction("Details", new { id });
+
+            }
+            else
+            {
+                
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
         }
 
-      
-        public IActionResult Withdraw(Guid id)
+
+        public async Task<IActionResult> Withdraw(Guid id, decimal amount)
         {
-  
+
+            if (amount <= 0)
+            {
+                ModelState.AddModelError("", "Withdraw amount must be greater than zero.");
+                return RedirectToAction("Details", new { id });
+
+            }
+
+            var depositData = new
+            {
+                TraderId = id,
+                Amount = amount
+            };
 
 
-            return View();
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Withdraw/" + id, jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+
+                TempData["Message"] = "Withdrawal successful!";
+                return RedirectToAction("Details", new { id });
+
+            }
+            else
+            {
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
         }
 
 
        
-        [HttpPost]
-        public IActionResult Withdraw(Guid id, decimal withdrawAmount)
-        {
-
  
-
-            return RedirectToAction("Index");
-        }
 
     }
 }

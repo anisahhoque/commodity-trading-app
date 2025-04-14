@@ -12,6 +12,27 @@
     </div>
     <div class="card-body">
         <h4>Balance: @Model.Balance.ToString("C")</h4>
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@ViewBag.traderId" />
+
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required />
+            </div>
+
+            <button type="submit"
+                    formaction="@Url.Action("Deposit", "Trader")"
+                    class="btn btn-success">
+                Deposit
+            </button>
+
+            <button type="submit"
+                    formaction="@Url.Action("Withdraw", "Trader")"
+                    class="btn btn-danger">
+                Withdraw
+            </button>
+        </form>
 
         <h5>Open Trades:</h5>
         @if (Model.OpenAccountTrades != null && Model.OpenAccountTrades.Any())
