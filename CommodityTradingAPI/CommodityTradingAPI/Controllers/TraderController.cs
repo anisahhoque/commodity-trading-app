@@ -27,6 +27,7 @@ namespace CommodityTradingAPI.Controllers
         public async Task<string> Index()
         {
             var traders = await _context.TraderAccounts
+                .Include(t => t.Trades)
                 .Include(u => u.User).ToListAsync();
  
             var settings = new JsonSerializerSettings
@@ -39,27 +40,24 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<string> Details(Guid id)
 
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
             var trader = await _context.TraderAccounts
-                            .Include(t => t.User) 
+                            .Include(t => t.User)
+                            
                             .FirstOrDefaultAsync(t => t.TraderId == id);
 
-
-
-            //var trades = trader.Trades.ToList();
-            if (trader == null)
+            var settings = new JsonSerializerSettings
             {
-                return NotFound("Trader not found");
-            }
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+
             var user = trader.User;
             var trades = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
-            if (trades == null)
-            {
-                return NotFound("No open trades found for this trader");
-            }
+
 
             TraderAccountPortfolioDto traderPortfolio = new()
             {
@@ -69,8 +67,8 @@ namespace CommodityTradingAPI.Controllers
                 OpenAccountTrades = trades
             };
 
-
-            return Ok(traderPortfolio);
+            return JsonConvert.SerializeObject(traderPortfolio, settings);
+            
         }
 
         //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
@@ -102,20 +100,31 @@ namespace CommodityTradingAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(Guid id, [FromBody] TraderAccount traderAccount)
+        public async Task<IActionResult> Edit(Guid id, [FromBody] EditTraderAccount model)
         {
-            if (id != traderAccount.TraderId)
+            if (id != model.TraderId)
             {
-                return BadRequest("Trader ID invalid.");
+                return BadRequest("Trader Id mismatch.");
             }
+            var trader = await _context.TraderAccounts
+                                        .FirstOrDefaultAsync(t => t.TraderId == id);
+            if (!string.IsNullOrEmpty(model.AccountName))
+            {
+                trader.AccountName = model.AccountName;
+            }
+
             await _context.SaveChangesAsync();
-            return NoContent();
+
+            return Ok(new { message = "Trader updated successfully." });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var trader = await _context.TraderAccounts.FindAsync(id);
+            var trader = await _context.TraderAccounts
+                          .Include(t => t.User)
+                          .Include(t => t.Trades)
+                          .FirstOrDefaultAsync(t => t.TraderId == id);
             if (trader == null)
             {
                 return NotFound("Trader not found");
