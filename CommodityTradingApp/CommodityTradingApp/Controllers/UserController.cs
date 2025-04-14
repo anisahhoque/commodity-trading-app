@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CommodityTradingApp.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class UserController : Controller
     {
         private readonly HttpClient _httpClient;
@@ -28,7 +29,6 @@ namespace CommodityTradingApp.Controllers
             _apiUrlRole = _config["api"] + "Role";
 
         }
-
 
         public async Task<IActionResult> Index()
         {
@@ -71,7 +71,6 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "Manager")]
         public async Task< IActionResult> Create()
         {
             var response = await _httpClient.GetAsync(_apiUrlCountry);
