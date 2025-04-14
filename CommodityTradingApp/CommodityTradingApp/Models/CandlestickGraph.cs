@@ -12,7 +12,6 @@ namespace CommodityTradingApp
     {
         private readonly IConfiguration _configuration;
 
-        // Constructor that takes IConfiguration to be injected
         public Candlestick(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -50,6 +49,7 @@ namespace CommodityTradingApp
             double[] lowData = new double[count];
             double[] openData = new double[count];
             double[] closeData = new double[count];
+            double[] volumeData = new double[count];
             string[] labels = new string[count];
 
             for (int i = 0; i < count; i++)
@@ -60,33 +60,51 @@ namespace CommodityTradingApp
                 lowData[i] = candle.low;
                 openData[i] = candle.open;
                 closeData[i] = candle.close;
+                volumeData[i] = candle.volume;
 
                 // Convert Unix timestamp to DateTime and format
                 DateTimeOffset dto = DateTimeOffset.FromUnixTimeSeconds(candle.time);
-                labels[i] = dto.ToLocalTime().ToString("ddd d MMM HH:mm");
+                labels[i] = dto.ToLocalTime().ToString("d MMM HH:mm");
             }
 
             commodityName = textInfo.ToTitleCase(commodityName);
 
-            // Create chart
-            XYChart c = new XYChart(1200, 800); // Size of chart
-            c.setPlotArea(50, 25, 900, 600).setGridColor(0xc0c0c0, 0xc0c0c0); // Size of the plot itself (the actual graph), last two numbers are size
-            c.addTitle($"{commodityName} Chart");
-            c.addText(50, 25, $"{commodityName}", "Arial Bold", 12, 0x4040c0);
-            c.xAxis().setTitle($"Data in steps of {timePeriod}");
+            // Create the chart
+            XYChart c = new XYChart(1200, 800);
+            c.addTitle($"{commodityName} Candlestick Chart");
+
+            // Set plot area
+            PlotArea plotArea = c.setPlotArea(70, 50, 1000, 600);
+            plotArea.setGridColor(0xc0c0c0, 0xc0c0c0);
+
+            // X-Axis setup
             c.xAxis().setLabels(labels).setFontAngle(45);
-            c.yAxis().setTitle($"{commodityName} Price");
-            c.setYAxisOnRight(true);
-            CandleStickLayer layer = c.addCandleStickLayer(highData, lowData, openData, closeData, 0x00ff00, 0xff0000);
-            layer.setLineWidth(2);
+            c.xAxis().setLabelStep(10); // Increase this to have more blank tics
+            c.xAxis().setTitle($"Data in steps of {timePeriod}");
+
+            // Primary Y-Axis for price
+            c.yAxis2().setTitle($"{commodityName} Price");
+            c.yAxis2().setAutoScale(0.05, 0.3); // Visual separation
+
+            // Add candlestick layer
+            CandleStickLayer candleLayer = c.addCandleStickLayer(highData, lowData, openData, closeData, 0x00ff00, 0xff0000);
+            candleLayer.setUseYAxis2();
+            candleLayer.setLineWidth(2);
+
+            // Secondary Y-Axis for volume
+            BarLayer volumeLayer = c.addBarLayer(volumeData, 0x9999ff);
+            volumeLayer.setBarWidth(8);
+
+            c.yAxis().setTitle($"{commodityName} Volume");
+            c.yAxis().setAutoScale(0.75, 0.05);
 
             // Generate chart image
             byte[] imageBytes = c.makeChart2(Chart.PNG);
             string base64Image = Convert.ToBase64String(imageBytes);
             string imageMap = c.getHTMLImageMap("clickable", "",
-                "title='{xLabel}\nHigh:{high}\nOpen:{open}\nClose:{close}\nLow:{low}'");
+                "title='{xLabel}\nHigh:{high}\nOpen:{open}\nClose:{close}\nLow:{low}\nVolume:{value}'");
 
-            // Make HTML
+            // Build HTML
             string html = $@"
                 <!DOCTYPE html>
                 <html>
@@ -112,5 +130,6 @@ namespace CommodityTradingApp
         public double high { get; set; }
         public double close { get; set; }
         public long time { get; set; } // Unix time in seconds
+        public double volume { get; set; } // Volume for the histogram
     }
 }
