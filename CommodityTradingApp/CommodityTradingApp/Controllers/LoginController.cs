@@ -21,8 +21,13 @@ namespace CommodityTradingApp.Controllers
             _apiUrl = _config["api"] + "Authentication/";
         }
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? message)
         {
+            if (!string.IsNullOrEmpty(message))
+            {
+                TempData["Warning"] = message;
+            }
+
             return View();
         }
 
