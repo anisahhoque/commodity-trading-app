@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Create User";
+}
+
+<h2>Create User</h2>
+
+<form asp-action="Create" method="post" asp-controller="User">
+    <!-- Username field -->
+    <div class="form-group">
+        <label for="Username">Username</label>
+        <input type="text" class="form-control" id="Username" name="Username" required />
+        
+    </div>
+
+    <!-- Password field -->
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <input type="password" class="form-control" id="Password" name="Password" required />
+        
+    </div>
+
+    <!-- Country selection (dropdown) -->
+    <!-- Country selection (dropdown) -->
+    <div class="form-group">
+        <label for="country">Country</label>
+        <select class="form-control" id="country" name="country" required>
+            <option value="">-- Select a Country --</option>
+            @if (ViewBag.Countries != null)
+            {
+                @foreach (var item in ViewBag.Countries)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="role">Role</label>
+        <select class="form-control" id="role" name="role" required>
+            <option value="">-- Select a Role --</option>
+            @if (ViewBag.Roles != null)
+            {
+                @foreach (var item in ViewBag.Roles)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary">Create User</button>
+</form>
+
+<!-- Validation scripts -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

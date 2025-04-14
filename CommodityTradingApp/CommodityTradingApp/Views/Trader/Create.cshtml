@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Create Trader Account";
+}
+
+<h2>Create Trader Account</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="userid">Select User</label>
+        <select asp-items="ViewBag.Users" class="form-control" name="userid" required>
+            <option value="">-- Select a user --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="accountname">Account Name</label>
+        <input type="text" class="form-control" name="accountname" required />
+    </div>
+
+    <div class="form-group">
+        <label for="balance">Balance</label>
+        <input type="number" step="0.01" class="form-control" name="balance" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Create</button>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}

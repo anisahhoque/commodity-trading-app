@@ -2,6 +2,7 @@
 using CommodityTradingAPI.Models;
 using CommodityTradingAPI.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -31,49 +32,33 @@ namespace CommodityTradingAPI.Controllers
             {
                 return BadRequest("Invalid login");
             }
-            var token = CreateJwt(dbUser);
 
-            Response.Cookies.Append("AuthToken", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(5)
-            });
-
-            return Ok(new { message = "Login successful" });
+            return Ok();
         }
 
-        [HttpPost("Logout")]
-        public IActionResult Logout()
+        [HttpGet("role/{userId}")]
+        public  ActionResult<string> UserRole(Guid userId)
         {
-            Response.Cookies.Delete("AuthToken");
-            return Ok(new { message = "Logged out successfully" });
-        }
+            var user =  _context.Users
+                                  .Include(u => u.RoleAssignments)
+                                  .ThenInclude(ra => ra.Role)
+                                  .FirstOrDefault(u => u.UserId == userId);
 
-        private string CreateJwt(User user)
-        {
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            if (user == null)
             {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(5),
-                SigningCredentials = creds,
-                Issuer = _configuration["JwtSettings:Issuer"],
-                Audience = _configuration["JwtSettings:Audience"]
-            };
+                return NotFound("User not found");
+            }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(token);
-            return jwt;
+            // Get the role of the user
+            var role = user.RoleAssignments.FirstOrDefault()?.Role?.RoleName;
+
+            if (role == null)
+            {
+                return NotFound("Role not found");
+            }
+
+            return Ok(role);
         }
+
     }
 }

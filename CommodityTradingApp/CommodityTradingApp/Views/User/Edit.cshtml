@@ -1,0 +1,45 @@
+﻿@model EditUser
+
+<h2>Edit User</h2>
+
+<form asp-action="Edit" asp-route-id="@Model.UserId" method="post">
+    <div class="form-group">
+        <label for="Username">Username</label>
+        <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <input type="password" class="form-control" id="Password" name="Password" />
+    </div>
+
+    <div class="form-group">
+        <label for="CountryId">Country</label>
+        <select class="form-control" id="CountryId" name="CountryId">
+            @foreach (var country in Model.AllCountries)
+            {
+                <option value="@country.CountryId">
+                    @country.CountryName
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Select Roles</label><br />
+        @foreach (var role in Model.AllRoles)
+        {
+            <div class="checkbox">
+                <label>
+                    
+                    <input type="checkbox" name="SelectedRoleIds" value="@role.RoleId"
+                    @(Model.SelectedRoleIds.Contains(role.RoleId) ? "checked" : "") />
+                    @role.RoleName
+                </label>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="@Url.Action("Index", "User")" class="btn btn-secondary">Cancel</a>
+</form>

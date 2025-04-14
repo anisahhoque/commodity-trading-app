@@ -4,6 +4,7 @@ using CommodityTradingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CommodityTradingAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,18 @@ builder.Services.AddDbContext<CommoditiesDbContext>(options =>
     ?? ("Connection string 'DefaultConnection' not found."))
     .UseSeeding((context, _) =>
      {
+         // Check if Roles table is empty
+         var roles = context.Set<Role>();
+
+         if (!roles.Any())
+         {
+             var managerRole = new Role { RoleId = Guid.NewGuid(), RoleName = "Manager" };
+             var traderRole = new Role { RoleId = Guid.NewGuid(), RoleName = "Trader" };
+
+             roles.AddRange(managerRole, traderRole);
+             context.SaveChanges();
+         }
+         // Check if the Admin user exists
          var AdminExists = context.Set<User>().Any(u => u.Username == "Admin");
 
          if (!AdminExists)
@@ -26,44 +39,30 @@ builder.Services.AddDbContext<CommoditiesDbContext>(options =>
                  CountryId = 14
              });
              context.SaveChanges();
+             var adminId = context.Set<User>().FirstOrDefault(u => u.Username == "Admin").UserId;
+             var manager = context.Set<Role>().FirstOrDefault(r => r.RoleName == "Manager");
+
+             context.Set<RoleAssignment>().Add(new RoleAssignment
+             {
+                 AssignmentId = Guid.NewGuid(),
+                 UserId = adminId,
+                 RoleId = manager.RoleId
+             });
+
+             context.SaveChanges();
          }
      }
     ));
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false; // change when deployed
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddHttpClient<ExternalApiService>();
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
-        };
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var accessToken = context.Request.Cookies["AuthToken"];
-                if (!string.IsNullOrEmpty(accessToken))
-                {
-                    context.Token = accessToken;
-                }
-                return Task.CompletedTask;
-            }
-        };
-    });
-
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        });
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<CommodityTradingAPI.Services.ILogger, AuditLogService>();
 
 
 builder.Services.AddControllers();
@@ -71,7 +70,6 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 var app = builder.Build();
-
 using (var scope = app.Services.CreateScope())
 {
     var CommoditiesDbContext = scope.ServiceProvider.GetRequiredService<CommoditiesDbContext>();

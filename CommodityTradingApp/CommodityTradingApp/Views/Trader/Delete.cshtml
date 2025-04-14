@@ -1,0 +1,20 @@
+﻿@model CommodityTradingApp.Models.Trader
+
+@{
+    ViewData["Title"] = "Delete Trader";
+}
+
+<h2>Delete Trader</h2>
+
+<h4>Are you sure you want to delete this trader?</h4>
+
+<div>
+    <strong>Account Name:</strong> @Model.AccountName <br />
+    <strong>Balance:</strong> @Model.Balance.ToString("C")
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit">Yes, Delete</button> |
+    <a asp-action="Index">Cancel</a>
+</form>

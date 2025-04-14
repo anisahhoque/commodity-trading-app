@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CommodityTradingAPI.Data;
+using CommodityTradingAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -13,22 +16,25 @@ namespace CommodityTradingAPI.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
-        private static readonly List<string> SupportedCommodities = new List<string>
+        private readonly CommoditiesDbContext _context;
+        private static readonly List<String> SupportedCommodities = new()
         {
             "gold"
             , "platinum", "lean_hogs", "oat", "aluminium", "soybean_meal", "lumber", "micro_gold", "feeder_cattle", "rough_rice", "palladium"
         };
 
-        public CommodityController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public CommodityController(IHttpClientFactory httpClientFactory, IConfiguration configuration, CommoditiesDbContext context)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _context = context;
         }
 
         [HttpGet]
-        public IActionResult GetCommodityList()
+        public async Task<ActionResult<List<Commodity>>> Index()
         {
-            return Ok(SupportedCommodities);
+            var availableCommodities = await _context.Commodities.ToListAsync();
+            return availableCommodities;
         }
 
         [HttpGet("{commodityName}")]

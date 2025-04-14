@@ -1,92 +1,253 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CommodityTradingApp.Models;
+using CommodityTradingApp.ViewModels;
+using Newtonsoft.Json;
+using System.Data;
+using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text;
 
 namespace CommodityTradingApp.Controllers
 {
-    //Need to ensure i have DBContext, and inject it into controller
-    //DBcontext must have class that represents DbSet<Trader> Traders
 
 
     public class TraderController : Controller
     {
-        // GET: Trader/Index
-        public IActionResult Index()
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        private readonly string _apiUrl;
+        public TraderController(IConfiguration config, HttpClient httpClient)
         {
-            //TODO: DELETE WHEN CONNECTED TO DB
-            // Simulate current user and role
-            bool isManager = true; // Change to false to test user view
-            Guid currentUserId = Guid.Parse("a67c1bde-32ff-4c60-89ef-90b7dbd45f2e");
+            _config = config;
+            _httpClient = httpClient;
+            _apiUrl = _config["api"] + "Trader/";
 
-            var allTraders = new List<Trader>
-    {
-        new Trader { Id = Guid.NewGuid(), AccountName = "Alice", Balance = 5000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Bob", Balance = 10000, UserId = Guid.NewGuid() },
-        new Trader { Id = Guid.NewGuid(), AccountName = "Charlie", Balance = 7500, UserId = Guid.NewGuid() }
-    };
-
-            IEnumerable<Trader> visibleTraders;
-
-            if (isManager)
+        }
+        public async Task<IActionResult> Index()
+        {
+            var response = _httpClient.GetAsync(_apiUrl).Result;
+            if (response.IsSuccessStatusCode)
             {
-                visibleTraders = allTraders;
+                var json = await response.Content.ReadAsStringAsync();
+                var traders = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
+                return View(traders);
             }
             else
             {
-                visibleTraders = allTraders.Where(t => t.UserId == currentUserId);
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
+                return View(new List<TraderAccount>());
             }
 
-            return View(visibleTraders);
+           
         }
 
 
-        // GET: Trader/Details/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
-        public IActionResult Details(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
         {
-            //TODO: DELETE WHEN CONNECTED TO DB
-            //Simulate current user and role
-            bool isManager = true;
-            Guid currentUserId = Guid.Parse("a67c1bde-32ff-4c60-89ef-90b7dbd45f2e");
-
-            var allTraders = new List<Trader>
-        {
-            new Trader { Id = Guid.Parse("c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4"), AccountName = "Alice", Balance = 5000, UserId = Guid.NewGuid() },
-            new Trader { Id = Guid.Parse("a9b7e68d-6b16-4f8d-ae88-9b64a9392e44"), AccountName = "Bob", Balance = 10000, UserId = Guid.NewGuid() },
-            new Trader { Id = Guid.Parse("d2db8f71-e6a1-4f3b-b1b3-b8d50b7cb327"), AccountName = "Charlie", Balance = 7500, UserId = Guid.NewGuid()}
-        };
-
-            var trader = allTraders.FirstOrDefault(t => t.Id == id); // Simulate fetching trader by ID
-
-            if (trader == null)
+            var response = _httpClient.GetAsync(_apiUrl + id).Result;
+            if (response.IsSuccessStatusCode)
             {
-                return NotFound();
+                var json = await response.Content.ReadAsStringAsync();
+                var trader = JsonConvert.DeserializeObject<TraderAccountPortfolioDto>(json);
+                ViewBag.traderId = id;
+                return View(trader);
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve trader account from the API");
+                return View(new TraderAccountPortfolioDto());
+            }
+           
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            var response = await _httpClient.GetAsync(_config["api"] + "User/");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<List<User>>(json);
+                ViewBag.Users = new SelectList(users, "UserId", "Username");
+            }
+            else
+            {
+
+                ModelState.AddModelError(string.Empty, "Unable to retrieve users from the API");
+                return View(new List<User>());
+            }
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Guid userid,string accountname,decimal balance)
+        {
+            var userData = new
+            {
+                UserId = userid,
+                Balance = balance,
+                AccountName = accountname
+            };
+                
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(userData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+
+
+            var response = await _httpClient.PostAsync(_apiUrl , jsonContent);
+
+
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "New Trader Account Created!";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Could not create trader account");
+                return RedirectToAction("Index", "Home");
             }
 
-            //if not a manager, block access to other traders
-            if (!isManager && trader.UserId != currentUserId)
-                return Unauthorized();
+            return RedirectToAction("Index");
 
-            //TODO: DELETE WHEN CONNECTED TO DB
-            //Simulate active and historical trades
-            var activeTrades = new List<Trade>
-            {
-                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Buy Gold", IsOpen = true}
-            };
-            var historicalTrades = new List<Trade>
-            {
-                new Trade { TradeId = Guid.NewGuid(), TraderId = trader.Id, Contract = "Sell Silver", IsOpen = false}
-            };
-
-            //Passing all of this information into the view
-            var model = new TraderDetailsViewModel
-            {
-                Trader = trader,
-                ActiveTrades = activeTrades,
-                HistoricalTrades = historicalTrades
-            };
-
-            return View(model);
         }
+
+        // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
+        //This is the view for editing a trader
+        public IActionResult Edit(Guid id)
+        {
+
+
+
+            return View();
+        }
+
+        // POST: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
+        [HttpPost]
+        public IActionResult Edit(EditTraderViewModel model)
+        {
+
+            return RedirectToAction("Index");
+        }
+
+        // GET: Trader/Delete/{guid}
+        //This is the view for deleting a trader
+        public IActionResult Delete(Guid id)
+        {
+
+
+            return View(); // Confirm delete
+        }
+
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(Guid id)
+        {
+            
+
+
+            return RedirectToAction("Index");
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deposit(Guid id, decimal amount)
+        {
+            if (amount <= 0)
+            {
+                ModelState.AddModelError("", "Deposit amount must be greater than zero.");
+                return RedirectToAction("Details", new { id });
+
+            }
+
+            var depositData = new
+            {
+                TraderId = id,
+                Amount = amount
+            };
+
+            
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            
+            var response = await _httpClient.PostAsync(_apiUrl + "Deposit/" + id, jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                
+                TempData["Message"] = "Deposit successful!";
+                return RedirectToAction("Details", new { id });
+
+            }
+            else
+            {
+                
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+
+        public async Task<IActionResult> Withdraw(Guid id, decimal amount)
+        {
+
+            if (amount <= 0)
+            {
+                ModelState.AddModelError("", "Withdraw amount must be greater than zero.");
+                return RedirectToAction("Details", new { id });
+
+            }
+
+            var depositData = new
+            {
+                TraderId = id,
+                Amount = amount
+            };
+
+
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(depositData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+
+            var response = await _httpClient.PostAsync(_apiUrl + "Withdraw/" + id, jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+
+                TempData["Message"] = "Withdrawal successful!";
+                return RedirectToAction("Details", new { id });
+
+            }
+            else
+            {
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error: {errorMessage}");
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+
+       
+ 
+
     }
-
-
 }

@@ -1,0 +1,72 @@
+﻿@model User
+
+@{
+    ViewData["Title"] = "User List";
+}
+
+<h2>User Details</h2>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User Id</th>
+            <th>Username</th>
+            <th>Country</th>
+            <th>Roles</th>
+            <th>Trader Accounts</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+            <td>@Model.UserId</td>
+            <td>@Model.Username</td>
+            <td>@(Model.Country?.CountryName ?? "N/A")</td>
+            <td>
+                @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
+                {
+                    foreach (var assignment in Model.RoleAssignments)
+                    {
+                        @assignment.Role.RoleName <br />
+                    }
+                }
+                else
+                {
+                    <span>No roles</span>
+                }
+            </td>
+            <td>
+                @if (Model.TraderAccounts != null && Model.TraderAccounts.Any())
+                {
+                    foreach (var trader in Model.TraderAccounts)
+                    {
+                        @trader.TraderId <br />
+                        @trader.AccountName <br />
+                        @trader.Balance <br />
+                        @trader.Balance <br />
+                        @if (trader.Trades != null && trader.Trades.Any())
+                        {
+                            foreach (var trade in trader.Trades)
+                            {
+                                <p>uh idk what to put here for now will link to another page i reckon</p>
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    <span>None found.</span>
+                }
+            </td>
+
+            <td>
+                <a asp-action="Details" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-info btn-sm">Details</a>
+                <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-action="Delete" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+                </tr>
+            
+        </tbody>
+    </table>

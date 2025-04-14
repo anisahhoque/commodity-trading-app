@@ -18,7 +18,7 @@ namespace CommodityTradingAPI.Services
             _blobServiceClient = new BlobServiceClient(_storageConnectionString);
         }
 
-        public async Task LogChangeAsync(AuditLog auditLog)
+        public async Task LogChangeAsync(ILog auditLog)
         {
             try
             {
