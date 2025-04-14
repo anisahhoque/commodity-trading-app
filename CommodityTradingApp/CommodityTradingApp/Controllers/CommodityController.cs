@@ -34,8 +34,15 @@ namespace CommodityTradingApp.Controllers
             {
                 var allCommods = await result.Content.ReadAsAsync<List<Commodity>>();
 
+
+
                 // Call CreateChartHtmlAsync for the candlestick chart
+                
+                //TODO: Move charts into commodity details page, unless we want to see all charts on the index page???
+                
                 var chartHtml = await _candlestick.CreateChartHtmlAsync("gold", "5m", "1744600000", "1744622096");
+
+
 
                 // Pass chartHtml to the view
                 ViewBag.ChartHtml = chartHtml;
