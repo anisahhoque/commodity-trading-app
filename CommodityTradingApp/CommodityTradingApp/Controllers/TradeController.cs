@@ -3,6 +3,7 @@ using CommodityTradingApp.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -96,8 +97,17 @@ namespace CommodityTradingApp.Controllers
         public async Task<IActionResult> CreateTrade([Bind("TraderId, CommodityId, Quantity, IsBuy, IsOpen, contract, Bourse")] CreateTradeDto tempTrade)
         {
 
+            tempTrade.IsOpen = "True";
+            tempTrade.Bourse = "Test";
+            tempTrade.contract = "Hello";
+
+            tempTrade.Mitigations = new Dictionary<string, int>();
+
+            tempTrade.Mitigations.Add("SellPointProfit", 1000);
+            tempTrade.Mitigations.Add("SellPointLoss", 24);
+
             //Bind data to dto
-            var result = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, tempTrade);
+            var result = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress+"Trade", tempTrade);
             if (result.IsSuccessStatusCode)
             {
                 Console.WriteLine("good");
