@@ -120,20 +120,37 @@ namespace CommodityTradingApp.Controllers
 
         }
 
-        // GET: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
-        //This is the view for editing a trader
-        public IActionResult Edit(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
         {
-
-
-
             return View();
         }
 
-        // POST: Trader/Edit/c9b9f2c5-4d95-4b6a-bb6a-dc3d70a5d8f4
-        [HttpPost]
-        public IActionResult Edit(EditTraderViewModel model)
+
+        [HttpPost("Trader/Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, EditTrader model)
         {
+            var updatedAccount = new
+            {
+                TraderId = id,
+                AccountName = model.AccountName
+            };
+
+            var jsonContent = new StringContent(
+                JsonConvert.SerializeObject(updatedAccount),
+                Encoding.UTF8,
+                "application/json"
+            );
+            var response = await _httpClient.PutAsync(_apiUrl + id, jsonContent);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Message"] = "Trader account updated successfully.";
+            }
+            else
+            {
+                TempData["Message"] = "Failed to update trader account.";
+            }
 
             return RedirectToAction("Index");
         }
