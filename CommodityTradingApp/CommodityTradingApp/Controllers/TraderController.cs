@@ -138,23 +138,42 @@ namespace CommodityTradingApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: Trader/Delete/{guid}
-        //This is the view for deleting a trader
-        public IActionResult Delete(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
         {
+            var response = await _httpClient.GetAsync(_apiUrl + id);
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Trader not found.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            var json = await response.Content.ReadAsStringAsync();
+            var trader = JsonConvert.DeserializeObject<TraderAccount>(json);
 
-            return View(); // Confirm delete
+            return View(trader);
+
         }
 
 
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(Guid id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            
 
+            var response = await _httpClient.DeleteAsync($"{_apiUrl}{id}?confirm=true");
 
-            return RedirectToAction("Index");
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Trader account deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            TempData["Error"] = $"Deletion failed: {error}";
+            return RedirectToAction(nameof(Delete), new { id });
+
+         
         }
 
 

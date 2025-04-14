@@ -40,27 +40,24 @@ namespace CommodityTradingAPI.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<string> Details(Guid id)
 
             //returns the trading accounts balance, plus all the traders' currently open trades
         {
             var trader = await _context.TraderAccounts
-                            .Include(t => t.User) 
+                            .Include(t => t.User)
+                            
                             .FirstOrDefaultAsync(t => t.TraderId == id);
 
-
-
-            //var trades = trader.Trades.ToList();
-            if (trader == null)
+            var settings = new JsonSerializerSettings
             {
-                return NotFound("Trader not found");
-            }
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+
             var user = trader.User;
             var trades = await _context.Trades.Where(t => t.TraderId == id && t.IsOpen).ToListAsync();
-            if (trades == null)
-            {
-                return NotFound("No open trades found for this trader");
-            }
+
 
             TraderAccountPortfolioDto traderPortfolio = new()
             {
@@ -70,8 +67,8 @@ namespace CommodityTradingAPI.Controllers
                 OpenAccountTrades = trades
             };
 
-
-            return Ok(traderPortfolio);
+            return JsonConvert.SerializeObject(traderPortfolio, settings);
+            
         }
 
         //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
@@ -116,7 +113,10 @@ namespace CommodityTradingAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var trader = await _context.TraderAccounts.FindAsync(id);
+            var trader = await _context.TraderAccounts
+                          .Include(t => t.User)
+                          .Include(t => t.Trades)
+                          .FirstOrDefaultAsync(t => t.TraderId == id);
             if (trader == null)
             {
                 return NotFound("Trader not found");
