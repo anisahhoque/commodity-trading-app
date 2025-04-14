@@ -8,46 +8,53 @@ namespace CommodityTradingAPI.Services
     public class AuditLogService : ILogger
     {
         private readonly BlobServiceClient _blobServiceClient;
-        private readonly string _containerName;
-        private readonly string _storageConnectionString;
+        private readonly BlobContainerClient _containerClient;
 
         public AuditLogService(IConfiguration configuration)
         {
-            _storageConnectionString = configuration.GetConnectionString("AzureBlobStorage");
-            _containerName = configuration["LogStorageName"];
-            _blobServiceClient = new BlobServiceClient(_storageConnectionString);
+            var storageConnectionString = configuration.GetConnectionString("AzureBlobStorage");
+            var containerName = configuration["LogStorageName"];
+
+            _blobServiceClient = new BlobServiceClient(storageConnectionString);
+            _containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Ensure the container exists at startup
+            _containerClient.CreateIfNotExists();
         }
 
         public async Task LogChangeAsync(ILog auditLog)
         {
             try
             {
-                // Generate the log file name based on the entity name and timestamp
                 string fileName = $"{auditLog.Timestamp:yyyy_MM_dd}/{auditLog.EntityName}_{auditLog.Timestamp:yyyyMMdd_HHmmss}.log";
-
-                BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-                if (!await containerClient.ExistsAsync())
-                {
-                    await containerClient.CreateAsync();
-                }
-
                 string logContent = JsonSerializer.Serialize(auditLog, new JsonSerializerOptions { WriteIndented = true });
 
-                // Upload the log
-                BlobClient blobClient = containerClient.GetBlobClient(fileName);
-                using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(logContent)))
-                {
-                    await blobClient.UploadAsync(stream, overwrite: true);
-                }
+                BlobClient blobClient = _containerClient.GetBlobClient(fileName);
+                using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(logContent));
+                await blobClient.UploadAsync(stream, overwrite: true);
             }
             catch (Exception ex)
             {
-                // Output any logging errors to terminal
                 Console.WriteLine($"Error logging change: {ex.Message}");
             }
         }
+
+        public async Task CreateNewLogAsync(string entityName, string action, string changedBy, string details)
+        {
+            var auditLog = new AuditLog
+            {
+                EntityName = entityName,
+                Action = action,
+                ChangedBy = changedBy,
+                Timestamp = DateTime.UtcNow,
+                Details = details
+            };
+
+            await LogChangeAsync(auditLog);
+        }
     }
 }
+
 
 
 namespace CommodityTradingAPI.Models
