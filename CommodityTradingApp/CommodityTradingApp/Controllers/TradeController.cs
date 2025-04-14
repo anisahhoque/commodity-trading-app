@@ -42,20 +42,30 @@ namespace CommodityTradingApp.Controllers
 
         public async Task<IActionResult> ActiveTrades(int page = 1, int pageSize = 10, bool? isOpen = true)
         {
-            var trades = _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+            var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+            var trades = await result.Content.ReadAsAsync<List<Trade>>();
+
+            if (trades == null)
+                return RedirectToAction("index");
+
+            var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
+            var totalTrades = filteredTrades.Count();
+            var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            if (totalTrades == 0)
+                return View();
 
 
-            //var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
-            //var totalTrades = filteredTrades.Count();
-            //var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return View(pagedTrades);
 
-
-
-
-            //return View(pagedTrades);
-
-            throw new NotImplementedException("hkjashdkjafhsfk");
+            //throw new NotImplementedException("hkjashdkjafhsfk");
         }
+
+        //public async Task<IActionResult> GetTradeById()
+        //{
+        //    var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/")
+        //}
+
         public async Task<IActionResult> DisplayCommodities()
         {
             var commodities = _httpClient.GetAsync($"{_httpClient.BaseAddress}/commodity");
@@ -66,6 +76,9 @@ namespace CommodityTradingApp.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
         {
+
+           
+
             //var newTrade = new Trade
             //{
             //    TradeId = Guid.NewGuid(),
