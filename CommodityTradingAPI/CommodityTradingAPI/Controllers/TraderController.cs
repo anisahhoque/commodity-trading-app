@@ -20,7 +20,7 @@ namespace CommodityTradingAPI.Controllers
         public TraderController(CommoditiesDbContext context, ExternalApiService externalApiService)
         {
             _context = context;
-           _externalApiService = externalApiService;
+            _externalApiService = externalApiService;
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace CommodityTradingAPI.Controllers
             var traders = await _context.TraderAccounts
                 .Include(t => t.Trades)
                 .Include(u => u.User).ToListAsync();
- 
+
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -42,11 +42,11 @@ namespace CommodityTradingAPI.Controllers
         [HttpGet("{id}")]
         public async Task<string> Details(Guid id)
 
-            //returns the trading accounts balance, plus all the traders' currently open trades
+        //returns the trading accounts balance, plus all the traders' currently open trades
         {
             var trader = await _context.TraderAccounts
                             .Include(t => t.User)
-                            
+
                             .FirstOrDefaultAsync(t => t.TraderId == id);
 
             var settings = new JsonSerializerSettings
@@ -68,11 +68,17 @@ namespace CommodityTradingAPI.Controllers
             };
 
             return JsonConvert.SerializeObject(traderPortfolio, settings);
-            
+
         }
 
         //should we also have an endpoint just to get a trading accounts balance??? maybe not needed
-
+        [HttpGet("User/{userId}")]
+        public async Task<ActionResult<List<TraderAccount>>> GetAllUserTraderAccounts(Guid userId)
+        {
+            //Get all accoutns associated with a specific user
+            var userAccounts = await _context.TraderAccounts.Where(x => x.UserId == userId).ToListAsync();
+            return userAccounts;
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([Bind("UserId","Balance","AccountName")] CreateTraderAccount model)

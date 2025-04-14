@@ -1,6 +1,11 @@
 ﻿using CommodityTradingApp.Models;
+using CommodityTradingApp.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
+
 using Newtonsoft.Json;
 
 namespace CommodityTradingApp.Controllers
@@ -9,45 +14,95 @@ namespace CommodityTradingApp.Controllers
     public class TradeController : Controller
     {
         private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
+        //private static List<Trade> trades = GetMockTrades();
+        //private static List<Commodity> commodities = GetMockCommodities();
+        public TradeController(HttpClient httpClient, IConfiguration configuration)
         private readonly IConfiguration _config;
-        private static List<Trade> trades = GetMockTrades();
-        private static List<Commodity> commodities = GetMockCommodities();
         private readonly string _apiUrl;
         private readonly string _apiUrlCommodity;
         public TradeController(HttpClient httpClient, IConfiguration config )
         {
+            _configuration = configuration;
             _httpClient = httpClient;
+
+            _httpClient.BaseAddress = new Uri(_configuration["api"]);
             _config = config;
             _apiUrl = _config["api"] + "Trade/";
             _apiUrlCommodity = _config["api"] + "Commodity/";
         }
         public async Task<IActionResult> Index()
         {
-            return View(trades);
+
+            var trades = await _httpClient.GetAsync($"{_httpClient.BaseAddress}trade");
+            //trades.
+            var tradeView = await trades.Content.ReadAsAsync<List<Trade>>();
+            return View(tradeView);
         }
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> TradeHistory(int page = 1, int pageSize = 10,bool? isOpen = false)
         {
-            var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
-            var totalTrades = filteredTrades.Count();
-            var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return View(pagedTrades);
+            var trades = _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+
+            return View();
+
+            //var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
+            //var totalTrades = filteredTrades.Count();
+            //var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            //return View(pagedTrades);
         }
 
         public async Task<IActionResult> ActiveTrades(int page = 1, int pageSize = 10, bool? isOpen = true)
         {
+            var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/trade");
+            var trades = await result.Content.ReadAsAsync<List<Trade>>();
+
+            if (trades == null)
+                return RedirectToAction("index");
+
             var filteredTrades = isOpen.HasValue ? trades.Where(t => t.IsOpen == isOpen.Value).ToList() : trades;
             var totalTrades = filteredTrades.Count();
             var pagedTrades = filteredTrades.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-
+            if (totalTrades == 0)
+                return View();
 
 
             return View(pagedTrades);
+
+            //throw new NotImplementedException("hkjashdkjafhsfk");
         }
+
+        //public async Task<IActionResult> GetTradeById()
+        //{
+        //    var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/")
+        //}
+
         public async Task<IActionResult> DisplayCommodities()
         {
+            var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}commodity");
+            var commodities = await result.Content.ReadAsAsync<List<Commodity>>();
+
+            //get user id from jwt token
+
+            var userId = "28324A1F-4254-48E5-8825-1FF3594E8301";
+
+            //get all trade accounts associated with that user
+            var request = await _httpClient.GetAsync(_httpClient.BaseAddress + "Trader/User/" + userId);
+
+            if (!request.IsSuccessStatusCode)
+            {
+                return NotFound("invalid"); 
+            }
+
+            var accounts = await request.Content.ReadAsAsync<List<TraderAccount>>();
+
+            ViewBag.traderAccounts = new SelectList(accounts, "TraderId", "AccountName");
+
+            //call get details for each commodity in commodities
+            return View(commodities);
             var commodityPrices = new List<CommodityWithPriceViewModel>();
             var response = await _httpClient.GetAsync(_apiUrlCommodity);
             long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -100,47 +155,76 @@ namespace CommodityTradingApp.Controllers
           
         }
         [HttpPost]
-        public async Task<IActionResult> CreateTrade(Guid CommodityId, int Quantity, bool IsBuy, decimal Price)
+        public async Task<IActionResult> CreateTrade([Bind("TraderId, CommodityId, Quantity, IsBuy, IsOpen, contract, Bourse")] CreateTradeDto tempTrade)
         {
-            var newTrade = new Trade
+
+            tempTrade.IsOpen = "True";
+            tempTrade.Bourse = "Test";
+            tempTrade.contract = "Hello";
+
+            tempTrade.Mitigations = new Dictionary<string, int>();
+
+            tempTrade.Mitigations.Add("SellPointProfit", 1000);
+            tempTrade.Mitigations.Add("SellPointLoss", 24);
+
+            //Bind data to dto
+            var result = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress+"Trade", tempTrade);
+            if (result.IsSuccessStatusCode)
             {
-                TradeId = Guid.NewGuid(),
-                TraderId = Guid.NewGuid(), 
-                CommodityId = CommodityId,
-                PricePerUnit = 100.0m, // will obtain price using api
-                Quantity = Quantity,
-                IsBuy = IsBuy,
-                Expiry = DateTime.Now.AddDays(30),
-                CreatedAt = DateTime.Now,
-                Bourse = "NYSE", //grab from api
-                MitigationId = Guid.NewGuid(),
-                IsOpen = true,
-                Contract = "ABC01"
-            };
-            trades.Add(newTrade);
-            return RedirectToAction("Index");
+                Console.WriteLine("good");
+                RedirectToAction("index");
+            }
+            //Send data over to api
+
+
+            //smile
+
+            //var newTrade = new Trade
+            //{
+            //    TradeId = Guid.NewGuid(),
+            //    TraderId = Guid.NewGuid(), 
+            //    CommodityId = CommodityId,
+            //    PricePerUnit = 100.0m, // will obtain price using api
+            //    Quantity = Quantity,
+            //    IsBuy = IsBuy,
+            //    Expiry = DateTime.Now.AddDays(30),
+            //    CreatedAt = DateTime.Now,
+            //    Bourse = "NYSE", //grab from api
+            //    MitigationId = Guid.NewGuid(),
+            //    IsOpen = true,
+            //    Contract = "ABC01"
+            //};
+            //trades.Add(newTrade);
+            //return RedirectToAction("Index");
+
+            return View();
         }
 
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> DeleteTrade(Guid id)
         {
-            //make a call to delete trade api
-            var tradeToDelete = trades.FirstOrDefault(t => t.TradeId == id);
-            if (tradeToDelete != null)
-            {
-                trades.Remove(tradeToDelete);
-            }
-            return RedirectToAction("Index");
+            return View();
+
+
+        //    //make a call to delete trade api
+        //    var tradeToDelete = trades.FirstOrDefault(t => t.TradeId == id);
+        //    if (tradeToDelete != null)
+        //    {
+        //        trades.Remove(tradeToDelete);
+        //    }
+        //    return RedirectToAction("Index");
         }
         public async Task<IActionResult> UpdateTrade(Guid id)
         {
-            var tradeToUpdate = trades.FirstOrDefault(t => t.TradeId == id);
-            if (tradeToUpdate != null)
-            {
-                tradeToUpdate.IsOpen = false; 
-            }
-            //make a call to update trade
-            return RedirectToAction("Index");
+
+            return View();
+            //var tradeToUpdate = trades.FirstOrDefault(t => t.TradeId == id);
+            //if (tradeToUpdate != null)
+            //{
+            //    tradeToUpdate.IsOpen = false; 
+            //}
+            ////make a call to update trade
+            //return RedirectToAction("Index");
         }
         private static List<Commodity> GetMockCommodities()
         {
