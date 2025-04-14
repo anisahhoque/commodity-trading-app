@@ -71,15 +71,17 @@ namespace CommodityTradingApp
 
             // Create the chart
             XYChart c = new XYChart(1200, 800);
+            c.setBackground(Chart.Transparent); // entire chart transparent
+
             c.addTitle($"{commodityName} Candlestick Chart");
 
             // Set plot area
-            PlotArea plotArea = c.setPlotArea(70, 50, 1000, 600);
+            PlotArea plotArea = c.setPlotArea(70, 50, 1000, 500, Chart.Transparent, Chart.Transparent, Chart.Transparent, Chart.Transparent, Chart.Transparent);
             plotArea.setGridColor(0xc0c0c0, 0xc0c0c0);
 
             // X-Axis setup
             c.xAxis().setLabels(labels).setFontAngle(45);
-            c.xAxis().setLabelStep(10); // Increase this to have more blank tics
+            c.xAxis().setLabelStep(12); // Increase this to have more blank tics
             c.xAxis().setTitle($"Data in steps of {timePeriod}");
 
             // Primary Y-Axis for price
