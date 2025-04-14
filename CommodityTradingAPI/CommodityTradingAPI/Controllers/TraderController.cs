@@ -125,7 +125,7 @@ namespace CommodityTradingAPI.Controllers
             return NoContent();
         }
 
-        [HttpPost("Deposit")]
+        [HttpPost("Deposit/{id}")]
         public async Task<IActionResult> Deposit([Bind("TraderId","Amount")] DepositDto deposit)
         {
             if (deposit == null || deposit.Amount <= 0)
@@ -145,6 +145,34 @@ namespace CommodityTradingAPI.Controllers
             return Ok(new
             {
                 Message = "Deposit successful",
+                NewBalance = trader.Balance
+            });
+        }
+        [HttpPost("Withdraw/{id}")]
+        public async Task<IActionResult> Withdraw([Bind("TraderId", "Amount")] DepositDto withdraw)
+        {
+            if (withdraw == null || withdraw.Amount <= 0)
+            {
+                return BadRequest("Invalid withdrawal request.");
+            }
+
+            var trader = await _context.TraderAccounts.FindAsync(withdraw.TraderId);
+            if (trader == null)
+            {
+                return NotFound("Trader not found.");
+            }
+
+            if (trader.Balance < withdraw.Amount)
+            {
+                return BadRequest("Insufficient balance.");
+            }
+
+            trader.Balance -= withdraw.Amount;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Withdrawal successful",
                 NewBalance = trader.Balance
             });
         }
