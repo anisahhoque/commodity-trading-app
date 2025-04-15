@@ -46,6 +46,20 @@ namespace CommodityTradingApp.Controllers
             //call get list of commodities
             return View(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var requsest = await _httpClient.GetAsync(_httpClient.BaseAddress + "/Details/" + id);
+
+            if (!requsest.IsSuccessStatusCode)
+                return NotFound();
+
+            var commod = await requsest.Content.ReadAsAsync<Commodity>();
+
+            return View(commod);
+        }
+
         private static List<Commodity> GetMockCommodities()
         {
             return new List<Commodity>
