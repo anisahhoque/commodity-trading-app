@@ -94,7 +94,7 @@ namespace CommodityTradingApp.Controllers
                     System.Text.Encoding.UTF8,
                     "application/json"
                 );
-                var chatLoginResponse = await _httpClient.PostAsync(_apiUrl + "Chat/login", chatLoginContent);
+                var chatLoginResponse = await _httpClient.PostAsync(_config["api"] + "Chat/login", chatLoginContent);
 
                 if (chatLoginResponse.IsSuccessStatusCode)
                 {
