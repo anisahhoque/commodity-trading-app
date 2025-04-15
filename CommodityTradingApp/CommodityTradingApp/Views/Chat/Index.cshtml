@@ -1,0 +1,30 @@
+﻿@{
+    var token = Context.Session.GetString("RocketChatToken");
+    var userId = Context.Session.GetString("RocketChatUserId");
+}
+
+<script type="text/javascript">
+    window.RocketChatWidget = {
+        authToken: '@token',
+        userId: '@userId',
+    };
+</script>
+<script src="https://commodities-trading-rocket-chat.ukwest.cloudapp.azure.com/livechat/rocketchat-livechat.min.js"></script>
+
+<h2>Welcome to the Chat</h2>
+
+@if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(userId))
+{
+    <iframe src="https://commodities-trading-rocket-chat.ukwest.cloudapp.azure.com/home?resumeToken=@token"
+            width="100%"
+            height="700"
+            frameborder="0"
+            style="border:1px solid #ccc;">
+    </iframe>
+}
+else
+{
+    <div class="alert alert-warning">
+        Unable to load chat. Please log in again.
+    </div>
+}

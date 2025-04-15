@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using CommodityTradingApp.Models;
 using System.Text.Json;
+using CommodityTradingApp.Models.DTOs;
 
 
 namespace CommodityTradingApp.Controllers
@@ -14,6 +15,7 @@ namespace CommodityTradingApp.Controllers
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
         private readonly string _apiUrl;
+        
         public LoginController(IConfiguration config, HttpClient httpClient)
         {
             _config = config;
@@ -34,13 +36,15 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password, string email)
         {
             var loginData = new
             {
                 Username = username,
                 Password = password
             };
+
+
 
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(loginData),
@@ -77,6 +81,45 @@ namespace CommodityTradingApp.Controllers
 
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                 TempData["Message"] = "Login successful!";
+
+                var chatLoginDto = new ChatLoginDto
+                {
+                    Username = username,
+                    Password = password,
+                    Name = username,
+                    Email = email
+                };
+                var chatLoginContent = new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(chatLoginDto),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+                var chatLoginResponse = await _httpClient.PostAsync(_config["api"] + "Chat/login", chatLoginContent);
+
+                if (chatLoginResponse.IsSuccessStatusCode)
+                {
+                    var chatResponseContent = await chatLoginResponse.Content.ReadAsStringAsync();
+
+                    var chatLoginResult = JsonSerializer.Deserialize<RocketChatLoginResponse>(chatResponseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (chatLoginResult != null)
+                    {
+                        
+                        HttpContext.Session.SetString("RocketChatToken", chatLoginResult.Token);
+                        HttpContext.Session.SetString("RocketChatUserId", chatLoginResult.UserId);
+
+                        
+                        TempData["Message"] = "Chat login successful!";
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Rocket.Chat login failed.");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -90,6 +133,8 @@ namespace CommodityTradingApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Remove("RocketChatToken");
+            HttpContext.Session.Remove("RocketChatUserId");
             if (Request.Cookies.ContainsKey("AuthToken"))
             {
                 Response.Cookies.Delete("AuthToken");
