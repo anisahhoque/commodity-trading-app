@@ -6,6 +6,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+
     <title>@ViewData["Title"] - Trading 213</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -17,6 +19,8 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Trading 213</a>
+                <img src="~/trading.png" alt="My Icon" width="48" />
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -96,3 +100,11 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<style>
+.center-crop {
+    width: 50px;          /* Set width */
+    height: 50px;         /* Set height */
+    object-fit: cover;     /* Crop and cover the area */
+    object-position: center; /* Align the image to the center */
+}
+</style>
