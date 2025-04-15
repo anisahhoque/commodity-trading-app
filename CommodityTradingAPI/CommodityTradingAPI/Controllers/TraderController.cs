@@ -75,6 +75,7 @@ namespace CommodityTradingAPI.Controllers
         public async Task<ActionResult<List<TraderAccount>>> GetAllUserTraderAccounts(Guid userId)
         {
             //Get all accoutns associated with a specific user
+            //idk if i messed something up pls check 
             var userAccounts = await _context.TraderAccounts.Where(x => x.UserId == userId)
                 .Include(x => x.User).ToListAsync();
             return userAccounts;
