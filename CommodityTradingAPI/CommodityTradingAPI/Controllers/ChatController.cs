@@ -28,7 +28,7 @@ namespace CommodityTradingAPI.Controllers
             _adminAuthToken = _configuration["authToken"];
         }
         [HttpPost("login")]
-        public async Task<IActionResult> LoginToChat([FromBody] ChatLoginDto model)//[Bind("Username", "Password", "Name", "Email")] ChatLoginDto model)
+        public async Task<IActionResult> LoginToChat([FromBody] ChatLoginDto model)
         {
             var username = model.Username;
             var password = model.Password;

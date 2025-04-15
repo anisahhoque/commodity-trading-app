@@ -36,7 +36,7 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password, string email, string name)
+        public async Task<IActionResult> Login(string username, string password, string email)
         {
             var loginData = new
             {
@@ -86,7 +86,7 @@ namespace CommodityTradingApp.Controllers
                 {
                     Username = username,
                     Password = password,
-                    Name = name,
+                    Name = username,
                     Email = email
                 };
                 var chatLoginContent = new StringContent(
