@@ -46,7 +46,6 @@ namespace CommodityTradingAPI.Controllers
         {
             var trader = await _context.TraderAccounts
                             .Include(t => t.User)
-
                             .FirstOrDefaultAsync(t => t.TraderId == id);
 
             var settings = new JsonSerializerSettings
@@ -76,7 +75,8 @@ namespace CommodityTradingAPI.Controllers
         public async Task<ActionResult<List<TraderAccount>>> GetAllUserTraderAccounts(Guid userId)
         {
             //Get all accoutns associated with a specific user
-            var userAccounts = await _context.TraderAccounts.Where(x => x.UserId == userId).ToListAsync();
+            var userAccounts = await _context.TraderAccounts.Where(x => x.UserId == userId)
+                .Include(x => x.User).ToListAsync();
             return userAccounts;
         }
 
