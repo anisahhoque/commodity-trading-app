@@ -94,6 +94,7 @@ namespace CommodityTradingApp.Controllers
 
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task< IActionResult> Create()
         {
             var response = await _httpClient.GetAsync(_apiUrlCountry);
@@ -130,6 +131,7 @@ namespace CommodityTradingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Create(string username, string password, string country, string role)
         {
 

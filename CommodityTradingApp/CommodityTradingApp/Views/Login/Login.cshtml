@@ -30,7 +30,14 @@
             <label for="password">Password</label>
             <input type="password" name="password" class="form-control" required placeholder="Enter password" />
         </div>
-
+        <div class="form-group mb-4">
+            <label for="email">Rocket Chat Email</label>
+            <input type="text" name="email" class="form-control" required placeholder="Enter email" />
+        </div>
+        <div class="form-group mb-4">
+            <label for="name">Rocket Chat Name</label>
+            <input type="text" name="name" class="form-control" required placeholder="Enter name" />
+        </div>
         <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
     <form asp-controller="User" asp-action="Create" method="get">
