@@ -102,12 +102,10 @@ namespace CommodityTradingApp.Controllers
             //call get details for each commodity in commodities
             //return View(commodities);
             var commodityPrices = new List<CommodityWithPriceViewModel>();
+            
             var response = await _httpClient.GetAsync(_apiUrlCommodity);
             long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            long unixMidnight = new DateTimeOffset(
-                                    DateTime.UtcNow.Date, 
-                                    TimeSpan.Zero         
-                                ).ToUnixTimeSeconds();
+            long unixMidnight = 0;
 
             if (response.IsSuccessStatusCode)
             {
@@ -127,18 +125,35 @@ namespace CommodityTradingApp.Controllers
 
                         var currPrice = currentPriceObj.Price;
                         var latest = priceList?.FirstOrDefault();
-                        var midnight = priceList?.Last();
-                        commodityPrices.Add(new CommodityWithPriceViewModel
+
+                        CommodityPrice midnight = new CommodityPrice();
+                        if (priceList.Count == 0)
                         {
-                            Commodity = commodity,
-                            Price = currentPriceObj.Price,
-                            High = latest?.High ?? 0,
-                            Low = latest?.Low ?? 0,
-                            AbsoluteChange = (midnight != null) ? latest.Close - midnight.Open : 0,
-                            RelativeChange = (midnight != null && midnight.Open != 0)
-                        ? ((latest.Close - midnight.Open) / midnight.Open) * 100
-                        : 0
-                        });
+                            midnight.Low = 10;
+                            midnight.High = 10;
+                            midnight.Volume = 10;
+                            midnight.Time = 10;
+                            midnight.Close = 10;
+                            midnight.Open = 11;
+                        }
+                        else
+                        {
+                            midnight = priceList?.Last();
+                        }
+
+                        var temp = new CommodityWithPriceViewModel();
+
+                        temp.Commodity = commodity;
+                        temp.Price = currentPriceObj.Price;
+                        temp.High = Math.Max(midnight.High, latest.High);
+                        temp.Low = Math.Max(midnight.Low, latest.Low);
+                        temp.AbsoluteChange = (midnight != null) ? latest.Close - midnight.Open : 0;
+                        temp.RelativeChange = (midnight != null && midnight.Open != 0)
+                    ? ((latest.Close - midnight.Open) / midnight.Open) * 100
+                    : 0;
+
+
+                        commodityPrices.Add(temp);
                     }
                 }
                 return View(commodityPrices);
