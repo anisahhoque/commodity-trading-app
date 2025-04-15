@@ -133,6 +133,8 @@ namespace CommodityTradingApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Remove("RocketChatToken");
+            HttpContext.Session.Remove("RocketChatUserId");
             if (Request.Cookies.ContainsKey("AuthToken"))
             {
                 Response.Cookies.Delete("AuthToken");
