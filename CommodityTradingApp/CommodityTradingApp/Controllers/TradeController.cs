@@ -14,22 +14,20 @@ namespace CommodityTradingApp.Controllers
     public class TradeController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
         //private static List<Trade> trades = GetMockTrades();
         //private static List<Commodity> commodities = GetMockCommodities();
-        public TradeController(HttpClient httpClient, IConfiguration configuration)
         private readonly IConfiguration _config;
         private readonly string _apiUrl;
         private readonly string _apiUrlCommodity;
         public TradeController(HttpClient httpClient, IConfiguration config )
         {
-            _configuration = configuration;
             _httpClient = httpClient;
 
-            _httpClient.BaseAddress = new Uri(_configuration["api"]);
+            
             _config = config;
             _apiUrl = _config["api"] + "Trade/";
             _apiUrlCommodity = _config["api"] + "Commodity/";
+            _httpClient.BaseAddress = new Uri(_config["api"]);
         }
         public async Task<IActionResult> Index()
         {
@@ -83,7 +81,7 @@ namespace CommodityTradingApp.Controllers
         public async Task<IActionResult> DisplayCommodities()
         {
             var result = await _httpClient.GetAsync($"{_httpClient.BaseAddress}commodity");
-            var commodities = await result.Content.ReadAsAsync<List<Commodity>>();
+            var commoditiesList = await result.Content.ReadAsAsync<List<Commodity>>();
 
             //get user id from jwt token
 
@@ -102,7 +100,7 @@ namespace CommodityTradingApp.Controllers
             ViewBag.traderAccounts = new SelectList(accounts, "TraderId", "AccountName");
 
             //call get details for each commodity in commodities
-            return View(commodities);
+            //return View(commodities);
             var commodityPrices = new List<CommodityWithPriceViewModel>();
             var response = await _httpClient.GetAsync(_apiUrlCommodity);
             long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -172,8 +170,10 @@ namespace CommodityTradingApp.Controllers
             if (result.IsSuccessStatusCode)
             {
                 Console.WriteLine("good");
-                RedirectToAction("index");
+                return RedirectToAction("index");
             }
+
+            return NotFound();
             //Send data over to api
 
 
@@ -197,7 +197,7 @@ namespace CommodityTradingApp.Controllers
             //trades.Add(newTrade);
             //return RedirectToAction("Index");
 
-            return View();
+            //return View();
         }
 
         [Authorize(Roles = "Manager")]

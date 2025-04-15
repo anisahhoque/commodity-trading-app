@@ -112,26 +112,26 @@ namespace CommodityTradingAPI.Controllers
             await _context.Trades.AddAsync(trade);
             await _context.SaveChangesAsync();
 
-            await _auditLogService.CreateNewLogAsync(
-                "Trade", // Entity
-                "Create (Open)", // Change
-                trade.TraderId.ToString() + " which is a trade account of " +
-                await _context.TraderAccounts
-                .Where(t => t.TraderId == trade.TraderId)
-                .Select(t => new
-                { t.User.UserId, t.User.Username })
-                .FirstOrDefaultAsync(), // Who changed
-                $"User {await _context.TraderAccounts // Full detail
-                .Where(t => t.TraderId == trade.TraderId)
-                .Select(t => new
-                { t.User.UserId, t.User.Username })
-                .FirstOrDefaultAsync()} created a {(trade.IsBuy ? "buy" : "sell")} of {trade.Quantity} of {commodity} on their account" +
-                $"{await _context.TraderAccounts
-                .Where(t => t.TraderId == trade.TraderId)
-                .Select(t => t.AccountName)
-                .FirstOrDefaultAsync()}",
-                trade.Trader.User.Country.CountryName == "Russia"
-                );
+            //await _auditLogService.CreateNewLogAsync(
+            //    "Trade", // Entity
+            //    "Create (Open)", // Change
+            //    trade.TraderId.ToString() + " which is a trade account of " +
+            //    await _context.TraderAccounts
+            //    .Where(t => t.TraderId == trade.TraderId)
+            //    .Select(t => new
+            //    { t.User.UserId, t.User.Username })
+            //    .FirstOrDefaultAsync(), // Who changed
+            //    $"User {await _context.TraderAccounts // Full detail
+            //    .Where(t => t.TraderId == trade.TraderId)
+            //    .Select(t => new
+            //    { t.User.UserId, t.User.Username })
+            //    .FirstOrDefaultAsync()} created a {(trade.IsBuy ? "buy" : "sell")} of {trade.Quantity} of {commodity} on their account" +
+            //    $"{await _context.TraderAccounts
+            //    .Where(t => t.TraderId == trade.TraderId)
+            //    .Select(t => t.AccountName)
+            //    .FirstOrDefaultAsync()}",
+            //    trade.Trader.User.Country.CountryName == "Russia"
+            //    );
 
             //return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
             return Created();
