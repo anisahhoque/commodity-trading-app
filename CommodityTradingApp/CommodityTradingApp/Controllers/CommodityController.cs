@@ -35,7 +35,7 @@ namespace CommodityTradingApp.Controllers
                 var allCommods = await result.Content.ReadAsAsync<List<Commodity>>();
 
                 // Call CreateChartHtmlAsync for the candlestick chart
-                var chartHtml = await _candlestick.CreateChartHtmlAsync("gold", "5m", "1744600000", "1744622096");
+                var chartHtml = await _candlestick.CreateChartHtmlAsync("gold", "15m", DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString(), DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
                 // Pass chartHtml to the view
                 ViewBag.ChartHtml = chartHtml;
