@@ -1,0 +1,59 @@
+﻿@model List<CommodityTradingApp.Models.TraderAccount>
+
+@{
+    ViewData["Title"] = "Trader Accounts by User";
+    var groupedByUser = Model.GroupBy(t => t.User?.Username ?? "Unknown User");
+}
+
+<h2>Trader Accounts</h2>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var group in groupedByUser)
+    {
+        <h3 class="mt-4">@group.Key</h3>
+
+        <table class="table table-sm table-bordered mb-4">
+            <thead class="thead-light">
+                <tr>
+                    <th>Trader ID</th>
+                    <th>Account Name</th>
+                    <th>Balance</th>
+                    <th>Number of Trades</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var trader in group)
+                {
+                    <tr>
+                        <td>
+                            <a asp-controller="Trader" asp-action="Details" asp-route-id="@trader.TraderId">
+                                @trader.TraderId
+                            </a>
+                        </td>
+
+                        <td>@trader.AccountName</td>
+                        <td>@trader.Balance.ToString("C")</td>
+                        <td>@trader.Trades?.Count()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div class="alert alert-info">
+        No trader accounts found.
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}

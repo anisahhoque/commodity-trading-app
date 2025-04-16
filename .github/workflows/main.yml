@@ -44,3 +44,4 @@ jobs:
 concurrency:
   group: "merge-test-check"
   cancel-in-progress: true
+

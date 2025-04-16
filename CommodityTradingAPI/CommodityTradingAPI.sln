@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommodityTradingAPI", "CommodityTradingAPI\CommodityTradingAPI.csproj", "{1DF5AC03-78CB-4839-B794-F48DA1127658}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommodityTradingAPITests", "CommodityTradingAPITests\CommodityTradingAPITests.csproj", "{EB2DFCF9-9266-4A46-9AA2-924ACDF88A7F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DF5AC03-78CB-4839-B794-F48DA1127658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DF5AC03-78CB-4839-B794-F48DA1127658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DF5AC03-78CB-4839-B794-F48DA1127658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DF5AC03-78CB-4839-B794-F48DA1127658}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB2DFCF9-9266-4A46-9AA2-924ACDF88A7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB2DFCF9-9266-4A46-9AA2-924ACDF88A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB2DFCF9-9266-4A46-9AA2-924ACDF88A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB2DFCF9-9266-4A46-9AA2-924ACDF88A7F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B12C5ACA-2CE2-4C9C-BD71-D97C4BF8524B}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,113 @@
+﻿@model User
+
+@{
+    ViewData["Title"] = "User List";
+}
+
+<h2>User Details</h2>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User Id</th>
+            <th>Username</th>
+            <th>Country</th>
+            <th>Roles</th>
+            <th>Trader Accounts</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+            <td>@Model.UserId</td>
+            <td>@Model.Username</td>
+            <td>@(Model.Country?.CountryName ?? "N/A")</td>
+            <td>
+                @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
+                {
+                    foreach (var assignment in Model.RoleAssignments)
+                    {
+                        @assignment.Role.RoleName <br />
+                    }
+                }
+                else
+                {
+                    <span>No roles</span>
+                }
+            </td>
+            <td>
+                @if (Model.TraderAccounts != null && Model.TraderAccounts.Any())
+                {
+                    <div class="dropdown">
+                        <button class="dropdown-button">Select Trader</button>
+                        <div class="dropdown-content">
+                            @foreach (var trader in Model.TraderAccounts)
+                            {
+                                <a asp-action="Details" asp-controller="Trader" asp-route-id="@trader.TraderId">
+                                    @trader.AccountName
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+
+
+                else
+                {
+                    <span>None found.</span>
+                }
+            </td>
+
+            <td>
+                <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-action="Delete" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+
+    </tbody>
+</table>
+<style>
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-button {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 200px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+            .dropdown-content a:hover {
+                background-color: #f1f1f1;
+            }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown:hover .dropdown-button {
+        background-color: #2980b9;
+    }
+</style>

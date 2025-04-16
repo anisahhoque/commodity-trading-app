@@ -1,0 +1,20 @@
+﻿@model EditTrader
+@{
+    ViewData["Title"] = "Edit Trader";
+}
+
+<h2>Edit Trader</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="TraderId" />
+
+    <div>
+        <label asp-for="AccountName"></label>
+        <input asp-for="AccountName" />
+        <span asp-validation-for="AccountName" class="text-danger"></span>
+    </div>
+
+
+
+    <button type="submit">Save</button>
+</form>
