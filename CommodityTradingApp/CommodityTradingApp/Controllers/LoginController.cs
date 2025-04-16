@@ -23,14 +23,8 @@ namespace CommodityTradingApp.Controllers
             _apiUrl = _config["api"] + "Authentication/";
         }
         [HttpGet]
-//warning message added
-        public IActionResult Login(string? message)
+        public IActionResult Login()
         {
-            if (!string.IsNullOrEmpty(message))
-            {
-                TempData["Warning"] = message;
-            }
-
             return View();
         }
 
@@ -47,8 +41,8 @@ namespace CommodityTradingApp.Controllers
 
 
             var jsonContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(loginData),
-                System.Text.Encoding.UTF8,
+                JsonSerializer.Serialize(loginData),
+                Encoding.UTF8,
                 "application/json"
             );
 
@@ -80,7 +74,7 @@ namespace CommodityTradingApp.Controllers
                 };
 
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
-                TempData["Message"] = "Login successful!";
+                //TempData["Message"] = "Login successful!";
 
                 var chatLoginDto = new ChatLoginDto
                 {

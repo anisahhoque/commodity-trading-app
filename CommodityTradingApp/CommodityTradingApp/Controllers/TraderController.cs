@@ -7,6 +7,7 @@ using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 
 namespace CommodityTradingApp.Controllers
@@ -26,21 +27,47 @@ namespace CommodityTradingApp.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var response = _httpClient.GetAsync(_apiUrl).Result;
-            if (response.IsSuccessStatusCode)
+            var token = Request.Cookies["AuthToken"];
+            if (string.IsNullOrEmpty(token))
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var traders = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
-                return View(traders);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+
+            if (role == "Manager")
+            {
+                var response = _httpClient.GetAsync(_apiUrl).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var traders = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
+                    return View(traders);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
+                    return View(new List<TraderAccount>());
+                }
             }
             else
             {
-
-                ModelState.AddModelError(string.Empty, "Unable to retrieve traders from the API");
-                return View(new List<TraderAccount>());
+                var response = await _httpClient.GetAsync(_apiUrl + "user/" + userId);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var trader = JsonConvert.DeserializeObject<List<TraderAccount>>(json);
+                    return View(trader);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Unable to retrieve trader account from the API");
+                    return View(new List<TraderAccount>());
+                }
             }
-
-           
         }
 
 

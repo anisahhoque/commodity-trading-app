@@ -74,7 +74,7 @@ app.UseStatusCodePages(async context =>
     }
     if (response.StatusCode == 401)
     {
-        response.Redirect("/Login/Login?message=You must be logged in to access this page.");
+        response.Redirect("/Login/Login");
     }
 });
 app.UseAuthorization();
