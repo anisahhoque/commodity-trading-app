@@ -46,6 +46,7 @@ namespace CommodityTradingApp.Controllers
             //call get list of commodities
             return View(result);
         }
+        //oigrf
         //private static List<Commodity> GetMockCommodities()
         //{
         //    return new List<Commodity>
