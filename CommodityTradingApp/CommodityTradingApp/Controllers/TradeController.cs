@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 
 using Newtonsoft.Json;
+using NuGet.Common;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CommodityTradingApp.Controllers
 {
@@ -84,8 +86,14 @@ namespace CommodityTradingApp.Controllers
             var commoditiesList = await result.Content.ReadAsAsync<List<Commodity>>();
 
             //get user id from jwt token
-
-            var userId = "28324A1F-4254-48E5-8825-1FF3594E8301";
+            var token = Request.Cookies["AuthToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Login");
+            }
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
 
             //get all trade accounts associated with that user
             var request = await _httpClient.GetAsync(_httpClient.BaseAddress + "Trader/User/" + userId);

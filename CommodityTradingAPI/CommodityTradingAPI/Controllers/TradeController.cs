@@ -136,7 +136,6 @@ namespace CommodityTradingAPI.Controllers
             //return CreatedAtAction(nameof(GetTradeById), new { id = trade.TradeId }, trade);
             return Created();
 
-            //Smiel and bee happy :P
 
         }
 

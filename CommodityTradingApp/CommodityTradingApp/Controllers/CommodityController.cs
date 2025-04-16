@@ -22,7 +22,7 @@ namespace CommodityTradingApp.Controllers
             string comodEndpoint = "commodity";
             _httpClient.BaseAddress = new Uri(_configuration["api"] + comodEndpoint);
 
-            commodities = GetMockCommodities();
+            //commodities = GetMockCommodities();
 
 
         }
@@ -46,43 +46,30 @@ namespace CommodityTradingApp.Controllers
             //call get list of commodities
             return View(result);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var requsest = await _httpClient.GetAsync(_httpClient.BaseAddress + "/Details/" + id);
-
-            if (!requsest.IsSuccessStatusCode)
-                return NotFound();
-
-            var commod = await requsest.Content.ReadAsAsync<Commodity>();
-
-            return View(commod);
-        }
-
-        private static List<Commodity> GetMockCommodities()
-        {
-            return new List<Commodity>
-            {
-                new Commodity
-                {
-                    CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
-                    CommodityName = "Gold"
+        //oigrf
+        //private static List<Commodity> GetMockCommodities()
+        //{
+        //    return new List<Commodity>
+        //    {
+        //        new Commodity
+        //        {
+        //            CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
+        //            CommodityName = "Gold"
                     
-                },
-                new Commodity
-                {
-                    CommodityId = Guid.Parse("92d2573e-3ad1-4f38-8859-9d4d9e9e3a0e"),
-                    CommodityName = "Oil"
+        //        },
+        //        new Commodity
+        //        {
+        //            CommodityId = Guid.Parse("92d2573e-3ad1-4f38-8859-9d4d9e9e3a0e"),
+        //            CommodityName = "Oil"
 
-                },
-                new Commodity
-                {
-                    CommodityId = Guid.Parse("f8c3618a-53a8-4097-871f-50a924bdcf1c") ,
-                    CommodityName = "Silver"
+        //        },
+        //        new Commodity
+        //        {
+        //            CommodityId = Guid.Parse("f8c3618a-53a8-4097-871f-50a924bdcf1c") ,
+        //            CommodityName = "Silver"
 
-                }
-            };
-        }
+        //        }
+        //    };
+        //}
     }
 }
