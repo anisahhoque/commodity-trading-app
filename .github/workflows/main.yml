@@ -26,8 +26,7 @@ jobs:
         run: |
           # For Windows (using PowerShell):
           Get-ChildItem -Recurse -Filter "*.sln" | ForEach-Object { dotnet restore $_.FullName }
-          
-     
+
       - name: Build the project
         run: |
           # Build each solution file
@@ -44,4 +43,3 @@ jobs:
 concurrency:
   group: "merge-test-check"
   cancel-in-progress: true
-
