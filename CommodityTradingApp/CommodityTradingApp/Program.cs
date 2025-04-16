@@ -70,7 +70,8 @@ app.UseStatusCodePages(async context =>
 
     if (response.StatusCode == 403)
     {
-        response.Redirect("Login/AccessDenied");
+        //will need to be changed when deployed
+        response.Redirect("https://localhost:59981/Login/AccessDenied");
     }
     if (response.StatusCode == 401)
     {
