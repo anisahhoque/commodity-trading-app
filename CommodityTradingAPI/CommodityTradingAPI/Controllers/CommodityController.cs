@@ -119,6 +119,21 @@ namespace CommodityTradingAPI.Controllers
             {
                 return StatusCode(500, $"Error connecting to API: {ex.Message}");
             }
+
         }
+
+        [HttpGet("Details/{cId}")]
+        public async Task<IActionResult> CommodityDetails(Guid cId)
+        {
+            var commod = await _context.Commodities.FirstOrDefaultAsync(x => x.CommodityId == cId);
+
+            if (commod == null)
+                return NotFound();
+
+            return Ok(commod);
+        }
+
+
+        
     }
 }
