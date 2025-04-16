@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release CommodityTradingAPI/CommodityTradingAPI.csproj
+        run: dotnet build --configuration Release CommodityTradingAPI/CommodityTradingAPI/CommodityTradingAPI.csproj
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp" CommodityTradingAPI/CommodityTradingAPI.csproj
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp" CommodityTradingAPI/CommodityTradingAPI/CommodityTradingAPI.csproj
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
