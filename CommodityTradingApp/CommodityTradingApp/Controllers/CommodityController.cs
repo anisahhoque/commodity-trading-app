@@ -35,7 +35,7 @@ namespace CommodityTradingApp.Controllers
                 var allCommods = await result.Content.ReadAsAsync<List<Commodity>>();
 
                 // Call CreateChartHtmlAsync for the candlestick chart
-                var chartHtml = await _candlestick.CreateChartHtmlAsync("gold", "5m", "1744600000", "1744622096");
+                var chartHtml = await _candlestick.CreateChartHtmlAsync("gold", "15m", DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString(), DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
                 // Pass chartHtml to the view
                 ViewBag.ChartHtml = chartHtml;
@@ -46,14 +46,29 @@ namespace CommodityTradingApp.Controllers
             //call get list of commodities
             return View(result);
         }
-        //private static List<Commodity> GetMockCommodities()
-        //{
-        //    return new List<Commodity>
-        //    {
-        //        new Commodity
-        //        {
-        //            CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
-        //            CommodityName = "Gold"
+
+
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var requsest = await _httpClient.GetAsync(_httpClient.BaseAddress + "/Details/" + id);
+
+            if (!requsest.IsSuccessStatusCode)
+                return NotFound();
+
+            var commod = await requsest.Content.ReadAsAsync<Commodity>();
+
+            return View(commod);
+        }
+
+        private static List<Commodity> GetMockCommodities()
+        {
+            return new List<Commodity>
+            {
+                new Commodity
+                {
+                    CommodityId = Guid.Parse("7c472314-bb42-4e02-86c1-7fc28e6de3b6"),
+                    CommodityName = "Gold"
                     
         //        },
         //        new Commodity

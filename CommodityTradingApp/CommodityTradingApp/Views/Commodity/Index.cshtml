@@ -22,8 +22,7 @@
     @foreach (var item in Model)
     {
         <div class="commodity-box">
-            <h3>@item.CommodityName</h3>
-            <p><strong>ID:</strong> @item.CommodityId</p>
+            <h2><a asp-controller="Commodity" asp-action="Details" asp-route-id="@item.CommodityId">@item.CommodityName.Replace("_" , " ")</a></h2>
 
         </div>
     }
