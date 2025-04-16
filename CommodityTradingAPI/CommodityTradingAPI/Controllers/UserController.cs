@@ -109,6 +109,7 @@ namespace CommodityTradingAPI.Controllers
                 .Include(u => u.RoleAssignments)
                     .ThenInclude(ra => ra.Role)
                 .Include(u => u.TraderAccounts)
+                .ThenInclude(ta => ta.Trades)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
 
